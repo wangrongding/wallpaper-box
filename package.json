@@ -1,46 +1,45 @@
 {
   "name": "desktop-renderer",
-  "version": "0.1.0",
   "private": true,
-  "main": "electron/electronMain.js",
+  "main": "electron/main.js",
   "scripts": {
-    "dev": "run-s dev:*",
-    "dev:web": "react-scripts start",
-    "dev:ele": "electron .",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "concurrently \"umi dev\" \"wait-on http://localhost:8000 && electron .\"",
+    "start": "umi dev",
+    "build": "umi build",
+    "postinstall": "umi generate tmp",
+    "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
+    "test": "umi-test",
+    "test:coverage": "umi-test --coverage"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "gitHooks": {
+    "pre-commit": "lint-staged"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
+  "lint-staged": {
+    "*.{js,jsx,less,md,json}": [
+      "prettier --write"
     ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+    "*.ts?(x)": [
+      "prettier --parser=typescript --write"
     ]
   },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.14.1",
-    "@testing-library/react": "^13.0.0",
-    "@testing-library/user-event": "^13.2.1",
-    "electron": "^18.1.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.0",
+    "@ant-design/pro-layout": "^6.5.0",
+    "react": "17.x",
+    "react-dom": "17.x",
+    "umi": "^3.5.23",
     "win-win-api": "0.0.4"
   },
   "devDependencies": {
-    "npm-run-all": "^4.1.5"
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@umijs/preset-react": "1.x",
+    "@umijs/test": "^3.5.23",
+    "concurrently": "^7.1.0",
+    "electron": "^18.1.0",
+    "lint-staged": "^10.0.7",
+    "prettier": "^2.2.0",
+    "typescript": "^4.1.2",
+    "wait-on": "^6.0.1",
+    "yorkie": "^2.0.0"
   }
 }
