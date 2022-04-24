@@ -4,10 +4,11 @@
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently \"umi dev\" \"wait-on http://localhost:8000 && electron .\"",
-    "start": "umi dev",
+    "dev:web": "umi dev",
+    "dev:exe": "electron .",
     "build": "umi build",
     "postinstall": "umi generate tmp",
-    "prettier": "prettier --write '**/*.{js,jsx,tsx,ts,less,md,json}'",
+    "prettier": "prettier --write **/*.{js,jsx,tsx,ts,less,md,json}",
     "test": "umi-test",
     "test:coverage": "umi-test --coverage"
   },

@@ -3,7 +3,7 @@ const winFns = new WinWin().winFns();
 const os = require("os");
 
 // 初始化壁纸窗口
-exports.initWallPaperWindow = function initWallPaperWindow(wallPaperWindow) {
+exports.setUnderLayer = function setUnderLayer(wallPaperWindow) {
   //壁纸句柄
   let wallPaperHwnd = null;
   //寻找底层窗体句柄
@@ -14,12 +14,7 @@ exports.initWallPaperWindow = function initWallPaperWindow(wallPaperWindow) {
   const createEnumWindowProc = () =>
     ffi.Callback(CPP.BOOL, [CPP.HWND, CPP.LPARAM], (tophandle) => {
       //寻找桌面句柄
-      let defview = winFns.FindWindowExW(
-        tophandle,
-        0,
-        L("SHELLDLL_DefView"),
-        NULL
-      );
+      let defview = winFns.FindWindowExW(tophandle, 0, L("SHELLDLL_DefView"), NULL);
       // 如果找到桌面句柄再找壁纸句柄
       if (defview != NULL) {
         wallPaperHwnd = winFns.FindWindowExW(0, tophandle, L("WorkerW"), NULL);
@@ -29,9 +24,7 @@ exports.initWallPaperWindow = function initWallPaperWindow(wallPaperWindow) {
   //遍历窗体获得窗口句柄
   winFns.EnumWindows(createEnumWindowProc(), 0);
   //获取electron的句柄
-  const electronAppHwnd = bufferCastInt32(
-    wallPaperWindow.getNativeWindowHandle()
-  );
+  const electronAppHwnd = bufferCastInt32(wallPaperWindow.getNativeWindowHandle());
   //将buffer类型的句柄进行转换
   function bufferCastInt32(buf) {
     return os.endianness() == "LE" ? buf.readInt32LE() : buf.readInt32BE();

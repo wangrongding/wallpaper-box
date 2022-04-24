@@ -1,12 +1,12 @@
-import { defineConfig } from 'umi';
+import { defineConfig } from "umi";
 
 export default defineConfig({
   nodeModulesTransform: {
-    type: 'none',
+    type: "none",
   },
   routes: [
-    { path: '/', component: '@/pages/index', exact: true },
-    { path: '/wallPaper', component: '@/pages/wallPaper/index' },
+    { path: "/", component: "@/pages/main/index", exact: true },
+    { path: "/wallPaper", component: "@/pages/wallPaper/index" },
   ],
   fastRefresh: {},
 });
