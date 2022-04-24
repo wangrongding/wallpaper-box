@@ -20,6 +20,7 @@ exports.createWallPaper = () => {
           nodeIntegration: true, //赋予此窗口页面中的JavaScript访问Node.js环境的能力
           enableRemoteModule: true, //打开remote模块
           webSecurity: true, //可以使用本地资源
+          contextIsolation: false, //是否使用上下文隔离
         },
       }),
     );
