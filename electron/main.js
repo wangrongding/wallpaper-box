@@ -1,15 +1,16 @@
-const { app, BrowserWindow, Notification } = require("electron");
+const { app, BrowserWindow, Notification, Menu } = require("electron");
 const { ipcMain } = require("electron");
 const { createWallPaper } = require("./createWallPaper.js");
 // 保持window对象的全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let mainWindow = null;
 // 创建窗口
 const createWindow = () => {
+  // 隐藏菜单栏
+  Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 800,
-    debug: true,
-    frame: true, //是否显示边缘框
+    // frame: false, //是否显示边缘框
     fullscreen: false, //是否全屏显示
     webPreferences: {
       nodeIntegration: true, //赋予此窗口页面中的JavaScript访问Node.js环境的能力
