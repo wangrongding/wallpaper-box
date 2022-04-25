@@ -8,7 +8,7 @@ const createWindow = () => {
   // 隐藏菜单栏
   Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
-    width: 1000,
+    width: 1150,
     height: 800,
     // frame: false, //是否显示边缘框
     fullscreen: false, //是否全屏显示
@@ -24,36 +24,34 @@ const createWindow = () => {
   mainWindow.loadURL("http://localhost:8000");
   console.log("createWindow");
   mainWindow.webContents.openDevTools(); // 打开窗口调试
-  createWallPaper();
+  // createWallPaper();
 };
 
 // 当 Electron 完成初始化并准备创建浏览器窗口时调用此方法
-app.on("ready", createWindow);
+app.on("ready", () => {
+  createWindow();
+});
 
 // 所有窗口关闭时退出应用.
-app.on("window-all-closed", function () {
+app.on("window-all-closed", () => {
   console.log("window-all-closed");
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-app.on("activate", function () {
+app.on("activate", () => {
   console.log("activate");
   if (mainWindow === null) {
     createWindow();
   }
 });
 
-function showNotification() {
+ipcMain.on("asynchronous-message", (event, arg) => {
+  console.log(arg); // prints "ping"
+  event.reply("asynchronous-reply", "pong");
   new Notification({
     title: "提示",
     body: "替换成功！",
   }).show();
-}
-
-ipcMain.on("asynchronous-message", (event, arg) => {
-  console.log(arg); // prints "ping"
-  showNotification();
-  event.reply("asynchronous-reply", "pong");
 });
