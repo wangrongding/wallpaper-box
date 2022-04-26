@@ -9,3 +9,9 @@ mainWindow.webContents.openDevTools() // 打开窗口调试
 ```javascript
 const { ipcRenderer: ipc } = window.require("electron");
 ```
+
+屏蔽 Electron 的安全警告
+
+```javascript
+process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
+```

@@ -1,6 +1,8 @@
 const { app, BrowserWindow, Notification, Menu } = require("electron");
 const { ipcMain } = require("electron");
 const { createWallPaper } = require("./createWallPaper.js");
+// 关闭electron警告
+process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 // 保持window对象的全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let mainWindow = null;
 // 创建窗口
@@ -8,14 +10,14 @@ const createWindow = () => {
   // 隐藏菜单栏
   Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
-    width: 1150,
-    height: 800,
+    width: 1300,
+    height: 1000,
     // frame: false, //是否显示边缘框
     fullscreen: false, //是否全屏显示
     webPreferences: {
       nodeIntegration: true, //赋予此窗口页面中的JavaScript访问Node.js环境的能力
       enableRemoteModule: true, //打开remote模块
-      webSecurity: true, //可以使用本地资源
+      webSecurity: false, //禁用同源策略
       contextIsolation: false, //是否使用上下文隔离
     },
   });
