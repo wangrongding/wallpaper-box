@@ -11,22 +11,15 @@ body {
   font-size: 14px;
 }
 .wallpaper-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0;
-  margin: 0;
+  display: grid;
+  // 定义每一列的列宽
+  // grid-template-columns: repeat(auto-fill, 300px);
+  grid-template-columns: repeat(auto-fill, 150px);
+  // 间距
+  gap: 10px;
+  justify-content: space-around;
   .wallpaper-item {
-    // width: 100px;
-    // height: 100px;
-    min-width: 100px;
-    min-height: 100px;
-    margin: 4px;
-    color: white;
-    background: #a1a1a1;
+    width: 150px;
     border-radius: 5px;
-    text-align: center;
-    line-height: 100px;
   }
 }

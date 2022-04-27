@@ -26,6 +26,7 @@ const createWindow = () => {
   mainWindow.loadURL("http://localhost:8000");
   console.log("createWindow");
   mainWindow.webContents.openDevTools(); // 打开窗口调试
+  // 创建壁纸窗口
   // createWallPaper();
 };
 
