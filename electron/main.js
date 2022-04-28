@@ -7,8 +7,6 @@ process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = "true";
 let mainWindow = null;
 // 创建窗口
 const createWindow = () => {
-  // 隐藏菜单栏
-  Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 1000,
@@ -21,8 +19,9 @@ const createWindow = () => {
       contextIsolation: false, //是否使用上下文隔离
     },
   });
+  // 隐藏菜单栏
+  Menu.setApplicationMenu(null);
   // mainWindow.loadURL("app://./index.html");
-  // mainWindow.loadFile("index.html");
   mainWindow.loadURL("http://localhost:8000");
   console.log("createWindow");
   mainWindow.webContents.openDevTools(); // 打开窗口调试
@@ -50,8 +49,17 @@ app.on("activate", () => {
   }
 });
 
+// 打开窗口调试
+ipcMain.on("open-devtools", () => {
+  mainWindow.webContents.toggleDevTools();
+});
+// 刷新当前页面
+ipcMain.on("refresh-window", () => {
+  mainWindow.webContents.reload();
+});
+
 ipcMain.on("asynchronous-message", (event, arg) => {
-  console.log(arg); // prints "ping"
+  console.log(arg);
   event.reply("asynchronous-reply", "pong");
   new Notification({
     title: "提示",

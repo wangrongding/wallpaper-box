@@ -1,107 +1,44 @@
 import styles from "./index.less";
 import { history } from "umi";
 import { message, Image } from "antd";
-import { Menu, MenuProps, Checkbox } from "antd";
-import { getWallHavenAssets } from "@/api/index";
+import { Menu, MenuProps, Checkbox, Switch } from "antd";
 import React, { useState } from "react";
+import WallPaperList from "./components/WallPaperList";
+const { ipcRenderer } = window.require("electron");
 const items: MenuProps["items"] = [
   { key: "1", label: "图片壁纸" },
   { key: "2", label: "视频壁纸" },
 ];
-const levelList = [
-  { label: "Apple", value: "Apple" },
-  { label: "Pear", value: "Pear" },
-  { label: "Orange", value: "Orange" },
-];
-const typeList = [
-  { label: "Apple", value: "Apple" },
-  { label: "Pear", value: "Pear" },
-  { label: "Orange", value: "Orange" },
-];
-
-export default class IndexPage extends React.Component {
-  state = {
-    wallpaperList: [] as any,
-  };
-
-  menuClick = () => {
-    message.info(`click`);
-  };
-
-  chooseWallPaper = (item: any) => {
-    message.info(`click`);
-  };
-
-  onLevelChange = (checkedValues: any) => {
-    console.log("checked = ", checkedValues);
-  };
-
-  onTypeChange = (checkedValues: any) => {
-    console.log("checked = ", checkedValues);
-  };
-
-  getWallpaper = () => {
-    getWallHavenAssets().then((res) => {
-      const list = res.data;
-      console.log("🚀🚀🚀 / list", list);
-      this.setState({
-        wallpaperList: list,
-      });
-    });
-  };
-
-  handleClick = () => {
-    history.push("/test");
-  };
-
-  componentDidMount() {
-    console.log("componentDidMount");
-    this.getWallpaper();
+const ThemeContext = React.createContext("light");
+// 绑定键盘事件
+window.addEventListener("keyup", handleKeyPress, true);
+function handleKeyPress(event: any) {
+  if (event.key === "F12") {
+    ipcRenderer.send("open-devtools");
+  } else if (event.key === "F5") {
+    ipcRenderer.send("refresh-window");
   }
+}
 
-  componentWillUnmount = () => {
-    this.setState = () => {
-      return;
-    };
+const IndexPage: React.FC = () => {
+  const [state, setState] = useState({});
+  const menuClick = () => {
+    message.info(`click`);
   };
-
-  render() {
-    return (
-      <div>
+  return (
+    <div className={styles.layout}>
+      <ThemeContext.Provider value="dark">
         <Menu
           theme="dark"
-          onClick={this.menuClick}
+          onClick={menuClick}
           defaultSelectedKeys={["1"]}
           mode="horizontal"
           items={items}
         />
-        <h1 className={styles.title} onClick={this.handleClick}>
-          开发中......
-        </h1>
-        <div className={styles["wallpaper-list"]}>
-          {this.state.wallpaperList.map((item: any, index: number) => {
-            return (
-              <Image
-                className={styles["wallpaper-item"]}
-                key={index}
-                src={item.thumbs.small}
-                preview={{
-                  src: item.path,
-                }}
-              />
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-}
+        <WallPaperList />
+      </ThemeContext.Provider>
+    </div>
+  );
+};
 
-// const { ipcRenderer } = window.require("electron");
-// function sendMessageToMain() {
-//   message.info(`ping`);
-//   ipcRenderer.send("asynchronous-message", "ping");
-// }
-// ipcRenderer.on("asynchronous-reply", (event: any, arg: string) => {
-//   console.log(event, arg); // prints "pong"
-// });
+export default IndexPage;

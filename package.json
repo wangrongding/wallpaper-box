@@ -25,8 +25,10 @@
   },
   "dependencies": {
     "@ant-design/pro-layout": "^6.5.0",
+    "@types/lodash": "^4.14.182",
     "antd": "^4.20.0",
     "axios": "^0.27.0",
+    "lodash": "^4.17.21",
     "react": "17.x",
     "react-dom": "17.x",
     "umi": "^3.5.23",
