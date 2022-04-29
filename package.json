@@ -3,7 +3,8 @@
   "private": true,
   "main": "electron/main.js",
   "scripts": {
-    "dev": "concurrently \"umi dev\" \"wait-on http://localhost:8000 && electron .\"",
+    "dev": "concurrently \"umi dev\" \"wait-on http://localhost:8000 && node ./electron/dev.js\"",
+    "dev1": "concurrently \"umi dev\" \"wait-on http://localhost:8000 && electron .\"",
     "dev:web": "umi dev",
     "dev:exe": "electron .",
     "build": "umi build",
@@ -39,6 +40,7 @@
     "@types/react-dom": "^17.0.0",
     "@umijs/preset-react": "1.x",
     "@umijs/test": "^3.5.23",
+    "chokidar": "^3.5.3",
     "concurrently": "^7.1.0",
     "electron": "^18.1.0",
     "lint-staged": "^10.0.7",

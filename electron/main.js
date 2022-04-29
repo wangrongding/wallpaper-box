@@ -8,9 +8,9 @@ let mainWindow = null;
 // 创建窗口
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    width: 1300,
-    height: 1000,
-    // frame: false, //是否显示边缘框
+    width: 1200,
+    height: 900,
+    frame: false, //是否显示边缘框
     fullscreen: false, //是否全屏显示
     webPreferences: {
       nodeIntegration: true, //赋予此窗口页面中的JavaScript访问Node.js环境的能力
@@ -24,7 +24,7 @@ const createWindow = () => {
   // mainWindow.loadURL("app://./index.html");
   mainWindow.loadURL("http://localhost:8000");
   console.log("createWindow");
-  mainWindow.webContents.openDevTools(); // 打开窗口调试
+  mainWindow.webContents.openDevTools({ mode: "right" }); // 打开窗口调试
   // 创建壁纸窗口
   // createWallPaper();
 };
