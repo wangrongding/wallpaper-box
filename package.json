@@ -7,8 +7,9 @@
   "scripts": {
     "dev": "vite",
     "dev:web": "vite --mode web",
+    "dev:electron": "rollup -c && electron . http://localhost:1234",
     "dev:split": "concurrently \"rollup -c\" \"npm:dev:web\" \"wait-on http://localhost:1234 \" \" electron . http://localhost:1234 \"",
-    "electron": "rollup -c && electron . http://localhost:1234",
+    "build": "tsc && vite build",
     "build:web": "tsc && vite build",
     "preview": "vite preview"
   },
