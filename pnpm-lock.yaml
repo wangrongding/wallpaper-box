@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@ant-design/icons': ^4.8.0
   '@types/lodash': ^4.14.191
   '@types/node': ^18.11.17
   '@types/react': ^18.0.26
@@ -31,6 +32,7 @@ specifiers:
   wait-on: ^7.0.1
 
 dependencies:
+  '@ant-design/icons': 4.8.0_biqbaboplfbrettd7655fr4n2y
   antd: 5.1.0_biqbaboplfbrettd7655fr4n2y
   axios: 1.2.1
   lodash: 4.17.21

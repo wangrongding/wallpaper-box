@@ -36,9 +36,11 @@ export default function List() {
     }
   }, 1000)
 
+  let mounted = false
   // 获取壁纸
   const getWallpaper = () => {
     setLoading(true)
+    if (!mounted) return
     getWallHavenAssets(query).then((res) => {
       const list = res.data
       setWallpaperList([...wallpaperList, ...list])
@@ -53,26 +55,22 @@ export default function List() {
   }
 
   useEffect(() => {
-    console.log('useEffect')
     getWallpaper()
+    return () => {
+      mounted = true
+    }
   }, [])
   return (
     <>
-      <h1>list</h1>
-      <div className=''>
-        <div style={{ display: 'inline-block', float: 'left', margin: ' 0 20px ' }}>
-          <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked />
-        </div>
-        部分功能开发中......
-      </div>
-      <div className='' onScroll={onScroll} ref={scrollRef}>
+      <div className=''>{/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}</div>
+      <div className='grid grid-cols-5 gap-4' onScroll={onScroll} ref={scrollRef}>
         {wallpaperList.map((item: any, index: number) => {
           return (
             <Image
+              rootClassName='custom-image'
               onContextMenu={() => {
                 chooseWallPaper(item)
               }}
-              className=''
               key={index}
               src={item.thumbs.small}
               preview={{
@@ -81,7 +79,9 @@ export default function List() {
             />
           )
         })}
-        <Spin style={{ gridColumn: '1 / 6' }} size='large' />
+      </div>
+      <div className='text-center mt-[30px]'>
+        <Spin size='large' />
       </div>
     </>
   )

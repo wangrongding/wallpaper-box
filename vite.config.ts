@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import AutoImport from 'unplugin-auto-import/vite'
-import { electronDev } from './plugins/vite-plugin-electron-dev'
+import { electronDev, getReplacer } from './plugins/vite-plugin-electron-dev'
 import path from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
@@ -11,6 +11,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     // vite 插件配置
     plugins: [
       mode !== 'web' && electronDev(),
+      getReplacer(),
       react(),
       // Api自动导入
       AutoImport({

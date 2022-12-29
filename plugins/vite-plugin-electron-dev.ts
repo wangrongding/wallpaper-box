@@ -1,40 +1,61 @@
-import { AddressInfo } from "net";
-import { ViteDevServer } from "vite";
-export let electronDev = () => {
+import { AddressInfo } from 'net'
+import { ViteDevServer } from 'vite'
+import optimizer from 'vite-plugin-optimizer'
+
+export const electronDev = () => {
   return {
-    name: "vite-plugin-electron-dev",
+    name: 'vite-plugin-electron-dev',
     configureServer(server: ViteDevServer) {
-      require("esbuild").buildSync({
-        entryPoints: ["./src/electron/main.ts"],
+      require('esbuild').buildSync({
+        entryPoints: ['./src/electron/main.ts'],
         bundle: true,
-        platform: "node",
-        outfile: "./electron/main.js",
-        external: ["electron"],
-      });
-      const httpServer = server.httpServer!;
-      httpServer.once("listening", () => {
-        let { spawn } = require("child_process");
-        let addressInfo = httpServer.address()! as AddressInfo;
+        platform: 'node',
+        outfile: './electron/main.js',
+        external: ['electron'],
+      })
+      const httpServer = server.httpServer!
+      httpServer.once('listening', () => {
+        let { spawn } = require('child_process')
+        let addressInfo = httpServer.address()! as AddressInfo
         // let httpAddress = `http://${addressInfo.address}:${addressInfo.port}`;
-        let httpAddress = `http://localhost:${addressInfo.port}`;
-        console.log("🚀🚀🚀 / httpAddress", httpAddress);
-        let electronProcess = spawn(
-          require("electron").toString(),
-          ["./electron/main.js", httpAddress],
-          {
-            cwd: process.cwd(),
-            stdio: "inherit",
-          }
-        );
-        electronProcess.on("close", () => {
+        let httpAddress = `http://localhost:${addressInfo.port}`
+        console.log('🚀🚀🚀 / httpAddress', httpAddress)
+        let electronProcess = spawn(require('electron').toString(), ['./electron/main.js', httpAddress], {
+          cwd: process.cwd(),
+          stdio: 'inherit',
+        })
+        electronProcess.on('close', () => {
           // if (electronProcess && electronProcess.kill) {
           //   process.kill(electronProcess.pid);
           //   electronProcess = null;
           // }
-          server.close();
-          process.exit();
-        });
-      });
+          server.close()
+          process.exit()
+        })
+      })
     },
-  };
-};
+  }
+}
+
+export const replacer = () => {
+  let externalModels = ['os', 'fs', 'path', 'events', 'child_process', 'crypto', 'http', 'buffer', 'url', 'better-sqlite3', 'knex']
+  let result = {}
+  for (let item of externalModels) {
+    result[item] = () => ({
+      find: new RegExp(`^${item}$`),
+      code: `const ${item} = require('${item}');export { ${item} as default }`,
+    })
+  }
+  result['electron'] = () => {
+    let electronModules = ['clipboard', 'ipcRenderer', 'nativeImage', 'shell', 'webFrame'].join(',')
+    return {
+      find: new RegExp(`^electron$`),
+      code: `const {${electronModules}} = require('electron');export {${electronModules}}`,
+    }
+  }
+  return result
+}
+
+export function getReplacer() {
+  return optimizer(replacer())
+}

@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell } from 'electron'
 import { setTrayIcon, createNativeImage, icons, tray } from './tray'
+import path from 'path'
 
 // 关闭electron警告
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
@@ -10,11 +11,13 @@ let mainWindow: BrowserWindow
 const createWindow = () => {
   // 创建窗口
   mainWindow = new BrowserWindow({
-    width: 1500,
-    height: 900,
+    width: 1900,
+    height: 1000,
     frame: false, //是否显示边缘框
     fullscreen: false, //是否全屏显示
     webPreferences: {
+      // preload: './preload.js',
+      // preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true, //赋予此窗口页面中的JavaScript访问Node.js环境的能力
       webSecurity: false, //禁用同源策略
       contextIsolation: false, //是否使用上下文隔离,在同一个 JavaScript 上下文中使用 Electron API
@@ -58,10 +61,8 @@ app.on('activate', () => {
 })
 
 // 在默认浏览器中打开 a 标签
-ipcMain.on('open-link-in-browser', (event, arg) => {
-  console.log('🚀🚀🚀 / event, arg', event, arg)
-
-  // shell.openExternal(arg)
+ipcMain.on('open-link-in-browser', (_, arg) => {
+  shell.openExternal(arg)
 })
 
 // 打开窗口调试

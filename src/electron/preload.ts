@@ -1,16 +1,24 @@
-// import { app, BrowserWindow, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, IpcRendererEvent, app, BrowserWindow } from 'electron'
 
-// window.addEventListener('DOMContentLoaded', () => {
-//   const replaceText = (selector: string, text: string) => {
-//     const element = document.getElementById(selector)
-//     if (element) element.innerText = text
-//   }
+export type Channels = 'ipc-example'
 
-//   for (const type of ['chrome', 'node', 'electron']) {
-//     replaceText(`${type}-version`, process.versions[type]!)
-//   }
-// })
-// const electron = new Electron()
-// window.electron = electron
+contextBridge.exposeInMainWorld('electron', {
+  ipcRenderer: {
+    sendMessage(channel: Channels, args: unknown[]) {
+      ipcRenderer.send(channel, args)
+    },
+    on(channel: Channels, func: (...args: unknown[]) => void) {
+      const subscription = (_event: IpcRendererEvent, ...args: unknown[]) => func(...args)
+      ipcRenderer.on(channel, subscription)
+
+      return () => {
+        ipcRenderer.removeListener(channel, subscription)
+      }
+    },
+    once(channel: Channels, func: (...args: unknown[]) => void) {
+      ipcRenderer.once(channel, (_event, ...args) => func(...args))
+    },
+  },
+})
 
 export {}
