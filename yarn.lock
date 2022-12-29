@@ -861,15 +861,6 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/ffi-napi@^2.4.3":
-  version "2.4.3"
-  resolved "https://registry.npmjs.org/@types/ffi-napi/-/ffi-napi-2.4.3.tgz#8e0194a47f1fc9a2d1e00dcae66c919ae97faa2d"
-  integrity sha512-lkSpnVM3252+IAxwqmX5zPh8Nugzz7rtTcLC8tnGaY48n/5kmrO0AV3OVQDMgSKPI5X4I3vx0yeArfGV6PlwCQ==
-  dependencies:
-    "@types/node" "*"
-    "@types/ref-napi" "*"
-    "@types/ref-struct-di" "*"
-
 "@types/graceful-fs@^4.1.2":
   version "4.1.5"
   resolved "https://registry.npmmirror.com/@types/graceful-fs/-/graceful-fs-4.1.5.tgz#21ffba0d98da4350db64891f92a9e5db3cdb4e15"
@@ -1083,34 +1074,6 @@
     "@types/prop-types" "*"
     "@types/scheduler" "*"
     csstype "^3.0.2"
-
-"@types/ref-napi@*":
-  version "3.0.4"
-  resolved "https://registry.npmjs.org/@types/ref-napi/-/ref-napi-3.0.4.tgz#d7edc063b244c85767867ce1167ec2d7051728a1"
-  integrity sha512-ng8SCmdZbz1GHaW3qgGoX9IaHoIvgMqgBHLe3sv18NbAkHVgnjRW8fJq51VTUm4lnJyLu60q9/002o7qjOg13g==
-  dependencies:
-    "@types/node" "*"
-
-"@types/ref-napi@^1.4.1":
-  version "1.4.1"
-  resolved "https://registry.npmjs.org/@types/ref-napi/-/ref-napi-1.4.1.tgz#cf5a5ae6a90f6cb2a1d4db21ad32ce0e7c59a6fb"
-  integrity sha512-30A5bpOd+403PJCyyarGH8AOW2IowJ5AZySiGG1B4Sad5CRHt8O+cALEbSUZT+0sE456yAwB2+UjXpH+BIVN1g==
-  dependencies:
-    "@types/node" "*"
-
-"@types/ref-struct-di@*":
-  version "1.1.6"
-  resolved "https://registry.npmjs.org/@types/ref-struct-di/-/ref-struct-di-1.1.6.tgz#9775753b24ba5bf248dd66d79d4fdb7cebef6e95"
-  integrity sha512-+Sa2H3ynDYo2ungR3d5kmNetlkAYNqQVjJvs1k7i6zvo7Zu/qb+OsrXU54RuiOYJCwY9piN+hOd4YRRaiEOqgw==
-  dependencies:
-    "@types/ref-napi" "*"
-
-"@types/ref-union-di@^1.0.0":
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/@types/ref-union-di/-/ref-union-di-1.0.3.tgz#5954f6f94364f4420f11ca58a2b4dd91e8cfc62e"
-  integrity sha512-eonV03cHemB4w9i5U9oi5DLplpW2gK4pTJPdBAedg8RI/QViJXSnNprBriJ03eb/4qx06gPVGZ3SA2EdGuFGjw==
-  dependencies:
-    "@types/ref-napi" "*"
 
 "@types/scheduler@*":
   version "0.16.2"
@@ -3475,16 +3438,16 @@ fd-slicer@~1.1.0:
   dependencies:
     pend "~1.2.0"
 
-ffi-napi@^3.0.1:
-  version "3.1.0"
-  resolved "https://registry.npmjs.org/ffi-napi/-/ffi-napi-3.1.0.tgz#5bd037a26eaa4234c664e8b9d27be3719505c7bd"
-  integrity sha512-EsHO+sP2p/nUC/3l/l8m9niee1BLm4asUFDzkkBGR4kYVgp2KqdAYUomZhkKtzim4Fq7mcYHjpUaIHsMqs+E1g==
+ffi-napi@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.npmmirror.com/ffi-napi/-/ffi-napi-4.0.3.tgz#27a8d42a8ea938457154895c59761fbf1a10f441"
+  integrity sha512-PMdLCIvDY9mS32RxZ0XGb95sonPRal8aqRhLbeEtWKZTe2A87qRFG9HjOhvG8EX2UmQw5XNRMIOT+1MYlWmdeg==
   dependencies:
     debug "^4.1.1"
     get-uv-event-loop-napi-h "^1.0.5"
-    node-addon-api "^2.0.0"
+    node-addon-api "^3.0.0"
     node-gyp-build "^4.2.1"
-    ref-napi "^2.0.1"
+    ref-napi "^2.0.1 || ^3.0.2"
     ref-struct-di "^1.1.0"
 
 file-uri-to-path@1.0.0:
@@ -5614,10 +5577,10 @@ nice-try@^1.0.4:
   resolved "https://registry.npmmirror.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha512-1nh45deeb5olNY7eX82BkPO7SSxR5SSYJiPTrTdFUVYwAl8CKMA5N9PjTYkHiRjisVcxcQ1HXdLhx2qxxJzLNQ==
 
-node-addon-api@^2.0.0:
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/node-addon-api/-/node-addon-api-2.0.2.tgz#432cfa82962ce494b132e9d72a15b29f71ff5d32"
-  integrity sha512-Ntyt4AIXyaLIuMHF6IOoTakB3K+RWxwtsHNRxllEoA6vPwP9o4866g6YWDLUdnucilZhmkxiHwHr11gAENw+QA==
+node-addon-api@^3.0.0:
+  version "3.2.1"
+  resolved "https://registry.npmmirror.com/node-addon-api/-/node-addon-api-3.2.1.tgz#81325e0a2117789c0128dab65e7e38f07ceba161"
+  integrity sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==
 
 node-fetch@^1.0.1:
   version "1.7.3"
@@ -7544,14 +7507,14 @@ redux@^4.0.0, redux@^4.0.1:
   dependencies:
     "@babel/runtime" "^7.9.2"
 
-ref-napi@^2.0.1, ref-napi@^2.0.3:
-  version "2.1.2"
-  resolved "https://registry.npmjs.org/ref-napi/-/ref-napi-2.1.2.tgz#5986069d7b0ea83e1fef48239a2bd75318ce341b"
-  integrity sha512-aFl+vrIuLWUXMUTQGAwGAuSNLX3Ub5W3iVP8b7KyFFZUdn4+i4U1TXXTop0kCTUfGNu8glBGVz4lowkwMcPVVA==
+"ref-napi@^2.0.1 || ^3.0.2", ref-napi@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.npmmirror.com/ref-napi/-/ref-napi-3.0.3.tgz#e259bfc2bbafb3e169e8cd9ba49037dd00396b22"
+  integrity sha512-LiMq/XDGcgodTYOMppikEtJelWsKQERbLQsYm0IOOnzhwE9xYZC7x8txNnFC9wJNOkPferQI4vD4ZkC0mDyrOA==
   dependencies:
     debug "^4.1.1"
     get-symbol-from-current-process-h "^1.0.2"
-    node-addon-api "^2.0.0"
+    node-addon-api "^3.0.0"
     node-gyp-build "^4.2.1"
 
 ref-struct-di@^1.1.0, ref-struct-di@^1.1.1:
@@ -9127,16 +9090,13 @@ which@^2.0.1, which@^2.0.2:
   dependencies:
     isexe "^2.0.0"
 
-win-win-api@0.0.4:
-  version "0.0.4"
-  resolved "https://registry.npmjs.org/win-win-api/-/win-win-api-0.0.4.tgz#c56cac210a11c55242ad7427ecc587e9946b1b55"
-  integrity sha512-bpdJOvSylfboytW1O6S22AXjwHgkpemB6dQXNDgLlBDlR4dg9cT9b8mjvyfeJtt41gtlg+1dEjtQly8O7pqPPA==
+win-win-api@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.npmmirror.com/win-win-api/-/win-win-api-0.0.5.tgz#8a2f00a6d192f09fcb1375bb9ddb3758ddb61f17"
+  integrity sha512-4MZq3DYSClQOLk2OHqTEg0AF5hPMmCFEWqK4q+Bvzo6iUW+YQot2EuDFv/PCHXZzIS849raVWO7TP1TqvGPUCw==
   dependencies:
-    "@types/ffi-napi" "^2.4.3"
-    "@types/ref-napi" "^1.4.1"
-    "@types/ref-union-di" "^1.0.0"
-    ffi-napi "^3.0.1"
-    ref-napi "^2.0.3"
+    ffi-napi "^4.0.3"
+    ref-napi "^3.0.3"
     ref-struct-di "^1.1.1"
     ref-union-di "^1.0.1"
 
