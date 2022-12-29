@@ -30,6 +30,8 @@ specifiers:
   vite-plugin-optimizer: ^1.4.2
   vite-plugin-svg-icons: ^2.0.1
   wait-on: ^7.0.1
+  win-win-api: ^0.0.5
+  win32-ffi: 0.0.6-alpha.5
 
 dependencies:
   '@ant-design/icons': 4.8.0_biqbaboplfbrettd7655fr4n2y
@@ -41,6 +43,8 @@ dependencies:
   react-redux: 8.0.5_gm3gubmwja4o7q6fr6adx3fpz4
   react-router-dom: 6.6.1_biqbaboplfbrettd7655fr4n2y
   redux: 4.2.0
+  win-win-api: 0.0.5
+  win32-ffi: 0.0.6-alpha.5
 
 devDependencies:
   '@types/lodash': 4.14.191
@@ -1401,6 +1405,17 @@ packages:
       ms: 2.0.0
     dev: true
 
+  /debug/3.2.7:
+    resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+    dependencies:
+      ms: 2.1.2
+    dev: false
+
   /debug/4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
     engines: {node: '>=6.0'}
@@ -1411,7 +1426,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.2
-    dev: true
 
   /decode-uri-component/0.2.2:
     resolution: {integrity: sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ==}
@@ -1744,6 +1758,21 @@ packages:
       pend: 1.2.0
     dev: true
 
+  /ffi-napi/4.0.3:
+    resolution: {integrity: sha512-PMdLCIvDY9mS32RxZ0XGb95sonPRal8aqRhLbeEtWKZTe2A87qRFG9HjOhvG8EX2UmQw5XNRMIOT+1MYlWmdeg==}
+    engines: {node: '>=10'}
+    requiresBuild: true
+    dependencies:
+      debug: 4.3.4
+      get-uv-event-loop-napi-h: 1.0.6
+      node-addon-api: 3.2.1
+      node-gyp-build: 4.5.0
+      ref-napi: 3.0.3
+      ref-struct-di: 1.1.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /fill-range/4.0.0:
     resolution: {integrity: sha512-VcpLTWqWDiTerugjj8e3+esbg+skS3M9e54UuR3iCeIDMXCLTsAH8hTSzDQU/X6/6t3eYkOKoZSef2PlU6U1XQ==}
     engines: {node: '>=0.10.0'}
@@ -1866,6 +1895,16 @@ packages:
     dependencies:
       pump: 3.0.0
     dev: true
+
+  /get-symbol-from-current-process-h/1.0.2:
+    resolution: {integrity: sha512-syloC6fsCt62ELLrr1VKBM1ggOpMdetX9hTrdW77UQdcApPHLmf7CI7OKcN1c9kYuNxKcDe4iJ4FY9sX3aw2xw==}
+    dev: false
+
+  /get-uv-event-loop-napi-h/1.0.6:
+    resolution: {integrity: sha512-t5c9VNR84nRoF+eLiz6wFrEp1SE2Acg0wS+Ysa2zF0eROes+LzOfuTaVHxGy8AbS8rq7FHEJzjnCZo1BupwdJg==}
+    dependencies:
+      get-symbol-from-current-process-h: 1.0.2
+    dev: false
 
   /get-value/2.0.6:
     resolution: {integrity: sha512-Ln0UQDlxH1BapMu3GPtf7CuYNwRZf2gwCuPqbyG6pB8WfmFpzqcy4xtAaAMUhnNqjMKTiCPZG2oMT3YSx8U2NA==}
@@ -2477,7 +2516,6 @@ packages:
 
   /ms/2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
-    dev: true
 
   /nanoid/3.3.4:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
@@ -2503,6 +2541,15 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /node-addon-api/3.2.1:
+    resolution: {integrity: sha512-mmcei9JghVNDYydghQmeDX8KoAm0FAiYyIcUt/N4nhyAipB17pllZQDOJD2fotxABnt4Mdz+dKTO7eftLg4d0A==}
+    dev: false
+
+  /node-gyp-build/4.5.0:
+    resolution: {integrity: sha512-2iGbaQBV+ITgCz76ZEjmhUKAKVf7xfY1sRl4UiKQspfZMH2h06SyhNsnSVy50cwkFQDGLyif6m/6uFXHkOZ6rg==}
+    hasBin: true
+    dev: false
 
   /node-releases/2.0.8:
     resolution: {integrity: sha512-dFSmB8fFHEH/s81Xi+Y/15DQY6VHW81nXRj86EMSL3lmuTmK1e+aT4wrFCkTbm+gSwkw4KpX+rT/pMM2c1mF+A==}
@@ -3474,6 +3521,35 @@ packages:
       '@babel/runtime': 7.20.7
     dev: false
 
+  /ref-napi/3.0.3:
+    resolution: {integrity: sha512-LiMq/XDGcgodTYOMppikEtJelWsKQERbLQsYm0IOOnzhwE9xYZC7x8txNnFC9wJNOkPferQI4vD4ZkC0mDyrOA==}
+    engines: {node: '>= 10.0'}
+    requiresBuild: true
+    dependencies:
+      debug: 4.3.4
+      get-symbol-from-current-process-h: 1.0.2
+      node-addon-api: 3.2.1
+      node-gyp-build: 4.5.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /ref-struct-di/1.1.1:
+    resolution: {integrity: sha512-2Xyn/0Qgz89VT+++WP0sTosdm9oeowLP23wRJYhG4BFdMUrLj3jhwHZNEytYNYgtPKLNTP3KJX4HEgBvM1/Y2g==}
+    dependencies:
+      debug: 3.2.7
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /ref-union-di/1.0.1:
+    resolution: {integrity: sha512-JWSF2BwNVtCgmEfoDGMh8S1KO07oq+T8L7cBHwcsmQmeXDZd9JNlrxU+ebSHs+jsf0qrqFFWXMCmj94Tcl26TA==}
+    dependencies:
+      debug: 3.2.7
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
   /regenerator-runtime/0.13.11:
     resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
     dev: false
@@ -4214,6 +4290,30 @@ packages:
   /webpack-virtual-modules/0.5.0:
     resolution: {integrity: sha512-kyDivFZ7ZM0BVOUteVbDFhlRt7Ah/CSPwJdi8hBpkK7QLumUqdLtVfm/PX/hkcnrvr0i77fO5+TjZ94Pe+C9iw==}
     dev: true
+
+  /win-win-api/0.0.5:
+    resolution: {integrity: sha512-4MZq3DYSClQOLk2OHqTEg0AF5hPMmCFEWqK4q+Bvzo6iUW+YQot2EuDFv/PCHXZzIS849raVWO7TP1TqvGPUCw==}
+    deprecated: see win32-ffi
+    dependencies:
+      ffi-napi: 4.0.3
+      ref-napi: 3.0.3
+      ref-struct-di: 1.1.1
+      ref-union-di: 1.0.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
+
+  /win32-ffi/0.0.6-alpha.5:
+    resolution: {integrity: sha512-I2O9k8SQCogiUs3zMk9MXMEkPVkROL8Uw59g7Xu+qljjiKs6emTut3yeZlYdm5OOxuoDH2SIHzMRqw1tU8lNNA==}
+    engines: {node: '>=14'}
+    dependencies:
+      ffi-napi: 4.0.3
+      ref-napi: 3.0.3
+      ref-struct-di: 1.1.1
+      ref-union-di: 1.0.1
+    transitivePeerDependencies:
+      - supports-color
+    dev: false
 
   /wrap-ansi/7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}

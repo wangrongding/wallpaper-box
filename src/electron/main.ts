@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell } from 'electron'
-import { setTrayIcon, createNativeImage, icons, tray } from './tray'
 import path from 'path'
+import { setTrayIcon, createNativeImage, icons, tray } from './tray'
+// import { createWallPaper } from './createWallPaper'
 
 // 关闭electron警告
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
@@ -35,15 +36,14 @@ const createWindow = () => {
   Menu.setApplicationMenu(null)
   // 设置托盘图标
   setTrayIcon()
+  // 创建动态壁纸
+  // createWallPaper()
 }
 
 // 当 Electron 完成初始化并准备创建浏览器窗口时调用此方法
 app.on('ready', () => {
   createWindow()
 })
-// app.whenReady().then(() => {
-//   createWindow();
-// });
 
 // 所有窗口关闭时退出应用.
 app.on('window-all-closed', () => {
@@ -63,6 +63,11 @@ app.on('activate', () => {
 // 在默认浏览器中打开 a 标签
 ipcMain.on('open-link-in-browser', (_, arg) => {
   shell.openExternal(arg)
+})
+
+// 创建动态壁纸
+ipcMain.on('create-live-wallpaper', (_, arg) => {
+  // createWallPaper()
 })
 
 // 打开窗口调试
