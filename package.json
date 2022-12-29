@@ -1,52 +1,47 @@
 {
-  "name": "desktop-renderer",
+  "name": "wallpaper-box",
   "private": true,
+  "type": "commonjs",
+  "version": "0.0.0",
   "main": "electron/main.js",
   "scripts": {
-    "dev": "concurrently \"umi dev\" \"wait-on http://localhost:8000 && node ./electron/dev.js\"",
-    "dev1": "concurrently \"umi dev\" \"wait-on http://localhost:8000 && electron .\"",
-    "dev:web": "umi dev",
-    "dev:exe": "electron .",
-    "build": "umi build",
-    "postinstall": "umi generate tmp",
-    "prettier": "prettier --write **/*.{js,jsx,tsx,ts,less,md,json}",
-    "test": "umi-test",
-    "test:coverage": "umi-test --coverage"
-  },
-  "gitHooks": {
-    "pre-commit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{js,jsx,less,md,json}": [
-      "prettier --write"
-    ],
-    "*.ts?(x)": [
-      "prettier --parser=typescript --write"
-    ]
+    "dev": "vite",
+    "dev:web": "vite --mode web",
+    "dev:split": "concurrently \"rollup -c\" \"npm:dev:web\" \"wait-on http://localhost:1234 \" \" electron . http://localhost:1234 \"",
+    "electron": "rollup -c && electron . http://localhost:1234",
+    "build:web": "tsc && vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@ant-design/pro-layout": "^6.5.0",
-    "@types/lodash": "^4.14.182",
-    "antd": "^4.20.0",
-    "axios": "^0.27.0",
+    "antd": "^5.1.0",
+    "axios": "^1.2.1",
     "lodash": "^4.17.21",
-    "react": "17.x",
-    "react-dom": "17.x",
-    "umi": "^3.5.23",
-    "win-win-api": "^0.0.5"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-redux": "^8.0.5",
+    "react-router-dom": "^6.6.1",
+    "redux": "^4.2.0"
   },
   "devDependencies": {
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
-    "@umijs/preset-react": "1.x",
-    "@umijs/test": "^3.5.23",
-    "chokidar": "^3.5.3",
-    "concurrently": "^7.1.0",
-    "electron": "^18.1.0",
-    "lint-staged": "^10.0.7",
-    "prettier": "^2.2.0",
-    "typescript": "^4.1.2",
-    "wait-on": "^6.0.1",
-    "yorkie": "^2.0.0"
+    "@types/lodash": "^4.14.191",
+    "@types/node": "^18.11.17",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react": "^3.0.0",
+    "autoprefixer": "^10.4.13",
+    "concurrently": "^7.6.0",
+    "electron": "^22.0.0",
+    "postcss": "^8.4.20",
+    "rollup": "^3.8.1",
+    "rollup-plugin-node-polyfills": "^0.2.1",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "sass": "^1.57.1",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.9.3",
+    "unplugin-auto-import": "^0.12.1",
+    "vite": "^4.0.0",
+    "vite-plugin-optimizer": "^1.4.2",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "wait-on": "^7.0.1"
   }
 }

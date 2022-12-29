@@ -7,15 +7,8 @@ const request = axios.create({
 });
 // request请求拦截器
 request.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     const { data = {}, method } = config;
-    // if (method === "post") {
-    //   config.data = data.data;
-    // } else if (method === "get" || method === "delete") {
-    //   config.params = data;
-    // } else if (method === "put") {
-    //   config.data = { ...data.data };
-    // }
     switch (method) {
       case "post":
         config.data = data.data;
@@ -34,9 +27,9 @@ request.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  (error: any) => {
     return error;
-  },
+  }
 );
 
 // 请求成功回调
