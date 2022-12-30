@@ -4,24 +4,31 @@
 
 技术栈：`React生态` + `Electron` + `TypeScript` + `Vite`。
 
-## RunCat
+## 目前的功能
+
+### RunCat
 
 由于 RunCat 更换高级的猫猫要收费，所以就在这个软件中加一个类似的功能。
 
 通过图标的变换速度，来动态表示 cpu 的使用情况。
 
-<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif" width="600" />  
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif" width="600" />
+
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" />
 
-## 壁纸列表
+### 壁纸列表
 
 壁纸来源于 wallhaven.cc ，最喜欢的一个壁纸网站。
 
+可以直接设置成桌面壁纸，也可以下载到本地或者预览。
+
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204280233745.png" width="600" />
 
-## 动态壁纸效果
+### 动态壁纸
 
-功能还在完善中 ~
+动态壁纸功能还在完善中 ~
+
+windows 下可以用，mac 下还有点问题 😅。
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204250101273.gif" width="600" />
 
@@ -51,7 +58,6 @@ pnpm dev:split
 ```sh
 # 打包
 pnpm build
-# 打包 web 端
 ```
 
 ## 最后
