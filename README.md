@@ -10,6 +10,7 @@
 
 通过图标的变换速度，来动态表示 cpu 的使用情况。
 
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif" width="600" />  
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" />
 
 ## 壁纸列表
