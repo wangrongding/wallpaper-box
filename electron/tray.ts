@@ -26,11 +26,11 @@ let main: BrowserWindow
 export function setTrayIcon(mainWindow: BrowserWindow) {
   main = mainWindow
   // 设置托盘图标标题
-  // tray.setTitle('wallpaper-hub')
+  // tray.setTitle('wallpaper-box')
   // 初始化托盘图标
   tray = new Tray(icons[0])
   // 设置托盘图标悬停提示
-  tray.setToolTip('wallpaper-hub')
+  tray.setToolTip('wallpaper-box')
   // 动态替换托盘图标
   dynamicTrayIcon(intervalIndex)
   // 设置托盘图标菜单

@@ -1,4 +1,4 @@
-# wallpaper-hub (WIP)
+# wallpaper-box (WIP)
 
 一个桌面壁纸客户端，支持动态壁纸。
 
@@ -42,10 +42,17 @@ pnpm i
 
 ### 开发预览 Developer Preview
 
+直接运行下面的命令，即可启动客户端项目。
+
 ```sh
-# 直接运行
 pnpm dev
-# 只调试 web 端
+
+```
+
+如果你想要分别调试 web 和 electron 端，可以使用下面的命令：
+
+```sh
+# 启动 web 服务
 pnpm dev:web
 # 调试 electron 端
 pnpm dev:electron
