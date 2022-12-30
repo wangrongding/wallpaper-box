@@ -10,6 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-web
+dist-electron
 *.local
 
 # Editor directories and files
@@ -24,5 +26,4 @@ dist-ssr
 *.sw?
 
 
-/electron
 /public/icons

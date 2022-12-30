@@ -22,6 +22,7 @@
   },
   "include": [
     "src",
+    "electron",
     "auto-imports.d.ts" // 自动导入的api
   ],
   "exclude": ["node_modules", "dist"], // 排除的文件

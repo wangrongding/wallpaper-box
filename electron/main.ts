@@ -1,6 +1,5 @@
 import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell } from 'electron'
-import path from 'path'
-import { setTrayIcon, createNativeImage, icons, tray } from './tray'
+import { setTrayIcon } from './tray'
 // import { createWallPaper } from './createWallPaper'
 
 // 关闭electron警告
@@ -35,10 +34,12 @@ const createWindow = () => {
   // 隐藏菜单栏
   Menu.setApplicationMenu(null)
   // 设置托盘图标
-  setTrayIcon()
+  setTrayIcon(mainWindow)
   // 创建动态壁纸
   // createWallPaper()
 }
+
+// ============================ app ============================
 
 // 当 Electron 完成初始化并准备创建浏览器窗口时调用此方法
 app.on('ready', () => {
@@ -60,6 +61,8 @@ app.on('activate', () => {
   }
 })
 
+// ============================ 事件 ============================
+
 // 在默认浏览器中打开 a 标签
 ipcMain.on('open-link-in-browser', (_, arg) => {
   shell.openExternal(arg)
@@ -70,15 +73,43 @@ ipcMain.on('create-live-wallpaper', (_, arg) => {
   // createWallPaper()
 })
 
+// ============================ 窗口 ============================
+
+// 刷新主窗口
+ipcMain.on('refresh-window', () => {
+  mainWindow.webContents.reload()
+})
 // 打开窗口调试
 ipcMain.on('open-devtools', () => {
   mainWindow.webContents.toggleDevTools()
 })
-// 刷新当前页面
-ipcMain.on('refresh-window', () => {
-  mainWindow.webContents.reload()
+// 最小化窗口
+ipcMain.on('minimize-window', () => {
+  mainWindow.minimize()
+})
+// 最大化窗口
+ipcMain.on('maximize-window', () => {
+  mainWindow.maximize()
+})
+// 关闭窗口
+ipcMain.on('close-window', () => {
+  mainWindow.close()
+})
+// 恢复窗口
+ipcMain.on('unmaximize-window', () => {
+  mainWindow.unmaximize()
+})
+// 隐藏窗口
+ipcMain.on('hide-window', () => {
+  mainWindow.hide()
+})
+// 显示窗口
+ipcMain.on('show-window', () => {
+  mainWindow.show()
 })
 
+// ============================ 通知 ============================
+// 消息通知
 ipcMain.on('asynchronous-message', (event, arg) => {
   console.log(arg)
   event.reply('asynchronous-reply', 'pong')

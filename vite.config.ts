@@ -56,6 +56,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     },
     // 打包配置
     build: {
+      outDir: 'dist-web',
       rollupOptions: {
         plugins: [
           // buildPlugin()

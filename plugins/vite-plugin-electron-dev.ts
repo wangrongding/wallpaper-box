@@ -7,10 +7,10 @@ export const electronDev = () => {
     name: 'vite-plugin-electron-dev',
     configureServer(server: ViteDevServer) {
       require('esbuild').buildSync({
-        entryPoints: ['./src/electron/main.ts'],
+        entryPoints: ['./electron/main.ts'],
         bundle: true,
         platform: 'node',
-        outfile: './electron/main.js',
+        outfile: './dist-electron/main.js',
         external: ['electron'],
       })
       const httpServer = server.httpServer!
@@ -20,7 +20,7 @@ export const electronDev = () => {
         // let httpAddress = `http://${addressInfo.address}:${addressInfo.port}`;
         let httpAddress = `http://localhost:${addressInfo.port}`
         console.log('🚀🚀🚀 / httpAddress', httpAddress)
-        let electronProcess = spawn(require('electron').toString(), ['./electron/main.js', httpAddress], {
+        let electronProcess = spawn(require('electron').toString(), ['./dist-electron/main.js', httpAddress], {
           cwd: process.cwd(),
           stdio: 'inherit',
         })
