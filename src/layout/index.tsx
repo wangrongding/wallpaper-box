@@ -1,11 +1,15 @@
+import { ipcRenderer } from 'electron'
 import { Outlet } from 'react-router-dom'
 import { Layout, theme } from 'antd'
+import { MinusOutlined, FullscreenExitOutlined, BorderOutlined, CloseOutlined } from '@ant-design/icons'
 import MenuBar from './Menu'
-
-import { ipcRenderer } from 'electron'
+import './index.scss'
 
 const { Header, Footer, Content } = Layout
 export default function Container() {
+  // 窗口是否最大化
+  const [isMaximized, setIsMaximized] = useState(false)
+
   const {
     token: { colorBgContainer },
   } = theme.useToken()
@@ -14,19 +18,68 @@ export default function Container() {
     ipcRenderer.send('open-link-in-browser', url)
   }
 
+  // 最小化窗口
+  function minimizeWindow() {
+    ipcRenderer.send('minimize-window')
+  }
+
+  // 最大化窗口
+  function maximizeWindow() {
+    setIsMaximized(true)
+    ipcRenderer.send('maximize-window')
+  }
+
+  // 恢复窗口
+  function unMaximizeWindow() {
+    setIsMaximized(false)
+    ipcRenderer.send('unmaximize-window')
+  }
+
+  // 关闭窗口
+  function closeWindow() {
+    ipcRenderer.send('hide-window')
+  }
+
+  // 刷新窗口
+  function refreshWindow() {
+    ipcRenderer.send('refresh-window')
+  }
+
   return (
     <>
       <Layout>
-        <Header style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%', padding: '0 20px' }}>
-          {/* LOGO */}
-          <div className='float-left text-white font-bold text-[28px] px-4 h-[40px] leading-[40px] mt-[13px]'>🏞️ wallpaper-hub</div>
-          {/* 菜单栏 */}
-          <MenuBar />
+        <Header style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%', padding: '0 20px', margin: 0 }}>
+          <div className='main-header flex justify-between align-middle items-center'>
+            {/* LOGO */}
+            <div className='text-white font-bold text-[28px] px-4 h-[40px] leading-[40px]'>
+              <span onClick={refreshWindow}>🏞️</span> wallpaper-box
+            </div>
+            {/* 菜单栏 */}
+            <div className='mr-auto my-[0px] p-[0px] h-full'>
+              <MenuBar />
+            </div>
+
+            {/* 右边操作栏 */}
+            <div className='text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
+              {/* 最小化 */}
+              <MinusOutlined onClick={minimizeWindow} />
+
+              {isMaximized ? (
+                // 恢复
+                <FullscreenExitOutlined onClick={unMaximizeWindow} />
+              ) : (
+                // 最大化
+                <BorderOutlined onClick={maximizeWindow} />
+              )}
+              {/* 关闭按钮 */}
+              <CloseOutlined onClick={closeWindow} />
+            </div>
+          </div>
         </Header>
 
         {/* 内容区 */}
         <Content className='site-layout' style={{ padding: '20px 20px 0' }}>
-          <div style={{ padding: 24, background: colorBgContainer }} className='bgx h-[calc(100vh-118px)] overflow-y-auto'>
+          <div style={{ padding: 24, background: colorBgContainer }} id='main-content' className='h-[calc(100vh-118px)] overflow-y-auto'>
             <Outlet></Outlet>
           </div>
         </Content>

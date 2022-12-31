@@ -18,24 +18,24 @@ const defaultConfig = {
     // json(),
 
     // 打包结束后执行的钩子函数
-    {
-      buildEnd: (error) => {
-        if (error) {
-          console.log(error)
-        } else {
-          console.log('打包成功')
+    // {
+    //   buildEnd: (error) => {
+    //     if (error) {
+    //       console.log(error)
+    //     } else {
+    //       console.log('打包成功')
 
-          let electronProcess = spawn(require('electron').toString(), ['./dist-electron/main.js', httpAddress], {
-            cwd: process.cwd(),
-            stdio: 'inherit',
-          })
-          electronProcess.on('close', () => {
-            server.close()
-            process.exit()
-          })
-        }
-      },
-    },
+    //       let electronProcess = spawn(require('electron').toString(), ['./dist-electron/main.js', httpAddress], {
+    //         cwd: process.cwd(),
+    //         stdio: 'inherit',
+    //       })
+    //       electronProcess.on('close', () => {
+    //         server.close()
+    //         process.exit()
+    //       })
+    //     }
+    //   },
+    // },
   ],
 }
 

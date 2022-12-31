@@ -92,9 +92,9 @@ export function setTrayIconMenu() {
         main.show()
       },
     },
-    { label: '显示主窗口', role: 'unhide' },
     { label: '隐藏主窗口', role: 'hide' },
-    { label: '隐藏其他窗口', role: 'hideOthers' },
+    // { label: '隐藏其他窗口', role: 'hideOthers' },
+    // { label: '取消隐藏其他窗口', role: 'unhide' },
     { label: '重启应用', role: 'reload' },
     { label: '强制重启应用', role: 'forceReload' },
     { type: 'separator' },

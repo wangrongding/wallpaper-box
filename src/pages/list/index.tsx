@@ -2,10 +2,11 @@ import { message, Image, Button } from 'antd'
 import { Menu, MenuProps, Checkbox, Switch, Spin } from 'antd'
 import { saveFile } from '@/utils/index'
 import { getWallHavenAssets } from '@/api/index'
+import { useRequest } from 'ahooks'
 import _, { debounce } from 'lodash'
+import { ipcRenderer } from 'electron'
+
 export default function List() {
-  const scrollRef = createRef<HTMLDivElement>()
-  const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
   const [query, setQuery] = useState({
     page: 1,
@@ -13,9 +14,10 @@ export default function List() {
     categories: '000',
   })
 
-  const chooseWallPaper = (item: any) => {
-    console.log(item.path)
-    saveFile(item.path, item.id)
+  const chooseWallPaper = async (item: any) => {
+    console.log('chooseWallPaper', item.path)
+    ipcRenderer.send('create-static-wallpaper', item.path)
+    // saveFile(item.path, item.id)
   }
 
   const onLevelChange = (checkedValues: any) => {
@@ -25,45 +27,55 @@ export default function List() {
   const onTypeChange = (checkedValues: any) => {
     console.log('checked = ', checkedValues)
   }
-  // 滚动加载更多
-  const onScroll = debounce(() => {
-    if (loading) return
-    let clientHeight = scrollRef.current!.clientHeight //可视区域高度
-    let scrollTop = scrollRef.current!.scrollTop //滚动条滚动高度
-    let scrollHeight = scrollRef.current!.scrollHeight //滚动内容高度
-    if (clientHeight + scrollTop + 200 > scrollHeight) {
-      getWallpaper()
-    }
-  }, 1000)
 
-  let mounted = false
+  // const { data, error, loading, run } = useRequest(getWallHavenAssets, { manual: true })
+  // console.log('🚀🚀🚀 / data, error, loading', data, error, loading)
   // 获取壁纸
+  let mounted = false
+  const [loading, setLoading] = useState(false)
   const getWallpaper = () => {
     setLoading(true)
     if (!mounted) return
     getWallHavenAssets(query).then((res) => {
       const list = res.data
-      setWallpaperList([...wallpaperList, ...list])
+      setWallpaperList((prev) => [...prev, ...list])
+      // setQuery((prev) => ({ ...prev, page: prev.page + 1 }))
       setQuery(
         list.length &&
           Object.assign(query, {
             page: query.page + 1,
           }),
       )
+      console.log('🚀🚀🚀 / getWallpaper', query)
+
       setLoading(false)
     })
   }
 
+  // 滚动加载更多
+  const main = document.querySelector('#main-content')!
+  const onScroll = debounce(() => {
+    if (loading) return
+    const { scrollTop, scrollHeight, clientHeight } = main
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
+      // console.log('🚀🚀🚀 / getWallpaper')
+      getWallpaper()
+    }
+  }, 800)
+
   useEffect(() => {
+    main?.addEventListener('scroll', onScroll)
     getWallpaper()
+
     return () => {
       mounted = true
+      main?.removeEventListener('scroll', onScroll)
     }
   }, [])
   return (
     <>
       <div className=''>{/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}</div>
-      <div className='grid grid-cols-5 gap-4' onScroll={onScroll} ref={scrollRef}>
+      <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
         {wallpaperList.map((item: any, index: number) => {
           return (
             <Image
