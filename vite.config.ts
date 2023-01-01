@@ -4,6 +4,7 @@ import AutoImport from 'unplugin-auto-import/vite'
 import { electronDev, getReplacer } from './plugins/vite-plugin-electron-dev'
 import path from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
+// import esModule from 'vite-plugin-esmodule'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode, ssrBuild }) => {
@@ -12,6 +13,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     plugins: [
       mode !== 'web' && electronDev(),
       getReplacer(),
+      // esModule(['wallpaper']),
       react(),
       // Api自动导入
       AutoImport({
