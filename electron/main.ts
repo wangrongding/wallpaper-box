@@ -1,18 +1,38 @@
-import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell } from 'electron'
+import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell, globalShortcut } from 'electron'
 import { setTrayIcon } from './tray'
-// import { createWallPaper } from './createWallPaper'
+import { initMenu } from './menu'
+import { initKeyboard } from './keyboard'
+import { setProxy, removeProxy } from './proxy'
 
 // 关闭electron警告
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 // 保持window对象的全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let mainWindow: BrowserWindow
 
+// 初始化应用
+const initApp = () => {
+  // 创建窗口
+  createWindow()
+  // 设置托盘图标
+  setTrayIcon(mainWindow)
+  // 设置快捷键
+  initKeyboard(mainWindow)
+  // 设置菜单
+  initMenu(mainWindow)
+  // 设置代理
+  setProxy(mainWindow)
+  // 隐藏菜单栏
+  // Menu.setApplicationMenu(null)
+  // 创建动态壁纸
+  // createWallPaper()
+}
+
 // 创建窗口
 const createWindow = () => {
   // 创建窗口
   mainWindow = new BrowserWindow({
-    width: 1900,
-    height: 1000,
+    width: 1300,
+    height: 900,
     frame: false, //是否显示边缘框
     fullscreen: false, //是否全屏显示
     webPreferences: {
@@ -29,28 +49,24 @@ const createWindow = () => {
   })
 
   // 打开窗口调试,默认为 undocked 悬浮窗口
-  mainWindow.webContents.openDevTools({ mode: 'right' })
-  mainWindow.loadURL(process.argv[2])
-  // 隐藏菜单栏
-  Menu.setApplicationMenu(null)
-  // 设置托盘图标
-  setTrayIcon(mainWindow)
-  // 创建动态壁纸
-  // createWallPaper()
+  mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
+  // mainWindow.webContents.openDevTools({ mode: 'right' })
+  // mainWindow.loadURL('https://www.ipip.net/?origin=EN')
 }
 
 // ============================ app ============================
 
 // 当 Electron 完成初始化并准备创建浏览器窗口时调用此方法
 app.on('ready', () => {
-  createWindow()
+  initApp()
 })
 
 // 所有窗口关闭时退出应用.
 app.on('window-all-closed', () => {
   console.log('window-all-closed', process.platform)
-  app.quit()
-  // if (process.platform === "darwin") {}
+  if (process.platform !== 'darwin') {
+    // app.quit()
+  }
 })
 
 // 当应用程序激活时,在 macOS 上,当单击 dock 图标并且没有其他窗口打开时,通常在应用程序中重新创建一个窗口
@@ -58,6 +74,8 @@ app.on('activate', () => {
   console.log('activate')
   if (mainWindow === null) {
     createWindow()
+  } else {
+    mainWindow.show()
   }
 })
 
@@ -73,42 +91,65 @@ ipcMain.on('create-live-wallpaper', (_, arg) => {
   // createWallPaper()
 })
 
+// 设置代理
+ipcMain.on('set_proxy', (event, arg) => {
+  console.log(arg)
+  var { http_proxy } = arg
+  mainWindow.webContents.session.setProxy({
+    proxyRules: http_proxy,
+    proxyBypassRules: 'localhost',
+  })
+})
+
+// 移除代理
+ipcMain.on('remove_proxy', (event, arg) => {
+  mainWindow.webContents.session.setProxy({})
+})
+
 // ============================ 窗口 ============================
 
 // 刷新主窗口
 ipcMain.on('refresh-window', () => {
   mainWindow.webContents.reload()
 })
+
 // 打开窗口调试
 ipcMain.on('open-devtools', () => {
   mainWindow.webContents.toggleDevTools()
 })
+
 // 最小化窗口
 ipcMain.on('minimize-window', () => {
   mainWindow.minimize()
 })
+
 // 最大化窗口
 ipcMain.on('maximize-window', () => {
   mainWindow.maximize()
 })
+
 // 关闭窗口
 ipcMain.on('close-window', () => {
   mainWindow.close()
 })
+
 // 恢复窗口
 ipcMain.on('unmaximize-window', () => {
   mainWindow.unmaximize()
 })
+
 // 隐藏窗口
 ipcMain.on('hide-window', () => {
   mainWindow.hide()
 })
+
 // 显示窗口
 ipcMain.on('show-window', () => {
   mainWindow.show()
 })
 
 // ============================ 通知 ============================
+
 // 消息通知
 ipcMain.on('asynchronous-message', (event, arg) => {
   console.log(arg)

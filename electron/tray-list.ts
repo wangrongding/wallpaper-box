@@ -6,7 +6,7 @@ export function createNativeImage(path: string) {
   return nativeImage.createFromPath(path).resize({ width: 30, height: 28 })
 }
 
-export const tarys = {
+export const trays = {
   runcat: [
     createNativeImage(path.join(__dirname, '../public/icons/runcat/0.png')),
     createNativeImage(path.join(__dirname, '../public/icons/runcat/1.png')),
