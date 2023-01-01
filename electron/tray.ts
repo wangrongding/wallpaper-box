@@ -1,15 +1,14 @@
 import { Tray, nativeImage, Menu, shell, BrowserWindow } from 'electron'
 import * as path from 'path'
 import os from 'os'
-import { tarys } from './trayList'
+import { trays } from './tray-list'
 
-const isMac = process.platform === 'darwin'
 // 创建原生图像
 export function createNativeImage(path: string) {
   return nativeImage.createFromPath(path).resize({ width: 30, height: 28 })
 }
 
-export let icons = tarys.partyBlobCat
+export let icons = trays.partyBlobCat
 
 // 图表索引
 let index = 0
@@ -37,61 +36,29 @@ export function setTrayIcon(mainWindow: BrowserWindow) {
   setTrayIconMenu()
 }
 
+type Trays = keyof typeof trays
+// 切换托盘图标,参数的类型为 trays 的 key
+function changeTrayIcon(item: Trays) {
+  icons = trays[item]
+  // dynamicTrayIcon(intervalIndex)
+}
+
 // 设置托盘图标菜单
 export function setTrayIconMenu() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: '更换图标',
       submenu: [
-        { label: '小猫', type: 'radio', checked: true },
-        { label: '超级马里奥', type: 'radio' },
-        { label: 'Mona', type: 'radio' },
-        { label: 'partyBlobCat', type: 'radio' },
-        { label: 'Points', type: 'radio' },
-        { label: 'RuncatX', type: 'radio' },
+        { label: 'runcat', type: 'radio', checked: true, click: () => changeTrayIcon('runcat') },
+        { label: 'mario', type: 'radio', click: () => changeTrayIcon('mario') },
+        { label: 'Mona', type: 'radio', click: () => changeTrayIcon('mona') },
+        { label: 'partyBlobCat', type: 'radio', click: () => changeTrayIcon('partyBlobCat') },
+        { label: 'Points', type: 'radio', click: () => changeTrayIcon('points') },
+        { label: 'RuncatX', type: 'radio', click: () => changeTrayIcon('runcatX') },
       ],
-      // 选中事件
-      click: (menuItem, browserWindow, event) => {
-        console.log('🚀🚀🚀 / menuItem', menuItem)
-
-        // const { label } = menuItem
-        // switch (label) {
-        //   case '小猫':
-        //     icons = tarys.runcat
-        //     break
-        //   case '超级马里奥':
-        //     icons = tarys.mario
-        //     break
-        //   case 'Mona':
-        //     icons = tarys.mona
-        //     break
-        //   case 'partyBlobCat':
-        //     icons = tarys.partyBlobCat
-        //     break
-        //   case 'Points':
-        //     icons = tarys.points
-        //     break
-        //   case 'RuncatX':
-        //     icons = tarys.runcatX
-        //     break
-        //   default:
-        //     break
-        // }
-        // index = 0
-        // intervalIndex = 9
-        // dynamicTrayIcon(intervalIndex)
-      },
     },
-    // { label: '菜单5', type: 'checkbox' },
     { type: 'separator' },
-    {
-      label: '显示主窗口',
-      type: 'normal',
-      click: () => {
-        // 显示主窗口
-        main.show()
-      },
-    },
+    { label: '显示主窗口', type: 'normal', click: () => main.show() },
     { label: '隐藏主窗口', role: 'hide' },
     // { label: '隐藏其他窗口', role: 'hideOthers' },
     // { label: '取消隐藏其他窗口', role: 'unhide' },
@@ -101,12 +68,11 @@ export function setTrayIconMenu() {
     { label: '关于', role: 'about' },
     {
       label: 'Github🌸',
-      click: async () => {
-        await shell.openExternal('https://github.com/wangrongding')
-      },
+      click: async () => await shell.openExternal('https://github.com/wangrongding'),
     },
     { type: 'separator' },
-    { label: '退出', type: 'normal', role: isMac ? 'close' : 'quit' },
+    { label: '退出', type: 'normal', role: 'quit' },
+    // { label: 'checkbox', type: 'checkbox' },
   ])
   tray.setContextMenu(contextMenu)
 }
@@ -114,7 +80,7 @@ export function setTrayIconMenu() {
 // 动态替换托盘图标
 export function dynamicTrayIcon(intervalIndex: number) {
   // 替换托盘图标
-  tray.setImage(icons[index])
+  tray.setImage(icons[index] || icons[0])
   index = (index + 1) % icons.length
   intervalIndex = cpuUsage()
   // tray.setTitle(intervalIndex.toString())

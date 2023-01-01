@@ -4,7 +4,7 @@ import App from './App'
 import { BrowserRouter } from 'react-router-dom'
 
 // antd 样式
-// import "antd/dist/reset.css";
+import "antd/dist/reset.css";
 // 全局样式
 import '@/styles/index.scss'
 // tailwindcss 样式
