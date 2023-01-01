@@ -1,5 +1,5 @@
 import { app, BrowserWindow, screen } from 'electron'
-import { setUnderLayer } from './setUnderLayer'
+import { setUnderLayer } from './set-under-layer'
 
 let wallWindow: BrowserWindow[] = []
 // 创建窗口
