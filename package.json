@@ -17,7 +17,7 @@
   "dependencies": {
     "@ant-design/icons": "^4.8.0",
     "ahooks": "^3.7.4",
-    "antd": "^5.1.0",
+    "antd": "^5.1.2",
     "axios": "^1.2.1",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
