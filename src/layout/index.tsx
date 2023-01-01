@@ -49,7 +49,7 @@ export default function Container() {
     <>
       <Layout>
         <Header style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%', padding: '0 20px', margin: 0 }}>
-          <div className='main-header flex justify-between align-middle items-center'>
+          <div className='main-header flex justify-between align-middle items-center' onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}>
             {/* LOGO */}
             <div className='text-white font-bold text-[28px] px-4 h-[40px] leading-[40px]'>
               <span onClick={refreshWindow}>🏞️</span> wallpaper-box
