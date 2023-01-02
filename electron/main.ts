@@ -34,6 +34,7 @@ const createWindow = () => {
     width: 1300,
     height: 900,
     frame: false, //是否显示边缘框
+    titleBarStyle: 'hiddenInset', //标题栏样式
     fullscreen: false, //是否全屏显示
     webPreferences: {
       // preload: './preload.js',
