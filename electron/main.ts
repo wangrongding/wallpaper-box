@@ -2,6 +2,7 @@ import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell, globalSho
 import { setTrayIcon } from './tray'
 import { initMenu } from './menu'
 import { initKeyboard } from './keyboard'
+import { initDock } from './dock'
 import { setProxy, removeProxy } from './proxy'
 
 // 关闭electron警告
@@ -19,6 +20,8 @@ const initApp = () => {
   initKeyboard(mainWindow)
   // 设置菜单
   initMenu(mainWindow)
+  // 设置dock
+  initDock()
   // 设置代理
   setProxy(mainWindow)
   // 隐藏菜单栏
