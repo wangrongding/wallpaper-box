@@ -25,6 +25,13 @@
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif" width="600" />
 
+可以在托盘菜单中切换动态图标。  
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021550728.png" width="600" />
+
+可爱的超级马里奥~
+
+过几天弄下自定义动态图标。 直接选取本地准备好的帧动画相关的图片，然后就可以自定义动态图标了。（目前你可以使用这几款内置的图标，或者你也可以在 [icons 文件夹](./public/icons) 中添加你的图标，[修改 tray 配置文件](./electron/tray-list.ts) 即可）
+
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" />
 
 ### 壁纸列表
