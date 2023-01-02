@@ -157,6 +157,6 @@ ipcMain.on('asynchronous-message', (event, arg) => {
   event.reply('asynchronous-reply', 'pong')
   new Notification({
     title: '提示',
-    body: '替换成功！',
+    body: arg,
   }).show()
 })
