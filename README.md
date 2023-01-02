@@ -11,28 +11,11 @@
 - [x] 壁纸列表
 - [x] 下载壁纸
 - [x] 设置静态壁纸
+- [x] 设置动态壁纸（在 MacOs 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
 - [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
 - [x] 支持修改代理
-- [x] 设置动态壁纸（在 MacOs 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
 
 ## 使用
-
-### RunCat
-
-由于 RunCat 更换高级的猫猫要收费，所以就在这个软件中加一个类似的功能。
-
-通过图标的变换速度，来动态表示 cpu 的使用情况。
-
-<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif" width="600" />
-
-可以在托盘菜单中切换动态图标。  
-<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021550728.png" width="600" />
-
-可爱的超级马里奥~
-
-过几天弄下自定义动态图标。 直接选取本地准备好的帧动画相关的图片，然后就可以自定义动态图标了。（目前你可以使用这几款内置的图标，或者你也可以在 [icons 文件夹](./public/icons) 中添加你的图标，[修改 tray 配置文件](./electron/tray-list.ts) 即可）
-
-<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" />
 
 ### 壁纸列表
 
@@ -56,6 +39,22 @@ Windows 中的效果：
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204250101273.gif" width="600" />
 
+### RunCat
+
+由于 RunCat 更换高级的猫猫要收费，所以就在这个软件中加一个类似的功能。
+
+通过图标的变换速度，来动态表示 cpu 的使用情况。
+
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif" width="600" />
+
+可以在托盘菜单中切换动态图标。  
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021550728.png" width="600" />
+
+可爱的超级马里奥~
+
+过几天弄下自定义动态图标。 直接选取本地准备好的帧动画相关的图片，然后就可以自定义动态图标了。（目前你可以使用这几款内置的图标，或者你也可以在 [icons 文件夹](./public/icons) 中添加你的图标，[修改 tray 配置文件](./electron/tray-list.ts) 即可）
+
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" />
 ## 开发
 
 ### 安装依赖 Install dependencies
