@@ -14,6 +14,7 @@ const MenuBar: React.FC = () => {
 
   return (
     <Menu
+      style={{ height: '50px', lineHeight: '50px' }}
       theme='dark'
       mode='horizontal'
       onClick={handleMenuClick}

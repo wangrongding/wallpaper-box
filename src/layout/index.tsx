@@ -3,6 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Layout, theme } from 'antd'
 import { MinusOutlined, FullscreenExitOutlined, BorderOutlined, CloseOutlined } from '@ant-design/icons'
 import MenuBar from './Menu'
+import os from 'os'
 import './index.scss'
 
 const { Header, Footer, Content } = Layout
@@ -48,8 +49,12 @@ export default function Container() {
   return (
     <>
       <Layout>
-        <Header style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%', padding: '0 20px', margin: 0 }}>
-          <div className='main-header flex justify-between align-middle items-center' onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}>
+        <Header style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%', padding: '0 20px', margin: 0, height: '50px' }}>
+          <div
+            className='main-header flex justify-between align-middle items-center h-[50px]'
+            style={{ marginLeft: os.platform() !== 'darwin' ? 'none' : '50px' }}
+            onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}
+          >
             {/* LOGO */}
             <div className='text-white font-bold text-[28px] px-4 h-[40px] leading-[40px]'>
               <span onClick={refreshWindow}>🏞️</span> wallpaper-box
@@ -60,26 +65,28 @@ export default function Container() {
             </div>
 
             {/* 右边操作栏 */}
-            <div className='text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
-              {/* 最小化 */}
-              <MinusOutlined onClick={minimizeWindow} />
+            {os.platform() !== 'darwin' && (
+              <div className='text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
+                {/* 最小化 */}
+                <MinusOutlined onClick={minimizeWindow} />
 
-              {isMaximized ? (
-                // 恢复
-                <FullscreenExitOutlined onClick={unMaximizeWindow} />
-              ) : (
-                // 最大化
-                <BorderOutlined onClick={maximizeWindow} />
-              )}
-              {/* 关闭按钮 */}
-              <CloseOutlined onClick={closeWindow} />
-            </div>
+                {isMaximized ? (
+                  // 恢复
+                  <FullscreenExitOutlined onClick={unMaximizeWindow} />
+                ) : (
+                  // 最大化
+                  <BorderOutlined onClick={maximizeWindow} />
+                )}
+                {/* 关闭按钮 */}
+                <CloseOutlined onClick={closeWindow} />
+              </div>
+            )}
           </div>
         </Header>
 
         {/* 内容区 */}
         <Content className='site-layout' style={{ padding: '20px 20px 0' }}>
-          <div style={{ padding: 24, background: colorBgContainer }} id='main-content' className='h-[calc(100vh-118px)] overflow-y-auto'>
+          <div style={{ padding: 24, background: colorBgContainer }} id='main-content' className='h-[calc(100vh-104px)] overflow-y-auto'>
             <Outlet></Outlet>
           </div>
         </Content>
