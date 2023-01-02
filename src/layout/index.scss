@@ -1,11 +1,10 @@
 .main-header {
   -webkit-app-region: drag;
-  cursor: move;
-  .window-controls {
-    -webkit-app-region: no-drag;
-  }
-  div {
-    -webkit-app-region: no-drag;
-    cursor: pointer;
+  // cursor: move;
+
+  .no-drag,
+  img {
+    -webkit-user-drag: none;
+    cursor: default;
   }
 }

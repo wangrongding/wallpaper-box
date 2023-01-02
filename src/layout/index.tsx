@@ -57,7 +57,7 @@ export default function Container() {
             onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}
           >
             {/* LOGO */}
-            <div className='text-white font-bold text-[28px] px-4 h-[40px] leading-[40px]'>
+            <div className='no-drag text-white font-bold text-[28px] h-[40px] leading-[40px]'>
               <img src={Logo} className='logo h-[40px]' alt='logo' />
               {/* <span onClick={refreshWindow}>🏞️</span> wallpaper-box */}
             </div>

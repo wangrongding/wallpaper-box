@@ -36,6 +36,7 @@ export default function List() {
 
     // 设置壁纸
     await wallpaper.setWallpaper(filepath, { scale: 'auto' })
+    ipcRenderer.send('create-static-wallpaper')
     ipcRenderer.send('asynchronous-message', '设置成功！')
     setLoading(false)
   }
@@ -96,7 +97,7 @@ export default function List() {
   return (
     <Spin spinning={loading}>
       <div className='list-page'>
-        <p className='bg-slate-700 text-white leading-8 box-border pl-4 mb-4'>鼠标左击预览，右击设置为壁纸</p>
+        <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
         <div className=''>{/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}</div>
 
         <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
