@@ -42,6 +42,10 @@
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021543565.png" width="600" />
 
+鼠标左键预览大图，鼠标右键可以设置为桌面壁纸。
+
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021752830.gif" width="600" />
+
 ### 动态壁纸
 
 动态壁纸功能还在完善中 ~
