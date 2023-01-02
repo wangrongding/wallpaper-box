@@ -5,7 +5,7 @@ import { MinusOutlined, FullscreenExitOutlined, BorderOutlined, CloseOutlined } 
 import MenuBar from './Menu'
 import os from 'os'
 import './index.scss'
-import Logo from '@/assets/logo.svg'
+import Logo from '/logo-full.svg'
 
 const { Header, Footer, Content } = Layout
 export default function Container() {
