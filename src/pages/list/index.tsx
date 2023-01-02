@@ -32,10 +32,12 @@ export default function List() {
       fs.mkdirSync(dir)
     }
     const picturePath = path.join(dir, fileName)
-    const filepath: string = await downloadImg({ url: item.path, dest: picturePath })
-
+    // 判断文件是否存在
+    if (!fs.existsSync(picturePath)) {
+      await downloadImg({ url: item.path, dest: picturePath })
+    }
     // 设置壁纸
-    await wallpaper.setWallpaper(filepath, { scale: 'auto' })
+    await wallpaper.setWallpaper(picturePath, { scale: 'auto' })
     ipcRenderer.send('create-static-wallpaper')
     ipcRenderer.send('asynchronous-message', '设置成功！')
     setLoading(false)
@@ -94,6 +96,7 @@ export default function List() {
       main?.removeEventListener('scroll', onScroll)
     }
   }, [])
+
   return (
     <Spin spinning={loading}>
       <div className='list-page'>
