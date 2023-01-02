@@ -13,7 +13,7 @@
 - [x] 设置静态壁纸
 - [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
 - [x] 支持修改代理
-- [ ] 设置动态壁纸（wip，目前支持 MacOS ，在 Windows 端在开发中）
+- [x] 设置动态壁纸（在 MacOs 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
 
 ## 使用
 
@@ -48,9 +48,11 @@
 
 ### 动态壁纸
 
-动态壁纸功能还在完善中 ~
+MacOS 中的效果：
 
-windows 下可以用，mac 下还有点问题 😅。
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030031627.gif" width="600" />
+
+Windows 中的效果：
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204250101273.gif" width="600" />
 
