@@ -1,23 +1,13 @@
 import { Checkbox, Switch, Spin, message, Image as AntImage, Button } from 'antd'
 import { saveFile } from '@/utils/index'
 import { getWallHavenAssets } from '@/api/index'
-import { useRequest } from 'ahooks'
 import _, { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
-// import wallpaper from 'wallpaper'
-import wallpaper, { getWallpaper, setWallpaper } from 'wallpaper'
+import wallpaper from 'wallpaper'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import Axios from 'axios'
 import { downloadImage as downloadImg } from '@/utils/index'
-
-const isMac = process.platform === 'darwin'
-// 保存壁纸
-const onSave = (item: any) => {
-  console.log('🚀🚀🚀 / item', item)
-  saveFile(item.path, item.id)
-}
 
 export default function List() {
   const [loading, setLoading] = useState(false)
@@ -34,8 +24,9 @@ export default function List() {
 
   // 设置壁纸
   const setAsBackground = async (item: any) => {
+    setLoading(true)
     // 下载图片
-    const fileName = new Date().getTime() + 'background.jpg.jpg'
+    const fileName = item.path.split('/').pop()
     const dir = path.join(os.homedir(), '/Pictures/wallpaper-box')
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
@@ -45,23 +36,8 @@ export default function List() {
 
     // 设置壁纸
     await wallpaper.setWallpaper(filepath, { scale: 'auto' })
-    message.success('设置成功')
-    // ==============================================
-    // // 创建图片
-    // const img = new Image()
-    // img.src = item.path
-    // img.onload = (e) => {
-    //   const base64Image = convertToBase64(img)
-    //   let picturePath = path.join(os.homedir(), '/Pictures', 'background.jpg')
-    //   console.log('🚀🚀🚀 / picturePath', picturePath)
-    //   picturePath = path.normalize(picturePath)
-    //   fs.writeFile(picturePath, base64Image, 'base64', (err) => {
-    //     wallpaper.setWallpaper(picturePath, { scale: 'stretch' }).then(() => {
-    //       console.log(path.resolve(picturePath))
-    //       message.success('设置成功')
-    //     })
-    //   })
-    // }
+    ipcRenderer.send('asynchronous-message', '设置成功！')
+    setLoading(false)
   }
 
   const onLevelChange = (checkedValues: any) => {
@@ -74,23 +50,28 @@ export default function List() {
 
   // 获取壁纸
   let mounted = false
-  const getWallpaperList = () => {
+  async function getWallpaperList(): Promise<void> {
     setLoading(true)
     if (!mounted) return
-    getWallHavenAssets(query).then((res) => {
-      const list = res.data
-      setWallpaperList((prev) => [...prev, ...list])
-      // setQuery((prev) => ({ ...prev, page: prev.page + 1 }))
-      setQuery(
-        list.length &&
-          Object.assign(query, {
-            page: query.page + 1,
-          }),
-      )
-      console.log('🚀🚀🚀 / getWallpaperList', query)
+    console.log('🚀🚀🚀 / query', query)
+    const res = await getWallHavenAssets(query)
+    const list = res.data
+    setWallpaperList((prev) => [...prev, ...list])
+    setQuery(
+      list.length &&
+        Object.assign(query, {
+          page: query.page + 1,
+        }),
+    )
+    setLoading(false)
+  }
 
-      setLoading(false)
-    })
+  // TODO api key 需要做持久化配置
+  // 没有 api key 时，每次请求只有 24 条数据，所以需要多次请求
+  async function getWallpaperListWithNoApiKey(times: number = 3) {
+    for (let i = 0; i < times - 1; i++) {
+      await getWallpaperList()
+    }
   }
 
   // 滚动加载更多
@@ -99,13 +80,12 @@ export default function List() {
     if (loading) return
     const { scrollTop, scrollHeight, clientHeight } = main
     if (scrollTop + clientHeight >= scrollHeight - 100) {
-      // console.log('🚀🚀🚀 / getWallpaperList')
       getWallpaperList()
     }
   }, 800)
 
   useEffect(() => {
-    main?.addEventListener('scroll', onScroll)
+    main.addEventListener('scroll', onScroll)
     getWallpaperList()
 
     return () => {
@@ -114,29 +94,32 @@ export default function List() {
     }
   }, [])
   return (
-    <div className='list-page'>
-      <p className='bg-slate-700 text-white leading-8 box-border pl-4 mb-4'>鼠标左击预览，右击设置为壁纸</p>
-      <div className=''>{/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}</div>
-      <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
-        <AntImage.PreviewGroup>
-          {wallpaperList.map((item: any, index: number) => {
-            return (
-              <AntImage
-                rootClassName='custom-image'
-                onContextMenu={() => setAsBackground(item)}
-                key={index}
-                src={item.thumbs.small}
-                preview={{
-                  src: item.path,
-                }}
-              />
-            )
-          })}
-        </AntImage.PreviewGroup>
+    <Spin spinning={loading}>
+      <div className='list-page'>
+        <p className='bg-slate-700 text-white leading-8 box-border pl-4 mb-4'>鼠标左击预览，右击设置为壁纸</p>
+        <div className=''>{/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}</div>
+
+        <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
+          <AntImage.PreviewGroup>
+            {wallpaperList.map((item: any, index: number) => {
+              return (
+                <AntImage
+                  rootClassName='custom-image'
+                  onContextMenu={() => setAsBackground(item)}
+                  key={index}
+                  src={item.thumbs.small}
+                  preview={{
+                    src: item.path,
+                  }}
+                />
+              )
+            })}
+          </AntImage.PreviewGroup>
+        </div>
+        <div className='text-center mt-[30px]'>
+          <Spin tip='Loading' size='small' />
+        </div>
       </div>
-      <div className='text-center mt-[30px]'>
-        <Spin size='large' />
-      </div>
-    </div>
+    </Spin>
   )
 }

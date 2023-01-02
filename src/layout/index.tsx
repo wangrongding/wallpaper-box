@@ -5,6 +5,7 @@ import { MinusOutlined, FullscreenExitOutlined, BorderOutlined, CloseOutlined } 
 import MenuBar from './Menu'
 import os from 'os'
 import './index.scss'
+import Logo from '@/assets/logo.svg'
 
 const { Header, Footer, Content } = Layout
 export default function Container() {
@@ -57,7 +58,8 @@ export default function Container() {
           >
             {/* LOGO */}
             <div className='text-white font-bold text-[28px] px-4 h-[40px] leading-[40px]'>
-              <span onClick={refreshWindow}>🏞️</span> wallpaper-box
+              <img src={Logo} className='logo h-[40px]' alt='logo' />
+              {/* <span onClick={refreshWindow}>🏞️</span> wallpaper-box */}
             </div>
             {/* 菜单栏 */}
             <div className='mr-auto my-[0px] p-[0px] h-full'>
