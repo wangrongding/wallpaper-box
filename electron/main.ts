@@ -4,6 +4,7 @@ import { initMenu } from './menu'
 import { initKeyboard } from './keyboard'
 import { initDock } from './dock'
 import { setProxy, removeProxy } from './proxy'
+import { createLiveWallpaper, closeLiveWallpaper } from './create-live-wallpaper-mac'
 
 // 关闭electron警告
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
@@ -27,7 +28,7 @@ const initApp = () => {
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
   // 创建动态壁纸
-  // createWallPaper()
+  createLiveWallpaper()
 }
 
 // 创建窗口
@@ -92,7 +93,14 @@ ipcMain.on('open-link-in-browser', (_, arg) => {
 
 // 创建动态壁纸
 ipcMain.on('create-live-wallpaper', (_, arg) => {
-  // createWallPaper()
+  console.log('🚀🚀🚀 / create-live-wallpaper')
+  createLiveWallpaper()
+})
+
+// 创建静态壁纸
+ipcMain.on('create-static-wallpaper', (_, arg) => {
+  // 关闭动态壁纸
+  closeLiveWallpaper()
 })
 
 // 设置代理

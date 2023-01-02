@@ -38,7 +38,7 @@ export const electronDev = () => {
 }
 
 export const replacer = () => {
-  let externalModels = ['os', 'fs', 'path', 'events', 'child_process', 'crypto', 'http', 'https', 'buffer', 'url', 'better-sqlite3', 'knex']
+  let externalModels = ['os', 'fs', 'path', 'events', 'child_process', 'crypto', 'http', 'https', 'buffer', 'stream', 'url', 'better-sqlite3', 'knex']
   let result = {}
   for (let item of externalModels) {
     result[item] = () => ({
