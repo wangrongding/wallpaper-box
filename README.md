@@ -1,10 +1,21 @@
-# wallpaper-box (WIP)
+<p align="center">
+  <a href="https://vuejs.org" target="_blank" rel="noopener noreferrer">
+    <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021532343.svg" width="300" alt="wallpaper-box logo"/>
+  </a>
+</p>
 
 一个桌面壁纸客户端，支持动态壁纸。
 
-技术栈：`React生态` + `Electron` + `TypeScript` + `Vite`。
+目前支持的功能：
 
-## 目前的功能
+- [x] 壁纸列表
+- [x] 下载壁纸
+- [x] 设置静态壁纸
+- [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
+- [x] 支持修改代理
+- [ ] 设置动态壁纸（wip，目前支持 MacOS ，在 Windows 端在开发中）
+
+## 使用
 
 ### RunCat
 
@@ -22,7 +33,7 @@
 
 可以直接设置成桌面壁纸，也可以下载到本地或者预览。
 
-<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204280233745.png" width="600" />
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021543565.png" width="600" />
 
 ### 动态壁纸
 
