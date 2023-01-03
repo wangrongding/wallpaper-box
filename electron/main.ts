@@ -4,7 +4,8 @@ import { initMenu } from './menu'
 import { initKeyboard } from './keyboard'
 import { initDock } from './dock'
 import { setProxy, removeProxy } from './proxy'
-import { createLiveWallpaper, closeLiveWallpaper } from './create-live-wallpaper-mac'
+import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
+import { createWinLiveWallpaper, closeWinLiveWallpaper } from './create-win-live-wallpaper'
 
 // 关闭electron警告
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
@@ -28,7 +29,7 @@ const initApp = () => {
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
   // 创建动态壁纸
-  createLiveWallpaper()
+  createMacLiveWallpaper()
 }
 
 // 创建窗口
@@ -93,14 +94,22 @@ ipcMain.on('open-link-in-browser', (_, arg) => {
 
 // 创建动态壁纸
 ipcMain.on('create-live-wallpaper', (_, arg) => {
-  console.log('🚀🚀🚀 / create-live-wallpaper')
-  createLiveWallpaper()
+  console.log('🚀🚀🚀 / process.platform', process.platform)
+  if (process.platform === 'darwin') {
+    createMacLiveWallpaper()
+  } else if (process.platform === 'win32') {
+    // TODO 打开会导致 mac 端无法运行，在 win 端正常。
+    // createWinLiveWallpaper()
+  }
 })
 
-// 创建静态壁纸
-ipcMain.on('create-static-wallpaper', (_, arg) => {
-  // 关闭动态壁纸
-  closeLiveWallpaper()
+// 关闭动态壁纸
+ipcMain.on('close-live-wallpaper', (_, arg) => {
+  if (process.platform === 'darwin') {
+    closeLiveWallpaper()
+  } else if (process.platform === 'win32') {
+    closeWinLiveWallpaper()
+  }
 })
 
 // 设置代理
