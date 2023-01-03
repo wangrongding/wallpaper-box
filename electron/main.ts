@@ -29,7 +29,7 @@ const initApp = () => {
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
   // 创建动态壁纸
-  createMacLiveWallpaper()
+  createLiveWallpaperWindow()
 }
 
 // 创建窗口
@@ -58,6 +58,25 @@ const createWindow = () => {
   mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
   // mainWindow.webContents.openDevTools({ mode: 'right' })
   // mainWindow.loadURL('https://www.ipip.net/?origin=EN')
+}
+
+// 创建动态壁纸窗口
+function createLiveWallpaperWindow() {
+  if (process.platform === 'darwin') {
+    createMacLiveWallpaper()
+  } else if (process.platform === 'win32') {
+    // TODO 打开会导致 mac 端无法运行，在 win 端正常。
+    // createWinLiveWallpaper()
+  }
+}
+
+// 关闭动态壁纸窗口
+function closeLiveWallpaperWindow() {
+  if (process.platform === 'darwin') {
+    closeLiveWallpaper()
+  } else if (process.platform === 'win32') {
+    closeWinLiveWallpaper()
+  }
 }
 
 // ============================ app ============================
@@ -95,21 +114,12 @@ ipcMain.on('open-link-in-browser', (_, arg) => {
 // 创建动态壁纸
 ipcMain.on('create-live-wallpaper', (_, arg) => {
   console.log('🚀🚀🚀 / process.platform', process.platform)
-  if (process.platform === 'darwin') {
-    createMacLiveWallpaper()
-  } else if (process.platform === 'win32') {
-    // TODO 打开会导致 mac 端无法运行，在 win 端正常。
-    // createWinLiveWallpaper()
-  }
+  createLiveWallpaperWindow()
 })
 
 // 关闭动态壁纸
 ipcMain.on('close-live-wallpaper', (_, arg) => {
-  if (process.platform === 'darwin') {
-    closeLiveWallpaper()
-  } else if (process.platform === 'win32') {
-    closeWinLiveWallpaper()
-  }
+  closeLiveWallpaperWindow()
 })
 
 // 设置代理
