@@ -13,15 +13,13 @@ export function createLiveWallpaper() {
   }
   const displays = screen.getAllDisplays()
   displays.forEach(async (display, index) => {
-    // console.log('🚀🚀🚀 / display', display, wallWindow)
-    wallWindow = []
     wallWindow.push(
       new BrowserWindow({
         show: false,
         type: 'desktop',
         focusable: false, //窗口是否可以获取焦点
-        x: 0,
-        y: 0,
+        x: display.bounds.x,
+        y: display.bounds.y,
         width: display.bounds.width,
         height: display.bounds.height,
         frame: false, //是否显示边缘框
@@ -33,14 +31,15 @@ export function createLiveWallpaper() {
         },
       }),
     )
+    // console.log('🚀🚀🚀 / display', display, wallWindow)
     // 加载页面
     await wallWindow[index].loadURL('http://localhost:1234/wallpaper')
-    // 窗口忽略所有鼠标事件
-    wallWindow[index].setIgnoreMouseEvents(true)
     // 窗口最大化
     wallWindow[index].maximize()
     // // 窗口显示
     wallWindow[index].show()
+    // 窗口忽略所有鼠标事件
+    wallWindow[index].setIgnoreMouseEvents(true)
 
     // ===================================
     // 设置视频背后的颜色
