@@ -38,8 +38,10 @@ export default function List() {
     }
     // 设置壁纸
     await wallpaper.setWallpaper(picturePath, { scale: 'auto' })
-    ipcRenderer.send('create-static-wallpaper')
+    // 通知主进程设置壁纸完成
     ipcRenderer.send('asynchronous-message', '设置成功！')
+    // 通知主进程关闭动态壁纸
+    ipcRenderer.send('close-live-wallpaper')
     setLoading(false)
   }
 
