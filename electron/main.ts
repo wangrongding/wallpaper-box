@@ -5,7 +5,7 @@ import { initKeyboard } from './keyboard'
 import { initDock } from './dock'
 import { setProxy, removeProxy } from './proxy'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
-import { createWinLiveWallpaper, closeWinLiveWallpaper } from './create-win-live-wallpaper'
+// import { createWinLiveWallpaper, closeWinLiveWallpaper } from './create-win-live-wallpaper'
 
 // 关闭electron警告
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
@@ -75,7 +75,7 @@ function closeLiveWallpaperWindow() {
   if (process.platform === 'darwin') {
     closeLiveWallpaper()
   } else if (process.platform === 'win32') {
-    closeWinLiveWallpaper()
+    // closeWinLiveWallpaper()
   }
 }
 
