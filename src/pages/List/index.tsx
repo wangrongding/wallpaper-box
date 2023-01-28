@@ -12,7 +12,6 @@ import { downloadImage as downloadImg } from '@/utils/index'
 export default function List() {
   const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
-
   const [query, setQuery] = useState({
     page: 1,
     categories: '000',
@@ -54,53 +53,22 @@ export default function List() {
     console.log('checked = ', checkedValues)
   }
 
-  const [info, setInfo] = useState({
-    name: 'test',
-    age: 18,
-    sex: '男',
-    phone: '123456789',
-  })
-
   // 获取壁纸
   let mounted = false
   async function getWallpaperList(): Promise<void> {
     setLoading(true)
     if (!mounted) return
-    console.log('🚀🚀🚀 / getWallpaperList')
     console.log('🚀🚀🚀 / query', query)
     const res = await getWallHavenAssets(query)
     const list = res.data
     setWallpaperList((prev) => [...prev, ...list])
-    // setQuery(
-    //   list.length &&
-    //     Object.assign(query, {
-    //       page: query.page + 1,
-    //     }),
-    // )
-    await setQuery({
-      ...query,
-      page: query.page + 1,
-    })
-    console.log('🚀🚀🚀 / query', query)
-
-    // setInfo({
-    //   ...info,
-    //   name: 'test2',
-    //   age: info.age + 1,
-    // })
-    // console.log('🚀🚀🚀 / info', info)
-    changeInfo()
-
+    setQuery(
+      list.length &&
+        Object.assign(query, {
+          page: query.page + 1,
+        }),
+    )
     setLoading(false)
-  }
-
-  function changeInfo() {
-    setInfo({
-      ...info,
-      name: 'test2',
-      age: info.age + 1,
-    })
-    console.log('🚀🚀🚀 / info', info)
   }
 
   // TODO api key 需要做持久化配置
@@ -134,9 +102,7 @@ export default function List() {
   return (
     <Spin spinning={loading}>
       <div className='list-page'>
-        <p onClick={changeInfo} className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>
-          💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。aasssddd
-        </p>
+        <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
         <div className=''>{/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}</div>
 
         <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
