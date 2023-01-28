@@ -29,7 +29,7 @@ const initApp = () => {
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
   // 创建动态壁纸
-  createLiveWallpaperWindow()
+  // createLiveWallpaperWindow()
 }
 
 // 创建窗口
