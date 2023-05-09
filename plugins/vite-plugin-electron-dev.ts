@@ -3,6 +3,7 @@ import { ViteDevServer } from 'vite'
 import optimizer from 'vite-plugin-optimizer'
 
 export const electronDev = () => {
+  console.log('🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀2')
   return {
     name: 'vite-plugin-electron-dev',
     configureServer(server: ViteDevServer) {

@@ -5,13 +5,15 @@ import { electronDev, getReplacer } from './plugins/vite-plugin-electron-dev'
 import path from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import esModule from 'vite-plugin-esmodule'
+// import { buildPlugin } from './plugins/vite-plugin-electron-build'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode, ssrBuild }) => {
   return {
+    base: './',
     // vite 插件配置
     plugins: [
-      mode !== 'web' && electronDev(),
+      mode === 'sort' && electronDev(),
       getReplacer(),
       esModule(['wallpaper']),
       react(),
@@ -42,6 +44,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     server: {
       port: 1234,
       open: false,
+      host: '0.0.0.0',
       proxy: {
         '/api': {
           // target: "http://localhost:3000",
