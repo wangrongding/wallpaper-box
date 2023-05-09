@@ -26,4 +26,5 @@ dist-electron
 *.sw?
 
 test.js
-
+release
+out/

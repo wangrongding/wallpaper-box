@@ -8,7 +8,7 @@ export function createNativeImage(path: string) {
   return nativeImage.createFromPath(path).resize({ width: 30, height: 28 })
 }
 
-export let icons = trays.partyBlobCat
+export let icons = trays.mario
 
 // 图表索引
 let index = 0
