@@ -57,13 +57,15 @@ export default function List() {
   let mounted = false
   async function getWallpaperList(): Promise<void> {
     setLoading(true)
-    if (!mounted) return
-    console.log('🚀🚀🚀 / query', query)
-    const res = await getWallHavenAssets(query)
-    const list = res.data
-    setWallpaperList((prev) => [...prev, ...list])
+    // await getWallHavenAssets(query)
+    const res = await fetch(
+      `https://wallhaven.cc/api/v1/search?apikey=5RTfusrTnRbHBHs2oWWggQERAzHO2XTO&sorting=toplist&topRange=1y&page=${query.page}&categories=${query.categories}&purity=${query.purity}`,
+    )
+    const list = await res.json()
+    console.log('🚀🚀🚀 / res:', list.data)
+    setWallpaperList((prev) => [...prev, ...list.data])
     setQuery(
-      list.length &&
+      list.data.length &&
         Object.assign(query, {
           page: query.page + 1,
         }),
@@ -102,8 +104,12 @@ export default function List() {
   return (
     <Spin spinning={loading}>
       <div className='list-page'>
-        <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
-        <div className=''>{/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}</div>
+        <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>
+          💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。
+        </p>
+        <div className=''>
+          {/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}
+        </div>
 
         <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
           <AntImage.PreviewGroup>

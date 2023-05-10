@@ -1,10 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
-import { BrowserRouter } from 'react-router-dom'
+import { HashRouter } from 'react-router-dom'
 
 // antd 样式
-import "antd/dist/reset.css";
+import 'antd/dist/reset.css'
 // 全局样式
 import '@/styles/index.scss'
 // tailwindcss 样式
@@ -16,8 +16,8 @@ import 'virtual:svg-icons-register'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <App />
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>,
 )

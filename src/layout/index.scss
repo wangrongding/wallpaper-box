@@ -1,10 +1,14 @@
 .main-header {
-  -webkit-app-region: drag;
+  // -webkit-app-region: drag;
   // cursor: move;
 
-  .no-drag,
+  // .no-drag,
+  // img {
+  //   -webkit-user-drag: none;
+  //   cursor: default;
+  // }
+  .drag,
   img {
-    -webkit-user-drag: none;
-    cursor: default;
+    -webkit-app-region: drag;
   }
 }

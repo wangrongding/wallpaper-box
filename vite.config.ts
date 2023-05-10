@@ -6,6 +6,8 @@ import path from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import esModule from 'vite-plugin-esmodule'
 // import { buildPlugin } from './plugins/vite-plugin-electron-build'
+import nodeStdlibBrowser from 'node-stdlib-browser'
+import inject from '@rollup/plugin-inject'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode, ssrBuild }) => {
@@ -47,7 +49,6 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
       host: '0.0.0.0',
       proxy: {
         '/api': {
-          // target: "http://localhost:3000",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
@@ -57,6 +58,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
+        ...(mode === 'production' ? nodeStdlibBrowser : null),
       },
     },
     // 打包配置

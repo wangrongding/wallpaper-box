@@ -53,7 +53,7 @@ export default function Container() {
         <Header style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%', padding: '0 20px', margin: 0, height: '50px' }}>
           <div
             className='main-header flex justify-between align-middle items-center h-[50px]'
-            style={{ marginLeft: os.platform() !== 'darwin' ? 'none' : '50px' }}
+            // style={{ marginLeft: os.platform() !== 'darwin' ? 'none' : '50px' }}
             onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}
           >
             {/* LOGO */}
@@ -62,13 +62,14 @@ export default function Container() {
               {/* <span onClick={refreshWindow}>🏞️</span> wallpaper-box */}
             </div>
             {/* 菜单栏 */}
-            <div className='mr-auto my-[0px] p-[0px] h-full'>
+            <div className='no-drag mr-auto my-[0px] p-[0px] h-full'>
               <MenuBar />
             </div>
+            <div className=' drag flex-1 w-full h-full text-center'></div>
 
             {/* 右边操作栏 */}
-            {os.platform() !== 'darwin' && (
-              <div className='text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
+            {os.platform() === 'darwin' && (
+              <div className='no-drag text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
                 {/* 最小化 */}
                 <MinusOutlined onClick={minimizeWindow} />
 
