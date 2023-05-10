@@ -1,12 +1,17 @@
-import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell, globalShortcut } from 'electron'
+import { session, protocol, app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell, globalShortcut } from 'electron'
 import { setTrayIcon } from './tray'
 import { initMenu } from './menu'
 import { initKeyboard } from './keyboard'
 import { initDock } from './dock'
 import { setProxy, removeProxy } from './proxy'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
+import path from 'path'
+// import { createFileRoute, createURLRoute } from 'electron-router-dom'
+// import { CustomScheme } from './custom-scheme'
 // import { createWinLiveWallpaper, closeWinLiveWallpaper } from './create-win-live-wallpaper'
 
+// 是否为开发环境
+const isDev = process.env.IS_DEV === 'true'
 // 关闭electron警告
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 // 保持window对象的全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
@@ -32,6 +37,20 @@ const initApp = () => {
   // createLiveWallpaperWindow()
 }
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'file',
+    privileges: {
+      standard: true,
+      supportFetchAPI: true,
+      bypassCSP: true,
+      corsEnabled: true,
+      stream: true,
+      allowServiceWorkers: true,
+    },
+  },
+])
+
 // 创建窗口
 const createWindow = () => {
   // 创建窗口
@@ -39,7 +58,7 @@ const createWindow = () => {
     width: 1300,
     height: 900,
     frame: false, //是否显示边缘框
-    titleBarStyle: 'hiddenInset', //标题栏样式
+    // titleBarStyle: 'hiddenInset', //标题栏样式
     fullscreen: false, //是否全屏显示
     webPreferences: {
       // preload: './preload.js',
@@ -54,10 +73,26 @@ const createWindow = () => {
     },
   })
 
-  // 打开窗口调试,默认为 undocked 悬浮窗口
-  mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
   // mainWindow.webContents.openDevTools({ mode: 'right' })
   // mainWindow.loadURL('https://www.ipip.net/?origin=EN')
+  // const devServerURL = createURLRoute(process.argv[2] || 'http://localhost:1234', 'main')
+  // const fileRoute = createFileRoute(path.join(__dirname, '../dist-web/index.html'), 'main')
+  if (isDev) {
+    // 打开窗口调试,默认为 undocked 悬浮窗口
+    // mainWindow.loadURL(devServerURL)
+    // mainWindow.loadFile(...fileRoute)
+    // CustomScheme.registerScheme()
+    // mainWindow.loadURL(`app://../dist-web/index.html`)
+
+    mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
+    //为自定义的app协议提供特权
+    // mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
+    // mainWindow.webContents.openDevTools({ mode: 'right' })
+  } else {
+    // mainWindow.loadFile(...fileRoute)
+    mainWindow.loadURL('http://172.16.2.118:1234')
+    // mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
+  }
 }
 
 // 创建动态壁纸窗口
