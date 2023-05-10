@@ -12,6 +12,8 @@ export default function Setting() {
       <input type='text' />
       <p>代理服务器端口：</p>
       <input type='text' />
+
+      <p>图片存储位置：根目录下的 /wallpaper-box </p>
     </div>
   )
 }

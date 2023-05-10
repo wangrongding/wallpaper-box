@@ -27,7 +27,7 @@ export default function List() {
     setLoading(true)
     // 下载图片
     const fileName = item.path.split('/').pop()
-    const dir = path.join(os.homedir(), '/Pictures/wallpaper-box')
+    const dir = path.join(os.homedir(), '/wallpaper-box')
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir)
     }
