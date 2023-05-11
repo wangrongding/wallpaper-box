@@ -30,7 +30,7 @@ const initApp = () => {
   // 设置dock
   initDock()
   // 设置代理
-  setProxy(mainWindow)
+  // setProxy(mainWindow)
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
   // 创建动态壁纸

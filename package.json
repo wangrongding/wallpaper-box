@@ -17,7 +17,7 @@
     "build:electron": "rollup -c",
     "electron": "electron .",
     "package": "electron-forge package",
-    "make": "sudo rm -rf ./out && yarn build:web && electron-forge make",
+    "make": "sudo rm -rf ./out && yarn build:web && yarn build:electron && electron-forge make",
     "electron:start": "cross-env IS_DEV=false electron-forge start",
     "electron:dev": "cross-env IS_DEV=true electron-forge start"
   },

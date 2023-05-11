@@ -1,25 +1,28 @@
-import { Checkbox, Switch, Spin, message, Image as AntImage, Button } from 'antd'
-import { saveFile } from '@/utils/index'
-import { getWallHavenAssets } from '@/api/index'
+import { Select, Switch, Spin, message, Image as AntImage, Button } from 'antd'
 import _, { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
 import wallpaper from 'wallpaper'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
-import { downloadImage as downloadImg } from '@/utils/index'
 
 export default function List() {
   const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
   const [query, setQuery] = useState({
-    page: 1,
-    categories: '000',
-    purity: '000',
+    general: '0',
+    anime: '0',
+    people: '0',
+    sfw: '0',
+    sketchy: '0',
+    nsfw: '0',
     /*
     categories  100/101/111* /etc  (general/anime/people)     Turn categories on(1) or off(0)
     purity      100* /110/111/etc  (sfw/sketchy/nsfw)         Turn purities on(1) or off(0)NSFW requires a valid API key
     */
+
+    page: 1,
+    sorting: 'toplist',
   })
 
   // 设置壁纸
@@ -34,7 +37,23 @@ export default function List() {
     const picturePath = path.join(dir, fileName)
     // 判断文件是否存在
     if (!fs.existsSync(picturePath)) {
-      await downloadImg({ url: item.path, dest: picturePath })
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 60 * 1000)
+        const response = await fetch(item.path, { signal: controller.signal })
+        clearTimeout(timeoutId)
+
+        if (!response.ok) {
+          throw new Error(`Failed to download image: ${response.status} ${response.statusText}`)
+        }
+
+        const buffer = await response.arrayBuffer()
+        fs.writeFileSync(picturePath, Buffer.from(buffer))
+        console.log('Image downloaded successfully!')
+      } catch {
+        alert('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
+        setLoading(false)
+      }
     }
     // 设置壁纸
     await wallpaper.setWallpaper(picturePath, { scale: 'auto' })
@@ -45,12 +64,29 @@ export default function List() {
     setLoading(false)
   }
 
-  const onLevelChange = (checkedValues: any) => {
-    console.log('checked = ', checkedValues)
+  // 排序方式改变
+  const onSortChange = (checkedVal: any) => {
+    console.log('checked = ', checkedVal)
+    setQuery(
+      Object.assign(query, {
+        sorting: checkedVal,
+        page: 1,
+      }),
+    )
+    setWallpaperList([])
+    getWallpaperList()
   }
 
-  const onTypeChange = (checkedValues: any) => {
-    console.log('checked = ', checkedValues)
+  // 限制条件改变
+  const onLimitChange = async (checkedVal: any, type: any) => {
+    setQuery(
+      Object.assign(query, {
+        [type]: checkedVal ? '1' : '0',
+        page: 1,
+      }),
+    )
+    await setWallpaperList([])
+    await getWallpaperList()
   }
 
   // 获取壁纸
@@ -58,8 +94,11 @@ export default function List() {
   async function getWallpaperList(): Promise<void> {
     setLoading(true)
     // await getWallHavenAssets(query)
+    const categories = query.general + query.anime + query.people
+    const purity = query.sfw + query.sketchy + query.nsfw
+
     const res = await fetch(
-      `https://wallhaven.cc/api/v1/search?apikey=5RTfusrTnRbHBHs2oWWggQERAzHO2XTO&sorting=toplist&topRange=1y&page=${query.page}&categories=${query.categories}&purity=${query.purity}`,
+      `https://wallhaven.cc/api/v1/search?apikey=5RTfusrTnRbHBHs2oWWggQERAzHO2XTO&sorting=${query.sorting}&topRange=1y&page=${query.page}&categories=${categories}&purity=${purity}`,
     )
     const list = await res.json()
     console.log('🚀🚀🚀 / res:', list.data)
@@ -104,11 +143,60 @@ export default function List() {
   return (
     <Spin spinning={loading}>
       <div className='list-page'>
-        <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>
-          💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。
-        </p>
-        <div className=''>
-          {/* <Switch checkedChildren='人物' unCheckedChildren='人物' onChange={onLevelChange} defaultChecked /> */}
+        <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
+        <div className='mb-[20px] flex gap-4'>
+          <Switch
+            checkedChildren='general'
+            unCheckedChildren='general'
+            onChange={(val) => {
+              onLimitChange(val, 'general')
+            }}
+          />
+          <Switch
+            checkedChildren='anime'
+            unCheckedChildren='anime'
+            onChange={(val) => {
+              onLimitChange(val, 'anime')
+            }}
+          />
+          <Switch
+            checkedChildren='people'
+            unCheckedChildren='people'
+            onChange={(val) => {
+              onLimitChange(val, 'people')
+            }}
+          />
+          <Switch
+            checkedChildren='sfw'
+            unCheckedChildren='sfw'
+            onChange={(val) => {
+              onLimitChange(val, 'sfw')
+            }}
+          />
+          <Switch
+            checkedChildren='sketchy'
+            unCheckedChildren='sketchy'
+            onChange={(val) => {
+              onLimitChange(val, 'sketchy')
+            }}
+          />
+          <Switch
+            checkedChildren='nsfw'
+            unCheckedChildren='nsfw'
+            onChange={(val) => {
+              onLimitChange(val, 'nsfw')
+            }}
+          />
+          <Select
+            defaultValue='toplist'
+            style={{ width: 120 }}
+            onChange={onSortChange}
+            options={[
+              { value: 'favorites', label: 'favorites' },
+              { value: 'toplist', label: 'toplist' },
+              { value: 'views', label: 'views' },
+            ]}
+          />
         </div>
 
         <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
