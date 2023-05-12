@@ -1,6 +1,7 @@
 import { Select, Switch, Spin, message, Image as AntImage, Button } from 'antd'
 import _, { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
+import { CheckCircleFilled, EyeFilled } from '@ant-design/icons'
 
 // import path from 'path'
 // import os from 'os'
@@ -12,6 +13,7 @@ const path = require('path')
 export default function List() {
   const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
+  const [visible, setVisible] = useState(-1)
   const [query, setQuery] = useState({
     general: '0',
     anime: '0',
@@ -27,6 +29,8 @@ export default function List() {
     page: 1,
     sorting: 'toplist',
   })
+
+  const filterList = ['general', 'anime', 'people', 'sfw', 'sketchy', 'nsfw']
 
   // 设置壁纸
   const setAsBackground = async (item: any) => {
@@ -148,48 +152,18 @@ export default function List() {
       <div className='list-page'>
         <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
         <div className='mb-[20px] flex gap-4'>
-          <Switch
-            checkedChildren='general'
-            unCheckedChildren='general'
-            onChange={(val) => {
-              onLimitChange(val, 'general')
-            }}
-          />
-          <Switch
-            checkedChildren='anime'
-            unCheckedChildren='anime'
-            onChange={(val) => {
-              onLimitChange(val, 'anime')
-            }}
-          />
-          <Switch
-            checkedChildren='people'
-            unCheckedChildren='people'
-            onChange={(val) => {
-              onLimitChange(val, 'people')
-            }}
-          />
-          <Switch
-            checkedChildren='sfw'
-            unCheckedChildren='sfw'
-            onChange={(val) => {
-              onLimitChange(val, 'sfw')
-            }}
-          />
-          <Switch
-            checkedChildren='sketchy'
-            unCheckedChildren='sketchy'
-            onChange={(val) => {
-              onLimitChange(val, 'sketchy')
-            }}
-          />
-          <Switch
-            checkedChildren='nsfw'
-            unCheckedChildren='nsfw'
-            onChange={(val) => {
-              onLimitChange(val, 'nsfw')
-            }}
-          />
+          {filterList.map((item, index) => {
+            return (
+              <Switch
+                key={index}
+                checkedChildren={item}
+                unCheckedChildren={item}
+                onChange={(val) => {
+                  onLimitChange(val, item)
+                }}
+              />
+            )
+          })}
           <Select
             defaultValue='toplist'
             style={{ width: 120 }}
@@ -201,23 +175,43 @@ export default function List() {
             ]}
           />
         </div>
-
         <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
-          <AntImage.PreviewGroup>
-            {wallpaperList.map((item: any, index: number) => {
-              return (
+          {wallpaperList.map((item: any, index: number) => {
+            return (
+              <div key={index} className='relative'>
+                <img src={item.thumbs.small} alt='' style={{ breakInside: 'avoid-column', marginBottom: '6px' }} />
                 <AntImage
-                  rootClassName='custom-image'
-                  onContextMenu={() => setAsBackground(item)}
-                  key={index}
+                  width={0}
+                  height={0}
+                  className='absolute top-0 left-0 right-0 bottom-0'
+                  style={{ display: 'none !important', width: 0, height: 0 }}
                   src={item.thumbs.small}
                   preview={{
+                    visible: visible === index,
+                    scaleStep: 0.2,
                     src: item.path,
+                    onVisibleChange: (value) => {
+                      setVisible(-1)
+                    },
                   }}
                 />
-              )
-            })}
-          </AntImage.PreviewGroup>
+                <div className=' absolute top-0 left-0 right-0 bottom-0 opacity-0 hover:opacity-100 flex justify-center flex-row text-center items-center gap-4 bg-black bg-opacity-70'>
+                  <div
+                    onClick={() => setVisible(index)}
+                    className='bg-cyan-500 text-white w-fit p-3 rounded-md shadow-md cursor-pointer grid place-content-center'
+                  >
+                    <EyeFilled style={{ fontSize: '16px' }} />
+                  </div>
+                  <div
+                    onClick={() => setAsBackground(item)}
+                    className='bg-teal-500 text-white w-fit p-3 rounded-md shadow-md cursor-pointer grid place-content-center'
+                  >
+                    <CheckCircleFilled style={{ fontSize: '16px' }} />
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
         <div className='text-center mt-[30px]'>
           <Spin tip='Loading' size='small' />
