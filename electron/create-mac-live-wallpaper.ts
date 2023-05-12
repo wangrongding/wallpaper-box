@@ -1,10 +1,5 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron'
 
-async function requireWallpaper() {
-  const wallpaper = await import('wallpaper')
-  return wallpaper
-}
-
 let wallWindow: BrowserWindow[] = []
 // 创建窗口
 export function createMacLiveWallpaper() {

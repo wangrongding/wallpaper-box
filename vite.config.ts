@@ -5,9 +5,7 @@ import { electronDev, getReplacer } from './plugins/vite-plugin-electron-dev'
 import path from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import esModule from 'vite-plugin-esmodule'
-// import { buildPlugin } from './plugins/vite-plugin-electron-build'
-import nodeStdlibBrowser from 'node-stdlib-browser'
-import inject from '@rollup/plugin-inject'
+// import nodeStdlibBrowser from 'node-stdlib-browser'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode, ssrBuild }) => {
@@ -58,7 +56,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        ...(mode === 'production' ? nodeStdlibBrowser : null),
+        // ...(mode === 'production' ? nodeStdlibBrowser : null),
       },
     },
     // 打包配置
