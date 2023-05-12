@@ -22,6 +22,7 @@
     "electron:dev": "cross-env IS_DEV=true electron-forge start"
   },
   "dependencies": {
+    "@ant-design/cssinjs": "^1.9.1",
     "@ant-design/icons": "^5.0.1",
     "ahooks": "^3.7.4",
     "antd": "^5.1.2",
@@ -46,7 +47,6 @@
     "@electron-forge/maker-rpm": "^6.1.1",
     "@electron-forge/maker-squirrel": "^6.1.1",
     "@electron-forge/maker-zip": "^6.1.1",
-    "@rollup/plugin-inject": "^5.0.3",
     "@types/fs-extra": "^9.0.13",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.11.17",
@@ -54,7 +54,6 @@
     "@types/react-dom": "^18.0.9",
     "@vitejs/plugin-react": "^3.0.0",
     "autoprefixer": "^10.4.13",
-    "chokidar-cli": "^3.0.0",
     "concurrently": "^8.0.1",
     "cross-env": "^7.0.3",
     "electron": "24.2.0",

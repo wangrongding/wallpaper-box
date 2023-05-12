@@ -6,5 +6,13 @@ module.exports = {
   theme: {
     extend: {},
   },
+  // corePlugins: {
+  //   preflight: false,
+  // },
+  // variants: {
+  //   extend: {
+  //     visibility: ['hover', 'focus'],
+  //   },
+  // },
   plugins: [],
 }

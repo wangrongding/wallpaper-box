@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { DesktopOutlined, SettingOutlined, VideoCameraOutlined } from '@ant-design/icons'
+import { PictureFilled, SettingOutlined, VideoCameraOutlined, FolderOpenFilled } from '@ant-design/icons'
 import Container from '@/layout'
 import { Navigate } from 'react-router-dom'
 // import Dashboard from '@/pages/Dashboard'
@@ -7,6 +7,8 @@ import { Navigate } from 'react-router-dom'
 // 路由懒加载
 // const Dashboard = lazy(() => import('@/pages/dashboard'))
 const List = lazy(() => import('@/pages/List'))
+const MyList = lazy(() => import('@/pages/MyList'))
+const SetProxy = lazy(() => import('@/pages/SetProxy'))
 const LiveWallpaper = lazy(() => import('@/pages/LiveWallpaper'))
 const Setting = lazy(() => import('@/pages/Setting'))
 const WallPaperPage = lazy(() => import('@/pages/WallPaper'))
@@ -21,7 +23,7 @@ export const menuRoutes = [
   {
     path: '/list',
     title: '壁纸列表',
-    icon: <DesktopOutlined />,
+    icon: <PictureFilled />,
     element: withSuspense(<List />),
   },
   {
@@ -29,6 +31,12 @@ export const menuRoutes = [
     title: '视频壁纸',
     icon: <VideoCameraOutlined />,
     element: withSuspense(<LiveWallpaper />),
+  },
+  {
+    path: '/my-list',
+    title: '我的壁纸',
+    icon: <FolderOpenFilled />,
+    element: withSuspense(<MyList />),
   },
   {
     path: '/setting',
@@ -58,6 +66,10 @@ export const routes = [
   {
     path: '/wallPaper',
     element: withSuspense(<WallPaperPage />),
+  },
+  {
+    path: '/set-proxy',
+    element: withSuspense(<SetProxy />),
   },
   {
     path: '/401',

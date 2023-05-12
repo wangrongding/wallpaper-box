@@ -21,3 +21,13 @@ body {
   line-height: $line-height;
   user-select: none;
 }
+
+// 壁纸列表页下隐藏 ant-image
+.list-page {
+  .ant-image {
+    display: none !important;
+  }
+}
+.ant-image-preview-operations-wrapper {
+  top: 50px !important;
+}

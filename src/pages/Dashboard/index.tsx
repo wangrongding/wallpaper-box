@@ -5,12 +5,7 @@ export default function Dashboard() {
     <>
       <h1>Dashboard</h1>
       <div>
-        <Button
-          type='default'
-          onClick={() => {
-            setCount(count + 1)
-          }}
-        >
+        <Button type='default' onClick={() => setCount(count + 1)}>
           count {count}
         </Button>
       </div>
