@@ -24,8 +24,6 @@ let main: BrowserWindow
 // 设置托盘图标
 export function setTrayIcon(mainWindow: BrowserWindow) {
   main = mainWindow
-  // 设置托盘图标标题
-  // tray.setTitle('wallpaper-box')
   // 初始化托盘图标
   tray = new Tray(icons[0])
   // 设置托盘图标悬停提示
@@ -49,8 +47,8 @@ export function setTrayIconMenu() {
     {
       label: '更换图标',
       submenu: [
-        { label: 'runcat', type: 'radio', checked: true, click: () => changeTrayIcon('runcat') },
-        { label: 'mario', type: 'radio', click: () => changeTrayIcon('mario') },
+        { label: 'runcat', type: 'radio', click: () => changeTrayIcon('runcat') },
+        { label: 'mario', type: 'radio', click: () => changeTrayIcon('mario'), checked: true },
         { label: 'Mona', type: 'radio', click: () => changeTrayIcon('mona') },
         { label: 'partyBlobCat', type: 'radio', click: () => changeTrayIcon('partyBlobCat') },
         { label: 'Points', type: 'radio', click: () => changeTrayIcon('points') },
