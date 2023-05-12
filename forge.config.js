@@ -1,5 +1,8 @@
 module.exports = {
-  packagerConfig: {},
+  packagerConfig: {
+    // 图标
+    icon: './public/logo.icns',
+  },
   rebuildConfig: {},
   makers: [
     {
@@ -10,7 +13,7 @@ module.exports = {
       name: '@electron-forge/maker-dmg',
       config: {
         name: 'wallpaper-box', //可以是中文，但只是安装包名称。
-        // icon: './icon.icns',
+        icon: './public/logo.icns',
         // background: './share_parent_bg_blue.png',
       },
     },
