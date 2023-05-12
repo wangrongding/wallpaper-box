@@ -1,10 +1,13 @@
 import { Select, Switch, Spin, message, Image as AntImage, Button } from 'antd'
 import _, { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
-import wallpaper from 'wallpaper'
-import path from 'path'
-import fs from 'fs'
-import os from 'os'
+
+// import path from 'path'
+// import os from 'os'
+// import fs from 'fs'
+const fs = require('fs')
+const os = require('os')
+const path = require('path')
 
 export default function List() {
   const [loading, setLoading] = useState(false)
@@ -56,7 +59,7 @@ export default function List() {
       }
     }
     // 设置壁纸
-    await wallpaper.setWallpaper(picturePath, { scale: 'auto' })
+    ipcRenderer.send('set-wallpaper', picturePath)
     // 通知主进程设置壁纸完成
     ipcRenderer.send('asynchronous-message', '设置成功！')
     // 通知主进程关闭动态壁纸

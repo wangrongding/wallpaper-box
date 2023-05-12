@@ -1,4 +1,4 @@
-import { session, protocol, app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell, globalShortcut } from 'electron'
+import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut } from 'electron'
 import { setTrayIcon } from './tray'
 import { initMenu } from './menu'
 import { initKeyboard } from './keyboard'
@@ -37,6 +37,7 @@ const initApp = () => {
   // createLiveWallpaperWindow()
 }
 
+//为自定义的 file 协议提供特权
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'file',
@@ -85,14 +86,33 @@ const createWindow = () => {
     // mainWindow.loadURL(`app://../dist-web/index.html`)
 
     mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
-    //为自定义的app协议提供特权
     // mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
     // mainWindow.webContents.openDevTools({ mode: 'right' })
   } else {
     // mainWindow.loadFile(...fileRoute)
-    mainWindow.loadURL('http://172.16.2.118:1234')
-    // mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
+    mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
   }
+}
+
+async function setWallPaper(picturePath: string) {
+  // const picList = [
+  //   'wallhaven-2ye18x.jpg',
+  //   'wallhaven-1k6y7g.jpg',
+  //   'wallhaven-7p39gy.png',
+  //   'wallhaven-e7kpl8.png',
+  //   'wallhaven-e756dr.jpg',
+  //   'wallhaven-k7m65d.png',
+  //   'wallhaven-g7elo3.jpg',
+  //   'wallhaven-28m319.jpg',
+  //   'wallhaven-kx9pg7.jpg',
+  //   'wallhaven-rd83mq.jpg',
+  // ]
+  // const picturePath = path.join(dir, picList[Math.floor(Math.random() * picList.length)])
+  // const dir = path.join(os.homedir(), '/wallpaper-box')
+  // const picturePath = path.join(dir, fileName)
+  const wallpaper = await import('wallpaper')
+  await wallpaper.setWallpaper(picturePath, { scale: 'auto' })
+  // await wallpaper.setSolidColorWallpaper('000000')
 }
 
 // 创建动态壁纸窗口
@@ -140,6 +160,11 @@ app.on('activate', () => {
 })
 
 // ============================ 事件 ============================
+
+// 关闭动态壁纸
+ipcMain.on('set-wallpaper', (_, arg) => {
+  setWallPaper(arg)
+})
 
 // 在默认浏览器中打开 a 标签
 ipcMain.on('open-link-in-browser', (_, arg) => {

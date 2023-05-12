@@ -68,22 +68,20 @@ export default function Container() {
             <div className=' drag flex-1 w-full h-full text-center'></div>
 
             {/* 右边操作栏 */}
-            {os.platform() === 'darwin' && (
-              <div className='no-drag text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
-                {/* 最小化 */}
-                <MinusOutlined onClick={minimizeWindow} />
+            <div className='no-drag text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
+              {/* 最小化 */}
+              <MinusOutlined onClick={minimizeWindow} />
 
-                {isMaximized ? (
-                  // 恢复
-                  <FullscreenExitOutlined onClick={unMaximizeWindow} />
-                ) : (
-                  // 最大化
-                  <BorderOutlined onClick={maximizeWindow} />
-                )}
-                {/* 关闭按钮 */}
-                <CloseOutlined onClick={closeWindow} />
-              </div>
-            )}
+              {isMaximized ? (
+                // 恢复
+                <FullscreenExitOutlined onClick={unMaximizeWindow} />
+              ) : (
+                // 最大化
+                <BorderOutlined onClick={maximizeWindow} />
+              )}
+              {/* 关闭按钮 */}
+              <CloseOutlined onClick={closeWindow} />
+            </div>
           </div>
         </Header>
 
