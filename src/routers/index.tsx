@@ -7,7 +7,7 @@ import { Navigate } from 'react-router-dom'
 // 路由懒加载
 // const Dashboard = lazy(() => import('@/pages/dashboard'))
 const List = lazy(() => import('@/pages/List'))
-const MyList = lazy(() => import('@/pages/MyList'))
+const ListLocal = lazy(() => import('@/pages/ListLocal'))
 const SetProxy = lazy(() => import('@/pages/SetProxy'))
 const LiveWallpaper = lazy(() => import('@/pages/LiveWallpaper'))
 const Setting = lazy(() => import('@/pages/Setting'))
@@ -16,7 +16,9 @@ const Page404 = lazy(() => import('@/pages/ErrorPage/Page404'))
 const Page401 = lazy(() => import('@/pages/ErrorPage/Page401'))
 
 // 路由懒加载的loading
-const withSuspense = (Component: JSX.Element) => <Suspense fallback={<div>loading...</div>}>{Component}</Suspense>
+const withSuspense = (Component: JSX.Element) => (
+  <Suspense fallback={<div className='text-2xl font-bold text-center'>loading...</div>}>{Component}</Suspense>
+)
 
 // 菜单路由
 export const menuRoutes = [
@@ -27,7 +29,7 @@ export const menuRoutes = [
     element: withSuspense(<List />),
   },
   {
-    path: '/dashboard',
+    path: '/video-wallpaper',
     title: '视频壁纸',
     icon: <VideoCameraOutlined />,
     element: withSuspense(<LiveWallpaper />),
@@ -36,7 +38,7 @@ export const menuRoutes = [
     path: '/my-list',
     title: '我的壁纸',
     icon: <FolderOpenFilled />,
-    element: withSuspense(<MyList />),
+    element: withSuspense(<ListLocal />),
   },
   {
     path: '/setting',
