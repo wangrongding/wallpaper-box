@@ -57,9 +57,9 @@ export const menuRoutes = [
 export const routes = [
   {
     path: '/',
-    // element: <Navigate to='/list' />,
+    element: <Navigate to='/list' />,
+    // element: <Navigate to='/video-wallpaper' />,
     // element: <Navigate to='/setting' />,
-    element: <Navigate to='/video-wallpaper' />,
   },
   {
     path: '/',
