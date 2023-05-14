@@ -38,7 +38,7 @@ export function createMacLiveWallpaper() {
       // wallWindow[index].webContents.openDevTools({ mode: 'right' })
       await wallWindow[index].loadURL('http://localhost:1234/#/wallpaper')
     } else {
-      await wallWindow[index].loadFile(path.join(__dirname, '../dist-web/index.html/#/wallpaper'))
+      await wallWindow[index].loadFile(path.join(__dirname, '../dist-web/index.html#/wallpaper'))
     }
     // 窗口最大化
     wallWindow[index].maximize()
