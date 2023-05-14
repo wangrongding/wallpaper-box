@@ -1,5 +1,7 @@
 const typescript2 = require('rollup-plugin-typescript2')
 const { spawn } = require('child_process')
+
+// import { nodeResolve } from '@rollup/plugin-node-resolve'
 // const json = require("@rollup/plugin-json");
 
 let httpAddress = `http://localhost:1234`
@@ -14,6 +16,8 @@ const defaultConfig = {
   plugins: [
     // 使用typescript2插件
     typescript2(),
+    // 解析node_modules中的模块
+    // nodeResolve({ preferBuiltins: false }), // or `true`
     // 解析json文件
     // json(),
 

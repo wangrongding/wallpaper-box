@@ -1,33 +1,65 @@
-import { Button } from 'antd'
 import { ipcRenderer } from 'electron'
+import { InboxOutlined } from '@ant-design/icons'
+import type { UploadProps } from 'antd'
+import { Upload } from 'antd'
 
-// 设置动态壁纸
-const setLiveWallpaper = async (filePath: string) => {
-  ipcRenderer.send('create-live-wallpaper', filePath)
-}
+const { Dragger } = Upload
+const Store = require('electron-store')
+const store = new Store()
+
 export default function LiveWallpaper() {
-  // 选择视频文件时触发
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    console.log('🚀🚀🚀 / file', file?.path)
-    // 选择视频文件后，设置为壁纸
-    // file && setLiveWallpaper(file.path)
-    file && ipcRenderer.send('change-live-wallpaper', file.path)
-    // if (file) {
-    //   const url = URL.createObjectURL(file)
-    //   console.log(url)
-    // }
+  function useStateWithCallback<T>(initialValue: T): [T, Function] {
+    const [value, setValue] = useState(initialValue)
+    const setValueAndCallback = (newValue: T, callback: Function) => {
+      setValue((prevValue: T) => {
+        if (callback) {
+          callback(prevValue, newValue)
+        }
+        return newValue
+      })
+    }
+    return [value, setValueAndCallback]
   }
+
+  // const [filePath, setFilePath] = useState<string | null>(null)
+  const [filePath, setFilePath] = useStateWithCallback<string | null>(null)
+
+  // 设置动态壁纸
+  const setLiveWallpaper = async (val: string) => {
+    store.set('video-path', val)
+    ipcRenderer.send('create-live-wallpaper')
+  }
+
+  const props: UploadProps = {
+    name: 'file',
+    multiple: true,
+    action: '#',
+    customRequest: () => {},
+    maxCount: 1,
+    showUploadList: false,
+    onChange(info) {
+      setFilePath(info.file.originFileObj?.path || null, (prevValue: string, newValue: string) => {
+        setLiveWallpaper(newValue)
+      })
+    },
+  }
+
+  useEffect(() => {
+    setFilePath(store.get('video-path') || null)
+    return () => {}
+  }, [])
+
   return (
-    <div className='live-wallpaper-page grid content-center'>
-      <h1>视频壁纸</h1>
-
-      {/* 选择本地视频文件 */}
-      <input type='file' accept='video/*' onChange={handleFileChange} />
-
-      <Button type='default' onClick={() => setLiveWallpaper('/Users/wangrongding/Downloads/8531378176615536773332883595.mp4')}>
-        设置为视频壁纸
-      </Button>
+    <div className='live-wallpaper-page grid content-center px-[100px]'>
+      <h1 className='text-2xl font-bold'>视频壁纸</h1>
+      <Dragger {...props}>
+        <p className='ant-upload-drag-icon'>
+          <InboxOutlined />
+        </p>
+        <p className='ant-upload-text'>单击 或 拖动文件到此区域进行设置</p>
+        <p className='ant-upload-hint'>{filePath}</p>
+      </Dragger>
+      {filePath && <video className='text-white object-cover h-full w-full mt-4' src={`file://${filePath}`} autoPlay loop muted></video>}
     </div>
   )
 }

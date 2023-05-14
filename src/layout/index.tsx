@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom'
 import { Layout, theme } from 'antd'
 import { MinusOutlined, FullscreenExitOutlined, BorderOutlined, CloseOutlined } from '@ant-design/icons'
 import MenuBar from './Menu'
-import os from 'os'
 import './index.scss'
 import Logo from '/logo-full.svg'
 
@@ -53,7 +52,6 @@ export default function Container() {
         <Header style={{ position: 'sticky', top: 0, zIndex: 1, width: '100%', padding: '0 20px', margin: 0, height: '50px' }}>
           <div
             className='main-header flex justify-between align-middle items-center h-[50px]'
-            // style={{ marginLeft: os.platform() !== 'darwin' ? 'none' : '50px' }}
             onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}
           >
             {/* LOGO */}

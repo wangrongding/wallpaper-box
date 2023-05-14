@@ -1,9 +1,16 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron'
+import path from 'path'
 
+// 是否为开发环境
+const isDev = process.env.IS_DEV === 'true'
 let wallWindow: BrowserWindow[] = []
 // 创建窗口
 export function createMacLiveWallpaper() {
   if (wallWindow.length > 0) {
+    // 给窗口发送消息
+    wallWindow.forEach((window) => {
+      window.webContents.send('change-live-wallpaper')
+    })
     return
   }
   const displays = screen.getAllDisplays()
@@ -21,14 +28,18 @@ export function createMacLiveWallpaper() {
         // fullscreen: true, // TODO 是否全屏显示, 会导致窗口无法显示
         webPreferences: {
           nodeIntegration: true, // 赋予此窗口页面中的JavaScript访问Node.js环境的能力
-          webSecurity: true, // 可以使用本地资源
+          webSecurity: false, // 可以使用本地资源
           contextIsolation: false, // 是否使用上下文隔离
         },
       }),
     )
-    // console.log('🚀🚀🚀 / display', display, wallWindow)
     // 加载页面
-    await wallWindow[index].loadURL('http://localhost:1234/wallpaper')
+    if (isDev) {
+      // wallWindow[index].webContents.openDevTools({ mode: 'right' })
+      await wallWindow[index].loadURL('http://localhost:1234/#/wallpaper')
+    } else {
+      await wallWindow[index].loadFile(path.join(__dirname, '../dist-web/index.html/#/wallpaper'))
+    }
     // 窗口最大化
     wallWindow[index].maximize()
     // // 窗口显示
@@ -73,18 +84,4 @@ app.on('ready', () => {
   screen.on('display-metrics-changed', (event, display, changedMetrics) => {
     console.log('display-metrics-changed')
   })
-})
-
-// 更换动态壁纸
-ipcMain.on('change-live-wallpaper', (event, arg) => {
-  console.log('change-live-wallpaper', arg)
-  // 给窗口发送消息
-  wallWindow.forEach((window) => {
-    window.webContents.send('change-live-wallpaper', arg)
-  })
-  // ipcMain.emit('change-live-wallpaper', arg)
-  // // 关闭窗口
-  // closeLiveWallpaper()
-  // // 创建窗口
-  // createLiveWallpaper()
 })

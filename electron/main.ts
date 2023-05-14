@@ -6,10 +6,11 @@ import { initDock } from './dock'
 import { setProxy, removeProxy } from './proxy'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
 import path from 'path'
-// import { createFileRoute, createURLRoute } from 'electron-router-dom'
-// import { CustomScheme } from './custom-scheme'
-// import { createWinLiveWallpaper, closeWinLiveWallpaper } from './create-win-live-wallpaper'
+import Store from 'electron-store'
 
+Store.initRenderer()
+const store = new Store()
+const videoPath = store.get('video-path')
 // 是否为开发环境
 const isDev = process.env.IS_DEV === 'true'
 // 关闭electron警告
@@ -30,11 +31,11 @@ const initApp = () => {
   // 设置dock
   initDock()
   // 设置代理
-  // setProxy(mainWindow)
+  setProxy(mainWindow)
+  // 创建动态壁纸
+  videoPath && createLiveWallpaperWindow()
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
-  // 创建动态壁纸
-  // createLiveWallpaperWindow()
 }
 
 //为自定义的 file 协议提供特权
@@ -74,20 +75,10 @@ const createWindow = () => {
     },
   })
 
-  // mainWindow.webContents.openDevTools({ mode: 'right' })
-  // mainWindow.loadURL('https://www.ipip.net/?origin=EN')
-  // const devServerURL = createURLRoute(process.argv[2] || 'http://localhost:1234', 'main')
-  // const fileRoute = createFileRoute(path.join(__dirname, '../dist-web/index.html'), 'main')
   if (isDev) {
-    // 打开窗口调试,默认为 undocked 悬浮窗口
-    // mainWindow.loadURL(devServerURL)
-    // mainWindow.loadFile(...fileRoute)
-    // CustomScheme.registerScheme()
-    // mainWindow.loadURL(`app://../dist-web/index.html`)
-
-    mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
     // mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
-    // mainWindow.webContents.openDevTools({ mode: 'right' })
+    mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
+    mainWindow.webContents.openDevTools({ mode: 'right' })
   } else {
     // mainWindow.loadFile(...fileRoute)
     mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
@@ -127,6 +118,8 @@ function createLiveWallpaperWindow() {
 
 // 关闭动态壁纸窗口
 function closeLiveWallpaperWindow() {
+  // 清除 store 中的 video-path
+  store.delete('video-path')
   if (process.platform === 'darwin') {
     closeLiveWallpaper()
   } else if (process.platform === 'win32') {
@@ -173,7 +166,6 @@ ipcMain.on('open-link-in-browser', (_, arg) => {
 
 // 创建动态壁纸
 ipcMain.on('create-live-wallpaper', (_, arg) => {
-  console.log('🚀🚀🚀 / process.platform', process.platform)
   createLiveWallpaperWindow()
 })
 
