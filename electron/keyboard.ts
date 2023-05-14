@@ -1,5 +1,7 @@
 // 初始化全局键盘事件
 import { app, BrowserWindow, Notification, Menu, ipcMain, Tray, shell, globalShortcut } from 'electron'
+
+// 初始化键盘事件
 export const initKeyboard = (mainWindow: BrowserWindow) => {
   // 注册快捷键
   // 打开调试
