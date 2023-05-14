@@ -7,9 +7,9 @@
   "description": "wallpaper box",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail \"yarn dev:web \" \"wait-on tcp:1234 && rollup -c && yarn electron:dev\"",
+    "dev": "concurrently --kill-others-on-fail \"yarn dev:web \" \"wait-on tcp:1234 && yarn dev:electron\"",
     "dev:web": "vite",
-    "dev:electron": "rollup -c && yarn electron:dev",
+    "dev:electron": "cross-env IS_DEV=true node ./dev-electron.mjs",
     "dev:sort": "vite --mode sort",
     "preview": "vite preview",
     "build": "yarn make",
@@ -18,8 +18,8 @@
     "electron": "electron .",
     "package": "electron-forge package",
     "make": "sudo rm -rf ./out && yarn build:web && yarn build:electron && electron-forge make",
-    "electron:start": "cross-env IS_DEV=false electron-forge start",
-    "electron:dev": "cross-env IS_DEV=true electron-forge start"
+    "electron:start": "rollup -c && cross-env IS_DEV=false electron-forge start",
+    "electron:dev": "rollup -c && cross-env IS_DEV=true electron-forge start"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.9.1",
@@ -28,6 +28,7 @@
     "antd": "^5.1.2",
     "axios": "^1.2.1",
     "electron-squirrel-startup": "^1.0.0",
+    "electron-store": "^8.1.0",
     "fs-extra": "^11.1.0",
     "lodash": "^4.17.21",
     "node-stdlib-browser": "^1.2.0",
@@ -54,6 +55,7 @@
     "@types/react-dom": "^18.0.9",
     "@vitejs/plugin-react": "^3.0.0",
     "autoprefixer": "^10.4.13",
+    "chokidar": "^3.5.3",
     "concurrently": "^8.0.1",
     "cross-env": "^7.0.3",
     "electron": "24.2.0",
