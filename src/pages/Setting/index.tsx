@@ -1,4 +1,4 @@
-import { Button, Input, Switch } from 'antd'
+import { Button, Input, Switch, message } from 'antd'
 import { ipcRenderer } from 'electron'
 
 const Store = require('electron-store')
@@ -6,16 +6,24 @@ const store = new Store()
 export default function Setting() {
   const [rootPath, setRootPath] = useState('/wallpaper-box')
   const [proxyPath, setProxyPath] = useState('')
+  const [messageApi, contextHolder] = message.useMessage()
+
+  // 设置成功回调
+  function handleSetSuccess() {
+    messageApi.success('设置成功！')
+  }
 
   // 设置开机自启
   function setAutoStart(val: boolean) {
     ipcRenderer.send('set-auto-launch', val)
+    handleSetSuccess()
   }
 
   // 设置网络代理
   function setProxy() {
     store.set('proxy-path', proxyPath)
     ipcRenderer.send('set-proxy', proxyPath)
+    handleSetSuccess()
   }
 
   useEffect(() => {
@@ -25,6 +33,7 @@ export default function Setting() {
 
   return (
     <div className='px-[100px]'>
+      {contextHolder}
       <h1 className='font-bold text-2xl my-8'>Setting</h1>
 
       <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 部分功能开发中......</p>
