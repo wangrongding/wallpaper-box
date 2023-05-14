@@ -6,6 +6,9 @@ import path from 'path'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 import esModule from 'vite-plugin-esmodule'
 // import nodeStdlibBrowser from 'node-stdlib-browser'
+// import commonjsExternals from 'vite-plugin-commonjs-externals'
+// import builtinModules from 'builtin-modules'
+// const commonjsPackages = ['fs', 'os', 'node:process', 'node:util', 'node:child_process', 'path', ...builtinModules] as const
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode, ssrBuild }) => {
@@ -16,6 +19,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
       mode === 'sort' && electronDev(),
       getReplacer(),
       esModule(['wallpaper']),
+      // commonjsExternals({ externals: commonjsPackages }),
       react(),
       // Api自动导入
       AutoImport({
@@ -58,6 +62,10 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         '@': path.resolve(__dirname, './src'),
         // ...(mode === 'production' ? nodeStdlibBrowser : null),
       },
+    },
+
+    optimizeDeps: {
+      exclude: [],
     },
     // 打包配置
     build: {

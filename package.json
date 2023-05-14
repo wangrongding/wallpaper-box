@@ -2,7 +2,7 @@
   "name": "wallpaper-box",
   "private": true,
   "type": "commonjs",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "./dist-electron/main.js",
   "description": "wallpaper box",
   "license": "MIT",

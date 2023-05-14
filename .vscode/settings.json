@@ -1,9 +1,5 @@
 {
-  "cSpell.words": [
-    "nsis",
-    "runcat",
-    "tarys"
-  ],
+  "cSpell.words": ["nsis", "runcat", "tarys"],
   "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 10000
+  "files.autoSaveDelay": 60000
 }
