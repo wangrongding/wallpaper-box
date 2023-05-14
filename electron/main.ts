@@ -11,6 +11,7 @@ import Store from 'electron-store'
 Store.initRenderer()
 const store = new Store()
 const videoPath = store.get('video-path')
+const proxyPath = store.get('proxy-path') as string
 // 是否为开发环境
 const isDev = process.env.IS_DEV === 'true'
 // 关闭electron警告
@@ -31,7 +32,7 @@ const initApp = () => {
   // 设置dock
   initDock()
   // 设置代理
-  setProxy(mainWindow)
+  proxyPath && setProxy(mainWindow, proxyPath)
   // 创建动态壁纸
   videoPath && createLiveWallpaperWindow()
   // 隐藏菜单栏
@@ -164,6 +165,15 @@ app.on('activate', () => {
 
 // ============================ 事件 ============================
 
+// 设置网络代理
+ipcMain.on('set-proxy', (_, arg) => {
+  if (arg) {
+    setProxy(mainWindow, arg)
+  } else {
+    removeProxy(mainWindow)
+  }
+})
+
 // 设置自动启动
 ipcMain.on('set-auto-launch', (_, arg) => {
   setAutoLaunch(arg)
@@ -187,21 +197,6 @@ ipcMain.on('create-live-wallpaper', (_, arg) => {
 // 关闭动态壁纸
 ipcMain.on('close-live-wallpaper', (_, arg) => {
   closeLiveWallpaperWindow()
-})
-
-// 设置代理
-ipcMain.on('set_proxy', (event, arg) => {
-  console.log(arg)
-  var { http_proxy } = arg
-  mainWindow.webContents.session.setProxy({
-    proxyRules: http_proxy,
-    proxyBypassRules: 'localhost',
-  })
-})
-
-// 移除代理
-ipcMain.on('remove_proxy', (event, arg) => {
-  mainWindow.webContents.session.setProxy({})
 })
 
 // ============================ 窗口 ============================
