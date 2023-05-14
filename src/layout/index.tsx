@@ -1,7 +1,7 @@
 import { ipcRenderer } from 'electron'
 import { Outlet } from 'react-router-dom'
 import { Layout, theme } from 'antd'
-import { MinusOutlined, FullscreenExitOutlined, BorderOutlined, CloseOutlined } from '@ant-design/icons'
+import { MinusOutlined, FullscreenExitOutlined, BorderOutlined, GithubFilled, SyncOutlined, PlusOutlined } from '@ant-design/icons'
 import MenuBar from './Menu'
 import './index.scss'
 import Logo from '/logo-full.svg'
@@ -60,25 +60,31 @@ export default function Container() {
               {/* <span onClick={refreshWindow}>🏞️</span> wallpaper-box */}
             </div>
             {/* 菜单栏 */}
-            <div className='no-drag mr-auto my-[0px] p-[0px] h-full'>
+            <div className='no-drag mr-auto my-[0px] p-[0px] h-full flex'>
               <MenuBar />
+              <div
+                className='text-white w-[50px] font-bold text-xl grid place-content-center bg-emerald-600 hover:bg-emerald-400 cursor-pointer'
+                onClick={refreshWindow}
+              >
+                <SyncOutlined style={{ fontWeight: 'bold' }} />
+              </div>
             </div>
             <div className=' drag flex-1 w-full h-full text-center'></div>
 
             {/* 右边操作栏 */}
             <div className='no-drag text-white cursor-pointer text-[30px] flex justify-end gap-4 items-center'>
               {/* 最小化 */}
-              <MinusOutlined onClick={minimizeWindow} />
+              <MinusOutlined onClick={minimizeWindow} style={{ fontSize: '30px' }} />
 
               {isMaximized ? (
                 // 恢复
-                <FullscreenExitOutlined onClick={unMaximizeWindow} />
+                <FullscreenExitOutlined onClick={unMaximizeWindow} style={{ fontSize: '25px' }} />
               ) : (
                 // 最大化
-                <BorderOutlined onClick={maximizeWindow} />
+                <BorderOutlined onClick={maximizeWindow} style={{ fontSize: '25px' }} />
               )}
               {/* 关闭按钮 */}
-              <CloseOutlined onClick={closeWindow} />
+              <PlusOutlined style={{ transform: 'rotate(45deg)', fontSize: '30px' }} onClick={closeWindow} />
             </div>
           </div>
         </Header>
@@ -93,8 +99,8 @@ export default function Container() {
         {/* 底部 */}
         <Footer className='text-center h-[34px] leading-[34px] p-[0px]' style={{ padding: 0, margin: 0 }}>
           Created by 荣顶，follow me on{' '}
-          <a className='text-red-400' onClick={() => openLinkInBrowser('https://github.com/wangrongding')}>
-            Github🌸
+          <a className='text-red-400 inline-flex justify-center items-center' onClick={() => openLinkInBrowser('https://github.com/wangrongding')}>
+            Github 🌸 <GithubFilled />
           </a>
         </Footer>
       </Layout>

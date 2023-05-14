@@ -157,13 +157,14 @@ export default function List() {
   return (
     <div className='list-page'>
       {contextHolder}
-      <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
+      <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip: 如果加载慢，可以尝试挂梯子🪜 (不挂全局的话，Setting页也支持单独配置网络代理)</p>
       {/* 筛选条件 */}
       <div className='mb-[20px] flex gap-4'>
         {filterList.map((item, index) => {
           return (
             <Switch
               key={index}
+              size='default'
               checkedChildren={item}
               unCheckedChildren={item}
               onChange={(val) => {
@@ -174,12 +175,13 @@ export default function List() {
         })}
         <Select
           defaultValue='toplist'
+          size='small'
           style={{ width: 120 }}
           onChange={onSortChange}
           options={[
-            { value: 'favorites', label: 'favorites' },
             { value: 'toplist', label: 'toplist' },
             { value: 'views', label: 'views' },
+            { value: 'favorites', label: 'favorites' },
           ]}
         />
       </div>
