@@ -127,6 +127,16 @@ function closeLiveWallpaperWindow() {
   }
 }
 
+// 设置自动启动
+function setAutoLaunch(val: boolean) {
+  app.setLoginItemSettings({
+    openAtLogin: val,
+    openAsHidden: true,
+    path: app.getPath('exe'),
+    args: ['--processStart', `"${app.getPath('exe')}"`],
+  })
+}
+
 // ============================ app ============================
 
 // 当 Electron 完成初始化并准备创建浏览器窗口时调用此方法
@@ -153,6 +163,11 @@ app.on('activate', () => {
 })
 
 // ============================ 事件 ============================
+
+// 设置自动启动
+ipcMain.on('set-auto-launch', (_, arg) => {
+  setAutoLaunch(arg)
+})
 
 // 关闭动态壁纸
 ipcMain.on('set-wallpaper', (_, arg) => {
