@@ -2,6 +2,7 @@ import { Select, Switch, Spin, message, Image as AntImage, Button } from 'antd'
 import _, { debounce } from 'lodash'
 import { ipcRenderer } from 'electron'
 import { CheckCircleFilled, EyeFilled } from '@ant-design/icons'
+import { Image as CusImage } from '@/components/Image'
 
 // import path from 'path'
 // import os from 'os'
@@ -10,7 +11,13 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 
+// TODO 不生效
+message.config({
+  top: 100,
+  duration: 3,
+})
 export default function List() {
+  const [messageApi, contextHolder] = message.useMessage()
   const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
   const [visible, setVisible] = useState(-1)
@@ -64,10 +71,11 @@ export default function List() {
     }
     // 设置壁纸
     ipcRenderer.send('set-wallpaper', picturePath)
-    // 通知主进程设置壁纸完成
-    ipcRenderer.send('asynchronous-message', '设置成功！')
     // 通知主进程关闭动态壁纸
     ipcRenderer.send('close-live-wallpaper')
+    // 通知主进程设置壁纸完成 (系统弹窗通知)
+    // ipcRenderer.send('asynchronous-message', '设置成功！')
+    messageApi.success('设置成功！')
     setLoading(false)
   }
 
@@ -108,7 +116,6 @@ export default function List() {
       `https://wallhaven.cc/api/v1/search?apikey=5RTfusrTnRbHBHs2oWWggQERAzHO2XTO&sorting=${query.sorting}&topRange=1y&page=${query.page}&categories=${categories}&purity=${purity}`,
     )
     const list = await res.json()
-    console.log('🚀🚀🚀 / res:', list.data)
     setWallpaperList((prev) => [...prev, ...list.data])
     setQuery(
       list.data.length &&
@@ -148,75 +155,56 @@ export default function List() {
   }, [])
 
   return (
-    <Spin spinning={loading}>
-      <div className='list-page'>
-        <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
-        <div className='mb-[20px] flex gap-4'>
-          {filterList.map((item, index) => {
-            return (
-              <Switch
-                key={index}
-                checkedChildren={item}
-                unCheckedChildren={item}
-                onChange={(val) => {
-                  onLimitChange(val, item)
-                }}
-              />
-            )
-          })}
-          <Select
-            defaultValue='toplist'
-            style={{ width: 120 }}
-            onChange={onSortChange}
-            options={[
-              { value: 'favorites', label: 'favorites' },
-              { value: 'toplist', label: 'toplist' },
-              { value: 'views', label: 'views' },
-            ]}
-          />
-        </div>
-        <div className='grid grid-cols-7 gap-4' onScroll={onScroll}>
-          {wallpaperList.map((item: any, index: number) => {
-            return (
-              <div key={index} className='relative'>
-                <img src={item.thumbs.small} alt='' style={{ breakInside: 'avoid-column', marginBottom: '6px' }} />
-                <AntImage
-                  width={0}
-                  height={0}
-                  className='absolute top-0 left-0 right-0 bottom-0'
-                  style={{ display: 'none !important', width: 0, height: 0 }}
-                  src={item.thumbs.small}
-                  preview={{
-                    visible: visible === index,
-                    scaleStep: 0.2,
-                    src: item.path,
-                    onVisibleChange: (value) => {
-                      setVisible(-1)
-                    },
-                  }}
-                />
-                <div className=' absolute top-0 left-0 right-0 bottom-0 opacity-0 hover:opacity-100 flex justify-center flex-row text-center items-center gap-4 bg-black bg-opacity-70'>
-                  <div
-                    onClick={() => setVisible(index)}
-                    className='bg-cyan-500 text-white w-fit p-3 rounded-md shadow-md cursor-pointer grid place-content-center'
-                  >
-                    <EyeFilled style={{ fontSize: '16px' }} />
-                  </div>
-                  <div
-                    onClick={() => setAsBackground(item)}
-                    className='bg-teal-500 text-white w-fit p-3 rounded-md shadow-md cursor-pointer grid place-content-center'
-                  >
-                    <CheckCircleFilled style={{ fontSize: '16px' }} />
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-        <div className='text-center mt-[30px]'>
-          <Spin tip='Loading' size='small' />
-        </div>
+    <div className='list-page'>
+      {contextHolder}
+      <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip:使用鼠标左击预览图片，右击将其设为壁纸。</p>
+      {/* 筛选条件 */}
+      <div className='mb-[20px] flex gap-4'>
+        {filterList.map((item, index) => {
+          return (
+            <Switch
+              key={index}
+              checkedChildren={item}
+              unCheckedChildren={item}
+              onChange={(val) => {
+                onLimitChange(val, item)
+              }}
+            />
+          )
+        })}
+        <Select
+          defaultValue='toplist'
+          style={{ width: 120 }}
+          onChange={onSortChange}
+          options={[
+            { value: 'favorites', label: 'favorites' },
+            { value: 'toplist', label: 'toplist' },
+            { value: 'views', label: 'views' },
+          ]}
+        />
       </div>
-    </Spin>
+      {/* 壁纸列表 */}
+      <div className='grid grid-cols-7 gap-2' onScroll={onScroll}>
+        {wallpaperList.map((item: any, index: number) => {
+          return (
+            <CusImage
+              key={index}
+              src={item.thumbs.small}
+              previewSrc={item.path}
+              visible={visible}
+              index={index}
+              onPreview={() => setVisible(index)}
+              onSet={() => setAsBackground(item)}
+              onVisibleChange={() => setVisible(-1)}
+            />
+          )
+        })}
+      </div>
+      {loading && (
+        <div className='bg-white bg-opacity-40 fixed top-0 left-0 right-0 bottom-0 w-full h-full grid place-content-center'>
+          <Spin tip='Loading' size='large' />
+        </div>
+      )}
+    </div>
   )
 }
