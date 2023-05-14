@@ -19,17 +19,25 @@ async function build() {
 }
 
 // 创建 electron 进程
-function createElectronProcess() {
-  electronProcess = spawn(electron.toString(), ['./dist-electron/main.js', httpAddress], {
+async function createElectronProcess() {
+  electronProcess = await spawn(electron, ['./dist-electron/main.js', httpAddress], {
     cwd: process.cwd(),
     // stdio: 'inherit',
   })
   electronProcess.on('close', closeElectronProcess)
+  electronProcess.on('error', closeElectronProcess)
+  electronProcess.stdout.on('data', (data) => {
+    console.log(data.toString())
+  })
+  electronProcess.stderr.on('data', (data) => {
+    console.error(data.toString())
+  })
 }
 
 // 退出进程
-function closeElectronProcess() {
+function closeElectronProcess(code) {
   if (electronProcess && electronProcess.kill) {
+    console.log(`🤖 electron 进程退出，退出码 ${code}`)
     process.kill(electronProcess.pid)
     electronProcess = null
   }
