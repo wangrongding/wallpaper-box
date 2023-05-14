@@ -94,17 +94,3 @@ app.on('ready', () => {
     console.log('display-metrics-changed')
   })
 })
-
-// 更换动态壁纸
-ipcMain.on('change-live-wallpaper', (event, arg) => {
-  console.log('change-live-wallpaper', arg)
-  // 给窗口发送消息
-  wallWindow.forEach((window) => {
-    window.webContents.send('change-live-wallpaper', arg)
-  })
-  // ipcMain.emit('change-live-wallpaper', arg)
-  // // 关闭窗口
-  // closeLiveWallpaper()
-  // // 创建窗口
-  // createLiveWallpaper()
-})

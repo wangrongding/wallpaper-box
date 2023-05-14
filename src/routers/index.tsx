@@ -8,7 +8,6 @@ import { Navigate } from 'react-router-dom'
 // const Dashboard = lazy(() => import('@/pages/dashboard'))
 const List = lazy(() => import('@/pages/List'))
 const ListLocal = lazy(() => import('@/pages/ListLocal'))
-const SetProxy = lazy(() => import('@/pages/SetProxy'))
 const LiveWallpaper = lazy(() => import('@/pages/LiveWallpaper'))
 const Setting = lazy(() => import('@/pages/Setting'))
 const WallPaperPage = lazy(() => import('@/pages/WallPaper'))
@@ -58,7 +57,9 @@ export const menuRoutes = [
 export const routes = [
   {
     path: '/',
-    element: <Navigate to='/list' />,
+    // element: <Navigate to='/list' />,
+    // element: <Navigate to='/setting' />,
+    element: <Navigate to='/video-wallpaper' />,
   },
   {
     path: '/',
@@ -68,10 +69,6 @@ export const routes = [
   {
     path: '/wallPaper',
     element: withSuspense(<WallPaperPage />),
-  },
-  {
-    path: '/set-proxy',
-    element: withSuspense(<SetProxy />),
   },
   {
     path: '/401',
