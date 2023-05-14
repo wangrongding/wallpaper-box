@@ -13,14 +13,12 @@ export let devPlugin = () => {
         external: ["electron"],
       });
       const httpServer = server.httpServer!;
-      console.log("🚀🚀🚀 / httpServer", httpServer);
       httpServer.once("listening", () => {
         let { spawn } = require("child_process");
         let addressInfo = httpServer.address()! as AddressInfo;
 
         // let httpAddress = `http://${addressInfo.address}:${addressInfo.port}`;
         let httpAddress = `http://localhost:${addressInfo.port}`;
-        console.log("🚀🚀🚀 / httpAddress", httpAddress);
         let electronProcess = spawn(
           require("electron").toString(),
           ["./dist/mainEntry.js", httpAddress],
