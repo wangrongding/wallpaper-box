@@ -65,7 +65,7 @@ export default function List() {
         fs.writeFileSync(picturePath, Buffer.from(buffer))
         console.log('Image downloaded successfully!')
       } catch {
-        alert('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
+        messageApi.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
         setLoading(false)
       }
     }
@@ -94,36 +94,47 @@ export default function List() {
 
   // 限制条件改变
   const onLimitChange = async (checkedVal: any, type: any) => {
+    await setWallpaperList([])
     setQuery(
       Object.assign(query, {
         [type]: checkedVal ? '1' : '0',
         page: 1,
       }),
     )
-    await setWallpaperList([])
     await getWallpaperList()
   }
 
-  // 获取壁纸
-  let mounted = false
+  // 获取壁纸列表
   async function getWallpaperList(): Promise<void> {
     setLoading(true)
     // await getWallHavenAssets(query)
     const categories = query.general + query.anime + query.people
     const purity = query.sfw + query.sketchy + query.nsfw
 
-    const res = await fetch(
-      `https://wallhaven.cc/api/v1/search?apikey=5RTfusrTnRbHBHs2oWWggQERAzHO2XTO&sorting=${query.sorting}&topRange=1y&page=${query.page}&categories=${categories}&purity=${purity}`,
-    )
-    const list = await res.json()
-    setWallpaperList((prev) => [...prev, ...list.data])
-    setQuery(
-      list.data.length &&
-        Object.assign(query, {
-          page: query.page + 1,
-        }),
-    )
-    setLoading(false)
+    try {
+      const res = await fetch(
+        `https://wallhaven.cc/api/v1/search?apikey=cClHHdiiE4mLTht8yhzdky3beMhGX3rf&sorting=${query.sorting}&topRange=1y&page=${query.page}&categories=${categories}&purity=${purity}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+          mode: 'no-cors',
+        },
+      )
+      const list = await res.json()
+      setWallpaperList((prev) => [...prev, ...list.data])
+      setQuery(
+        list.data.length &&
+          Object.assign(query, {
+            page: query.page + 1,
+          }),
+      )
+    } catch {
+      query.nsfw === '1' ? messageApi.error('该分区暂时被限制，可能访问人次过多，请晚点重试') : messageApi.error('请检查网络，刷新重试')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // TODO api key 需要做持久化配置
@@ -149,7 +160,6 @@ export default function List() {
     getWallpaperList()
 
     return () => {
-      mounted = true
       main?.removeEventListener('scroll', onScroll)
     }
   }, [])
@@ -157,7 +167,9 @@ export default function List() {
   return (
     <div className='list-page'>
       {contextHolder}
-      <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 Tip: 如果加载慢，可以尝试挂梯子🪜 (不挂全局的话，Setting页也支持单独配置网络代理)</p>
+      <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>
+        💡 Tip: 如果加载慢，可以尝试挂梯子🪜 (不挂全局的话，Setting页也支持单独配置网络代理)
+      </p>
       {/* 筛选条件 */}
       <div className='mb-[20px] flex gap-4'>
         {filterList.map((item, index) => {
