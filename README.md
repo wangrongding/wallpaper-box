@@ -33,13 +33,15 @@
 
 ### 动态壁纸
 
-MacOS 中的效果：
-
-<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030031627.gif" width="600" />
+<img width="1197" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/8c70b7bb-e3b3-4571-a29d-53d0ad207815">
 
 Windows 中的效果：
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204250101273.gif" width="600" />
+
+MacOS 中的效果：
+
+<img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030031627.gif" width="600" />
 
 ### RunCat
 
@@ -58,6 +60,10 @@ Windows 中的效果：
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030045464.gif" width="600" />
 
+支持设置开机自启 ,支持设置网络代理
+
+<img width="1228" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/91b0d5ac-eecc-4061-b630-3b0e2bef4744">
+
 <!-- <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" /> -->
 
 ## 开发
@@ -65,7 +71,7 @@ Windows 中的效果：
 ### 安装依赖 Install dependencies
 
 ```sh
-pnpm i
+yarn i
 ```
 
 ### 开发预览 Developer Preview
@@ -73,26 +79,28 @@ pnpm i
 直接运行下面的命令，即可启动客户端项目。
 
 ```sh
-pnpm dev
+yarn dev
 
 ```
 
 如果你想要分别调试 web 和 electron 端，可以使用下面的命令：
 
 ```sh
-# 启动 web 服务
-pnpm dev:web
-# 调试 electron 端
-pnpm dev:electron
-# 分别调试 web 和 electron 端
-pnpm dev:split
+# 只启动 web 服务
+yarn dev:web
+# 只调试 electron
+yarn dev:electron
+# or
+yarn electron:dev
 ```
 
 ### 打包 Build
 
+构建后的产物在 out 文件夹中。
+
 ```sh
 # 打包
-pnpm build
+yarn make
 ```
 
 ## 最后
