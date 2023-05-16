@@ -33,7 +33,7 @@
 
 ### 动态壁纸
 
-<img width="1197" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/8c70b7bb-e3b3-4571-a29d-53d0ad207815">
+<img width="600" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/8c70b7bb-e3b3-4571-a29d-53d0ad207815">
 
 Windows 中的效果：
 
@@ -62,7 +62,7 @@ MacOS 中的效果：
 
 支持设置开机自启 ,支持设置网络代理
 
-<img width="1228" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/91b0d5ac-eecc-4061-b630-3b0e2bef4744">
+<img width="600" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/91b0d5ac-eecc-4061-b630-3b0e2bef4744">
 
 <!-- <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" /> -->
 
