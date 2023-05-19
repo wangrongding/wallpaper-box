@@ -66,6 +66,30 @@ MacOS 中的效果：
 
 <!-- <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212300236138.gif" width="600" /> -->
 
+
+## 常见问题
+
+### 1.无法打开应用程序
+
+因为作者不想花钱做数字签名🥲，一年的费用好高(这个项目做着玩的，没有收益👀)，所以你需要按照如下方式安装  
+
+打开终端：
+
+```sh
+# 命令一
+sudo spctl  --master-disable  
+# 命令二
+sudo xattr -r -d com.apple.quarantine <这里是一个空格> <打开 “访达”（Finder）进入 “应用程序” 目录，找到 wallpaper-box，拖进终端>
+
+# 然后回车
+```
+
+具体的步骤可以参考：[👉🏻解决方案](https://zhuanlan.zhihu.com/p/135948430)  
+
+如果你对技术非常热爱，很希望和你成为朋友，可以和我们一起交流技术一起变强。  
+
+| <img src="https://assets.fedtop.com/picbed/202302090947704.png" width="180px"> | <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202305190931902.png" width="180px"> | 
+
 ## 开发
 
 ### 安装依赖 Install dependencies
@@ -102,6 +126,7 @@ yarn electron:dev
 # 打包
 yarn make
 ```
+
 
 ## 最后
 
