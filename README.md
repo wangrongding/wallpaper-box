@@ -1,9 +1,10 @@
 <p align="center">
   <a href="https://vuejs.org" target="_blank" rel="noopener noreferrer">
+    <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021532343.svg" width="300" alt="wallpaper-box logo"/>
   </a>
 </p>
 
-一个桌面壁纸客户端，支持动态壁纸。
+🏞️ 一个桌面壁纸客户端，可以设置静态 / 动态壁纸，集成了 RunCat 的功能。(A desktop wallpaper client to set static / dynamic wallpapers, integrated with RunCat's features.)
 
 支持的功能：
 
