@@ -26,10 +26,6 @@
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>Workbench</b></td>
-      <td width="50%" align="center"><b>Project Resources</b></td>
-  </tr>
-  <tr>
      <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021543565.png"/></td>
      <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021752830.gif"/></td>
   </tr>
@@ -59,10 +55,6 @@
 可以在托盘菜单中切换动态图标。
 
 <table>
-  <tr>
-      <td width="50%" align="center"><b>Windows 中的效果：</b></td>
-      <td width="50%" align="center"><b>MacOS 中的效果：</b></td>
-  </tr>
   <tr>
      <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif"/></td>
      <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021550728.png"/></td>
