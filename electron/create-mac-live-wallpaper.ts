@@ -15,22 +15,28 @@ export function createMacLiveWallpaper() {
   }
   const displays = screen.getAllDisplays()
   displays.forEach(async (display, index) => {
+    const { id, bounds, workAreaSize, workArea } = display
+    // const { x, y, width, height } = workArea
+    const { width, height, x, y } = bounds
     wallWindow.push(
       new BrowserWindow({
         show: false, // 是否显示窗口
         type: 'desktop', // 设置窗口类型为桌面窗口
         focusable: false, // 窗口是否可以获取焦点
         frame: false, // 是否显示边缘框
-        x: display.bounds.x,
-        y: display.bounds.y,
-        width: display.bounds.width,
-        height: display.bounds.height,
-        // fullscreen: true, // TODO 是否全屏显示, 会导致窗口无法显示
+        x, // 窗口的x坐标
+        y,
+        width: width,
+        height: height,
         webPreferences: {
           nodeIntegration: true, // 赋予此窗口页面中的JavaScript访问Node.js环境的能力
           webSecurity: false, // 可以使用本地资源
           contextIsolation: false, // 是否使用上下文隔离
         },
+        hasShadow: false,
+        transparent: true,
+        enableLargerThanScreen: true,
+        roundedCorners: false, // MacOS Big Sur 版本后窗口默认有圆角
       }),
     )
     // 加载页面
