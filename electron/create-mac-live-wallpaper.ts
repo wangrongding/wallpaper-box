@@ -16,7 +16,6 @@ export function createMacLiveWallpaper() {
   const displays = screen.getAllDisplays()
   displays.forEach(async (display, index) => {
     const { id, bounds, workAreaSize, workArea } = display
-    // const { x, y, width, height } = workArea
     const { width, height, x, y } = bounds
     wallWindow.push(
       new BrowserWindow({
@@ -47,8 +46,6 @@ export function createMacLiveWallpaper() {
       // await wallWindow[index].loadFile(path.join(__dirname, '../dist-web/index.html#/wallpaper'))
       await wallWindow[index].loadURL(`file://${path.join(__dirname, '../dist-web/index.html')}#/wallpaper`)
     }
-    // 窗口最大化
-    wallWindow[index].maximize()
     // // 窗口显示
     wallWindow[index].show()
     // 窗口忽略所有鼠标事件
