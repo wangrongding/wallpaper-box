@@ -87,21 +87,6 @@ const createWindow = () => {
 }
 
 async function setWallPaper(picturePath: string) {
-  // const picList = [
-  //   'wallhaven-2ye18x.jpg',
-  //   'wallhaven-1k6y7g.jpg',
-  //   'wallhaven-7p39gy.png',
-  //   'wallhaven-e7kpl8.png',
-  //   'wallhaven-e756dr.jpg',
-  //   'wallhaven-k7m65d.png',
-  //   'wallhaven-g7elo3.jpg',
-  //   'wallhaven-28m319.jpg',
-  //   'wallhaven-kx9pg7.jpg',
-  //   'wallhaven-rd83mq.jpg',
-  // ]
-  // const picturePath = path.join(dir, picList[Math.floor(Math.random() * picList.length)])
-  // const dir = path.join(os.homedir(), '/wallpaper-box')
-  // const picturePath = path.join(dir, fileName)
   const wallpaper = await import('wallpaper')
   await wallpaper.setWallpaper(picturePath, { scale: 'auto' })
   // await wallpaper.setSolidColorWallpaper('000000')
