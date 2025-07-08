@@ -15,7 +15,7 @@
 - [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
 - [x] 支持修改代理
 - [ ] 网页 url 壁纸（指定一个网页成为桌面壁纸）
-- [ ] 支持用户自己手写 Threejs 动画壁纸
+- [ ] 支持用户自己手写 ThreeJs 动画壁纸
 
 ## 使用
 
@@ -43,7 +43,7 @@
   </tr>
   <tr>
      <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204250101273.gif"/></td>
-     <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030031627.gif"/></td>
+     <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/Kapture%202025-07-09%20at%2000.53.05.gif"/></td>
   </tr>
 </table>
 
