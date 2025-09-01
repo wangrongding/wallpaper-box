@@ -1,6 +1,6 @@
+import { Image as CusImage } from '@/components/Image'
 import { Empty, message } from 'antd'
 import { ipcRenderer } from 'electron'
-import { Image as CusImage } from '@/components/Image'
 
 const fs = require('fs')
 const path = require('path')

@@ -3,10 +3,7 @@
  * 参考 https://prettier.io/docs/en/options.html
  */
 module.exports = {
-  plugins: [
-    "@trivago/prettier-plugin-sort-imports",
-    "prettier-plugin-tailwindcss",
-  ],
+  plugins: ['@trivago/prettier-plugin-sort-imports', 'prettier-plugin-tailwindcss'],
   tailwindConfig: './tailwind.config.js',
   tabWidth: 2, // 空格数
   useTabs: false, // 是否开启tab

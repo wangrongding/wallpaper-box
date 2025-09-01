@@ -1,9 +1,9 @@
-import * as rollup from 'rollup'
-import chokidar from 'chokidar'
 // 引入 rollup 配置文件
 import rollupConfig from './rollup.config.js'
 import { spawn } from 'child_process'
+import chokidar from 'chokidar'
 import electron from 'electron'
+import * as rollup from 'rollup'
 
 const httpAddress = 'http://localhost:1234'
 let electronProcess
