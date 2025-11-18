@@ -7,6 +7,48 @@ import { setProxy, removeProxy } from './proxy'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
 import path from 'path'
 import Store from 'electron-store'
+import fs from 'fs/promises'
+import os from 'os'
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
+
+
+const ffmpeg = createFFmpeg({
+  log: false,
+  // 删掉 corePath 这行！就是这一行害的你
+})
+
+let ffmpegLoaded = false
+
+async function loadFFmpegOnce() {
+  if (!ffmpegLoaded) {
+    await ffmpeg.load()  // 它会自动用内置的 ffmpeg-core.js（已打包进 node_modules）
+    ffmpegLoaded = true
+  }
+}
+
+async function getVideoFrame(videoPath: string): Promise<string> {
+  await loadFFmpegOnce()
+
+  const inputName = 'input.mp4'
+  const outputName = 'frame.png'
+
+  ffmpeg.FS('writeFile', inputName, await fetchFile(videoPath))
+  await ffmpeg.run('-i', inputName, '-ss', '00:00:08', '-vframes', '1', '-q:v', '2', outputName)
+
+  const data = ffmpeg.FS('readFile', outputName)
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wallpaper-'))
+  const framePath = path.join(tempDir, outputName)
+
+  await fs.writeFile(framePath, data)  // 0.11 版本直接就是 Buffer，完美兼容
+
+  // 清理内存
+  try {
+    ffmpeg.FS('unlink', inputName)
+    ffmpeg.FS('unlink', outputName)
+  } catch {}
+
+  return framePath
+}
 
 Store.initRenderer()
 const store = new Store()
@@ -92,8 +134,29 @@ async function setWallPaper(picturePath: string) {
   // await wallpaper.setSolidColorWallpaper('000000')
 }
 
-// 创建动态壁纸窗口
-function createLiveWallpaperWindow() {
+// ===== 只替换你原来的 createLiveWallpaperWindow 函数，完整替换成下面这个 =====
+async function createLiveWallpaperWindow() {
+  const videoPath = store.get('video-path') as string
+  if (!videoPath) return
+
+  let tempFramePath = ''
+
+  try {
+    tempFramePath = await getVideoFrame(videoPath)
+    await setWallPaper(tempFramePath)
+    console.log('视频帧壁纸设置成功')
+  } catch (error) {
+    console.error('Failed to set wallpaper from video frame:', error)
+  }
+
+  // 10秒后自动删除临时图片，防止壁纸还没生效就被删掉
+  if (tempFramePath) {
+    setTimeout(() => {
+      fs.unlink(tempFramePath)
+      fs.rmdir(path.dirname(tempFramePath))
+    }, 10000)
+  }
+
   if (process.platform === 'darwin') {
     createMacLiveWallpaper()
   } else if (process.platform === 'win32') {
@@ -164,7 +227,7 @@ ipcMain.on('set-auto-launch', (_, arg) => {
   setAutoLaunch(arg)
 })
 
-// 关闭动态壁纸
+// 设置图片壁纸
 ipcMain.on('set-wallpaper', (_, arg) => {
   setWallPaper(arg)
 })
