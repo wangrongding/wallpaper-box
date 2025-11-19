@@ -7290,10 +7290,10 @@ wait-on@^7.0.1:
     minimist "^1.2.7"
     rxjs "^7.8.0"
 
-wallpaper@^6.1.1:
-  version "6.1.1"
-  resolved "https://registry.npmmirror.com/wallpaper/-/wallpaper-6.1.1.tgz#adb1e1c23b3f4f21269338bbee204ba0f813f308"
-  integrity sha512-CWvtaanpICvFOhqr0xlAnAgxHNROK3yGN/vaSnLUyTJmmJ5ipfJpByn1yqCNV22ZNQfXULi1xS/+W9riRMXMjQ==
+wallpaper@^7.2.1:
+  version "7.2.1"
+  resolved "https://registry.npmjs.org/wallpaper/-/wallpaper-7.2.1.tgz#f6ee0314d3d2ca7b53990f1f4a64b1e725966698"
+  integrity sha512-fqAhFSF/BVg+F7Hj+9xOnDWZMM20rjuDTYtietso4P8gYOPOBzJyzbJEDocDfoCgzDV5a1x68u54/ICr70mpPw==
 
 watchpack@^2.4.0:
   version "2.4.0"
