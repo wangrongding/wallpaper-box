@@ -1,8 +1,8 @@
-import { Select, Switch, Spin, message, Image as AntImage, Button } from 'antd'
-import _, { debounce } from 'lodash'
-import { ipcRenderer } from 'electron'
-import { CheckCircleFilled, EyeFilled } from '@ant-design/icons'
 import { Image as CusImage } from '@/components/Image'
+import { DownloadOutlined, CloseOutlined } from '@ant-design/icons'
+import { Select, Empty, Switch, Spin, message, Image as AntImage, Input, Space } from 'antd'
+import { ipcRenderer } from 'electron'
+import { debounce } from 'lodash'
 
 // import path from 'path'
 // import os from 'os'
@@ -10,6 +10,8 @@ import { Image as CusImage } from '@/components/Image'
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+
+const { Search } = Input
 
 // TODO 不生效
 message.config({
@@ -20,7 +22,8 @@ export default function List() {
   const [messageApi, contextHolder] = message.useMessage()
   const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
-  const [visible, setVisible] = useState(-1)
+  const [visible, setVisible] = useState(false)
+  const [previewSrc, setPreviewSrc] = useState('')
   const [query, setQuery] = useState({
     general: '0',
     anime: '0',
@@ -35,6 +38,7 @@ export default function List() {
 
     page: 1,
     sorting: 'toplist',
+    keyword: '',
   })
 
   const filterList = ['general', 'anime', 'people', 'sfw', 'sketchy', 'nsfw']
@@ -104,6 +108,19 @@ export default function List() {
     await getWallpaperList()
   }
 
+  // 搜索关键词
+  const onSearch = (keyword: string) => {
+    setWallpaperList([])
+    setQuery(
+      Object.assign(query, {
+        keyword: keyword,
+        page: 1,
+      }),
+    )
+    console.log('🚀🚀🚀 / keyword:', keyword, query)
+    getWallpaperList()
+  }
+
   // 获取壁纸列表
   async function getWallpaperList(): Promise<void> {
     setLoading(true)
@@ -113,7 +130,7 @@ export default function List() {
 
     try {
       const res = await fetch(
-        `https://wallhaven.cc/api/v1/search?apikey=cClHHdiiE4mLTht8yhzdky3beMhGX3rf&sorting=${query.sorting}&topRange=1y&page=${query.page}&categories=${categories}&purity=${purity}`,
+        `https://wallhaven.cc/api/v1/search?apikey=cClHHdiiE4mLTht8yhzdky3beMhGX3rf&q=${query.keyword}&sorting=${query.sorting}&topRange=1y&page=${query.page}&categories=${categories}&purity=${purity}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -135,6 +152,26 @@ export default function List() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePreview = (url: string) => {
+    setPreviewSrc(url)
+    setVisible(true)
+  }
+
+  const onDownload = (src: string) => {
+    fetch(src)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(new Blob([blob]))
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'image.png'
+        document.body.appendChild(link)
+        link.click()
+        URL.revokeObjectURL(url)
+        link.remove()
+      })
   }
 
   // TODO api key 需要做持久化配置
@@ -167,7 +204,7 @@ export default function List() {
   return (
     <div className='list-page'>
       {contextHolder}
-      <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>
+      <p className='mb-4 box-border bg-amber-200 pl-4 leading-8 text-black'>
         💡 Tip: 如果加载慢，可以尝试挂梯子🪜 (不挂全局的话，Setting页也支持单独配置网络代理)
       </p>
       {/* 筛选条件 */}
@@ -196,27 +233,65 @@ export default function List() {
             { value: 'favorites', label: 'favorites' },
           ]}
         />
+        <Search placeholder='input search text' style={{ width: 300 }} onSearch={onSearch} enterButton='Search' size='small' />
       </div>
       {/* 壁纸列表 */}
-      <div className='grid grid-cols-7 gap-2' onScroll={onScroll}>
-        {wallpaperList.map((item: any, index: number) => {
-          return (
-            <CusImage
-              key={index}
-              src={item.thumbs.small}
-              previewSrc={item.path}
-              visible={visible}
-              index={index}
-              onPreview={() => setVisible(index)}
-              onSet={() => setAsBackground(item)}
-              onVisibleChange={() => setVisible(-1)}
-            />
-          )
-        })}
-      </div>
+      {wallpaperList.length ? (
+        <div className='grid grid-cols-7 gap-2' onScroll={onScroll}>
+          {wallpaperList.map((item: any, index: number) => {
+            return (
+              <CusImage
+                key={index}
+                src={item.thumbs.small}
+                previewSrc={item.path}
+                index={index}
+                onPreview={handlePreview}
+                onSet={() => setAsBackground(item)}
+              />
+            )
+          })}
+        </div>
+      ) : (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+      )}
+
+      <AntImage
+        style={{ display: 'none !important' }}
+        preview={{
+          visible: visible,
+          scaleStep: 0.2,
+          src: previewSrc,
+          onVisibleChange: () => {
+            setPreviewSrc('')
+            setVisible(false)
+          },
+          toolbarRender: (_, previewEl) => {
+            return (
+              <Space size={12} className='img-toolbar-wrapper'>
+                <DownloadOutlined
+                  onClick={() => {
+                    onDownload(previewSrc)
+                  }}
+                />
+                {..._.props.children.map((item: any) => {
+                  return <span>{item}</span>
+                })}
+                <CloseOutlined
+                  onClick={() => {
+                    setPreviewSrc('')
+                    setVisible(false)
+                  }}
+                />
+              </Space>
+            )
+          },
+        }}
+      />
       {loading && (
-        <div className='bg-white bg-opacity-40 fixed top-0 left-0 right-0 bottom-0 w-full h-full grid place-content-center'>
-          <Spin tip='Loading' size='large' />
+        <div className='fixed bottom-0 left-0 right-0 top-0 grid h-full w-full place-content-center bg-white bg-opacity-40'>
+          <Spin size='large'>
+            <span>Loading</span>
+          </Spin>
         </div>
       )}
     </div>

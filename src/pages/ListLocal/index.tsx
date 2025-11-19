@@ -12,7 +12,6 @@ if (!fs.existsSync(dir)) {
 
 export default function List() {
   const [wallpaperList, setWallpaperList] = useState<string[]>([])
-  const [visible, setVisible] = useState(false)
   const [messageApi, contextHolder] = message.useMessage()
   // 获取壁纸
   let mounted = false
@@ -73,7 +72,6 @@ export default function List() {
               <CusImage
                 key={index}
                 src={`file://${item}`}
-                visible={visible}
                 index={index}
                 onSet={() => setAsBackground(item)}
                 onDelete={() => deleteWallpaper(item)}
