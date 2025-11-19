@@ -158,8 +158,10 @@ async function createLiveWallpaperWindow() {
   }
 
   if (process.platform === 'darwin') {
+    // 创建 mac 端动态壁纸窗口
     createMacLiveWallpaper()
   } else if (process.platform === 'win32') {
+    // 创建 win 端动态壁纸窗口
     // TODO 打开会导致 mac 端无法运行，在 win 端正常。
     // createWinLiveWallpaper()
   }

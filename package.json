@@ -39,9 +39,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.6.1",
     "redux": "^4.2.0",
-    "wallpaper": "^6.1.1",
-    "win-win-api": "^0.0.5",
-    "win32-ffi": "0.0.6-alpha.5"
+    "wallpaper": "^7.2.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.1.1",
