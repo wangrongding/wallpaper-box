@@ -14,8 +14,9 @@
 - [x] 设置动态壁纸（在 MacOs 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
 - [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
 - [x] 支持修改代理
-- [ ] 网页 url 壁纸（指定一个网页成为桌面壁纸）
-- [ ] 支持用户自己手写 ThreeJs 动画壁纸
+- [x] 网页 url 壁纸（指定一个线上网页成为桌面壁纸）
+- [x] 支持用户自定义网页壁纸（指定一个本地 html 文件成为桌面壁纸）
+- [ ] 支持大模型文生图，用户输入文字描述，创造壁纸
 
 ## 使用
 
@@ -46,6 +47,18 @@
      <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/Kapture%202025-07-09%20at%2000.53.05.gif"/></td>
   </tr>
 </table>
+
+### 网页壁纸
+
+可以将任意网页设置为桌面壁纸，支持在线网址和本地 HTML 文件。
+
+- **在线网址**：支持 `http://` 或 `https://` 开头的网址。
+  - 例如：`https://wangrongding.github.io/jellyfish/`
+  - 智能识别：输入 `google.com` 会自动识别为 `http://google.com`。
+- **本地文件**：支持本地 HTML 文件的绝对路径。
+  - Windows：例如 `C:\Users\wangrongding\Coding\jellyfish\index.html`
+  - macOS/Linux：例如 `/Users/wangrongding/Coding/jellyfish/index.html`
+  - 智能识别：输入路径时会自动添加 `file://` 协议头。
 
 ### RunCat
 
