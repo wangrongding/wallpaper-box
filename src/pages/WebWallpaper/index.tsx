@@ -10,10 +10,28 @@ const WebWallpaper = () => {
       message.warning('请输入网址或文件路径')
       return
     }
-    let targetUrl = url
-    // 简单的处理，如果不是 http 开头，且看起来像绝对路径，加上 file://
-    if (!url.startsWith('http') && !url.startsWith('file://')) {
-        targetUrl = `file://${url}`
+    let targetUrl = url.trim()
+    // 检查是否包含协议头
+    const hasProtocol = /^(http|https|file):\/\//i.test(targetUrl)
+
+    if (!hasProtocol) {
+      // 检查是否是 Windows 绝对路径 (例如 C:\ 或 C:/)
+      const isWinPath = /^[a-zA-Z]:[\\/]/.test(targetUrl)
+      // 检查是否是 Unix/Linux/macOS 绝对路径 (例如 /Users/...)
+      const isUnixPath = targetUrl.startsWith('/')
+
+      if (isWinPath || isUnixPath) {
+        targetUrl = `file://${targetUrl}`
+      } else if (
+        /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}/.test(targetUrl) ||
+        targetUrl.startsWith('localhost')
+      ) {
+        // 如果看起来像域名 (例如 google.com, localhost)，默认添加 http://
+        targetUrl = `http://${targetUrl}`
+      } else {
+        // 其他情况，默认尝试作为 file 协议处理
+        targetUrl = `file://${targetUrl}`
+      }
     }
     
     ipcRenderer.send('create-web-live-wallpaper', targetUrl)
