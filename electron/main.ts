@@ -130,7 +130,7 @@ const createWindow = () => {
 
 async function setWallPaper(picturePath: string) {
   const wallpaper = await import('wallpaper')
-  await wallpaper.setWallpaper(picturePath, { scale: 'auto' })
+  await wallpaper.setWallpaper(picturePath, { scale: 'auto',screen: 'all' })
   // await wallpaper.setSolidColorWallpaper('000000')
 }
 
