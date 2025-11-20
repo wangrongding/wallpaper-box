@@ -5,6 +5,7 @@ import { initKeyboard } from './keyboard'
 import { initDock } from './dock'
 import { setProxy, removeProxy } from './proxy'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
+import { createWebLiveWallpaper, closeWebLiveWallpaper } from './create-web-live-wallpaper'
 import path from 'path'
 import Store from 'electron-store'
 import fs from 'fs/promises'
@@ -53,6 +54,7 @@ async function getVideoFrame(videoPath: string): Promise<string> {
 Store.initRenderer()
 const store = new Store()
 const videoPath = store.get('video-path')
+const webPath = store.get('web-path') as string
 const proxyPath = store.get('proxy-path') as string
 // 是否为开发环境
 const isDev = process.env.IS_DEV === 'true'
@@ -76,7 +78,11 @@ const initApp = () => {
   // 设置代理
   proxyPath && setProxy(mainWindow, proxyPath)
   // 创建动态壁纸
-  videoPath && createLiveWallpaperWindow()
+  if (videoPath) {
+    createLiveWallpaperWindow()
+  } else if (webPath) {
+    createWebLiveWallpaperWindow()
+  }
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
 }
@@ -178,6 +184,27 @@ function closeLiveWallpaperWindow() {
   }
 }
 
+// 创建网页壁纸窗口
+function createWebLiveWallpaperWindow() {
+  const webPath = store.get('web-path') as string
+  if (!webPath) return
+
+  // 如果有视频壁纸，先关闭
+  closeLiveWallpaperWindow()
+
+  if (process.platform === 'darwin') {
+    createWebLiveWallpaper(webPath)
+  }
+}
+
+// 关闭网页壁纸窗口
+function closeWebLiveWallpaperWindow() {
+  store.delete('web-path')
+  if (process.platform === 'darwin') {
+    closeWebLiveWallpaper()
+  }
+}
+
 // 设置自动启动
 function setAutoLaunch(val: boolean) {
   app.setLoginItemSettings({
@@ -241,12 +268,24 @@ ipcMain.on('open-link-in-browser', (_, arg) => {
 
 // 创建动态壁纸
 ipcMain.on('create-live-wallpaper', (_, arg) => {
+  closeWebLiveWallpaperWindow() // 确保网页壁纸关闭
   createLiveWallpaperWindow()
 })
 
 // 关闭动态壁纸
 ipcMain.on('close-live-wallpaper', (_, arg) => {
   closeLiveWallpaperWindow()
+})
+
+// 创建网页壁纸
+ipcMain.on('create-web-live-wallpaper', (_, arg) => {
+  store.set('web-path', arg)
+  createWebLiveWallpaperWindow()
+})
+
+// 关闭网页壁纸
+ipcMain.on('close-web-live-wallpaper', (_, arg) => {
+  closeWebLiveWallpaperWindow()
 })
 
 // ============================ 窗口 ============================

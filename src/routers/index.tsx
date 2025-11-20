@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { PictureFilled, SettingOutlined, VideoCameraOutlined, FolderOpenFilled } from '@ant-design/icons'
+import { PictureFilled, SettingOutlined, VideoCameraOutlined, FolderOpenFilled, GlobalOutlined } from '@ant-design/icons'
 import Container from '@/layout'
 import { Navigate } from 'react-router-dom'
 // import Dashboard from '@/pages/Dashboard'
@@ -9,6 +9,7 @@ import { Navigate } from 'react-router-dom'
 const List = lazy(() => import('@/pages/List'))
 const ListLocal = lazy(() => import('@/pages/ListLocal'))
 const LiveWallpaper = lazy(() => import('@/pages/LiveWallpaper'))
+const WebWallpaper = lazy(() => import('@/pages/WebWallpaper'))
 const Setting = lazy(() => import('@/pages/Setting'))
 const WallPaperPage = lazy(() => import('@/pages/WallPaper'))
 const Page404 = lazy(() => import('@/pages/ErrorPage/Page404'))
@@ -32,6 +33,12 @@ export const menuRoutes = [
     title: '视频壁纸',
     icon: <VideoCameraOutlined />,
     element: withSuspense(<LiveWallpaper />),
+  },
+  {
+    path: '/web-wallpaper',
+    title: '网页壁纸',
+    icon: <GlobalOutlined />,
+    element: withSuspense(<WebWallpaper />),
   },
   {
     path: '/my-list',
