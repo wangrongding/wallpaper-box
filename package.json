@@ -12,14 +12,15 @@
     "dev:electron": "cross-env IS_DEV=true node ./dev-electron.mjs",
     "dev:sort": "vite --mode sort",
     "preview": "vite preview",
-    "build": "yarn make",
+    "build": "yarn dist",
     "build:web": "tsc && vite build",
     "build:electron": "rollup -c",
     "electron": "electron .",
-    "package": "electron-forge package",
-    "make": "sudo rm -rf ./out && yarn build:web && yarn build:electron && electron-forge make",
-    "electron:start": "rollup -c && cross-env IS_DEV=false electron-forge start",
-    "electron:dev": "rollup -c && cross-env IS_DEV=true electron-forge start"
+    "dist": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac",
+    "dist:dmg": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac dmg",
+    "dist:zip": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac zip",
+    "electron:start": "rollup -c && cross-env IS_DEV=false electron .",
+    "electron:dev": "rollup -c && cross-env IS_DEV=true electron ."
   },
   "dependencies": {
     "@ant-design/cssinjs": "1.9.1",
@@ -29,11 +30,9 @@
     "ahooks": "3.7.4",
     "antd": "5.8.4",
     "axios": "1.2.1",
-    "electron-squirrel-startup": "1.0.0",
     "electron-store": "8.1.0",
     "fs-extra": "^11.1.0",
     "lodash": "^4.17.21",
-    "node-stdlib-browser": "^1.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
@@ -42,12 +41,7 @@
     "wallpaper": "^7.2.1"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.1.1",
-    "@electron-forge/maker-deb": "^6.1.1",
-    "@electron-forge/maker-dmg": "^6.1.1",
-    "@electron-forge/maker-rpm": "^6.1.1",
-    "@electron-forge/maker-squirrel": "^6.1.1",
-    "@electron-forge/maker-zip": "^6.1.1",
+    "electron-builder": "^25.1.8",
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/fs-extra": "^9.0.13",
     "@types/lodash": "^4.14.191",
@@ -74,5 +68,23 @@
     "vite-plugin-optimizer": "^1.4.2",
     "vite-plugin-svg-icons": "^2.0.1",
     "wait-on": "^7.0.1"
+  },
+  "build": {
+    "appId": "com.wallpaper-box.app",
+    "productName": "wallpaper-box",
+    "directories": {
+      "output": "out"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "dist-web/**/*"
+    ],
+    "mac": {
+      "icon": "./public/logo.icns",
+      "target": ["dmg", "zip"]
+    },
+    "dmg": {
+      "title": "wallpaper-box"
+    }
   }
 }
