@@ -1,5 +1,8 @@
-import { Button, Input, Switch, message } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import { ipcRenderer } from 'electron'
+import { toast } from 'sonner'
 
 const Store = require('electron-store')
 const store = new Store()
@@ -7,12 +10,11 @@ export default function Setting() {
   const [rootPath, setRootPath] = useState('/wallpaper-box')
   const [proxyPath, setProxyPath] = useState('')
   const [autoLaunch, setAutoLaunch] = useState(false)
-  const [messageApi, contextHolder] = message.useMessage()
   const [loading, setLoading] = useState(false)
 
   // 设置成功回调
   function handleSetSuccess() {
-    messageApi.success('设置成功！')
+    toast.success('设置成功！')
   }
 
   // 设置开机自启
@@ -39,12 +41,12 @@ export default function Setting() {
     try {
       const res = await fetch('https://www.google.com')
       if (res.status === 200) {
-        messageApi.success('访问 Google 通了！！！')
+        toast.success('访问 Google 通了！！！')
       } else {
-        messageApi.error('访问 Google失败。。。', res.status)
+        toast.error(`访问 Google失败。。。 ${res.status}`)
       }
     } catch {
-      messageApi.error('请求不通，请检查代理是否正确！')
+      toast.error('请求不通，请检查代理是否正确！')
     } finally {
       setLoading(false)
     }
@@ -62,48 +64,41 @@ export default function Setting() {
 
   return (
     <div className='px-[100px]'>
-      {contextHolder}
-      <h1 className='font-bold text-2xl my-8'>Setting</h1>
+      <h1 className='my-8 text-2xl font-bold'>Setting</h1>
 
-      <p className='text-black bg-amber-200 leading-8 box-border pl-4 mb-4'>💡 部分功能开发中......</p>
+      <p className='mb-4 box-border rounded bg-amber-200 pl-4 leading-8 text-black'>💡 部分功能开发中......</p>
 
       {/* 设置代理 */}
-      <div className=' rounded-lg border-slate-400 border-4 my-4 p-8'>
-        <div>
+      <div className='my-4 space-y-4 rounded-lg border border-slate-300 p-8'>
+        <div className='flex items-center gap-3'>
           <label htmlFor='auto-start'>开机自启：</label>
-          <Switch id='auto-start' size='default' checked={autoLaunch} checkedChildren='开启' unCheckedChildren='关闭' onChange={setAutoStart} />
+          <Switch id='auto-start' checked={autoLaunch} onCheckedChange={setAutoStart} />
+          <span className='text-sm text-slate-500'>{autoLaunch ? '已开启' : '已关闭'}</span>
         </div>
 
-        <div className='flex items-center'>
+        <div className='flex items-center gap-3'>
           <label htmlFor='address'>图片存储位置：（开发中）</label>
-          <Input id='address' type='url' value={rootPath} style={{ width: '200px' }} />
-          <Button type='primary' className='ml-4'>
-            修改
-          </Button>
-          {/* <Input type='file' /> */}
-          {/* <p>根目录下的 /wallpaper-box </p> */}
+          <Input id='address' type='url' value={rootPath} className='w-[200px]' readOnly />
+          <Button className='ml-1'>修改</Button>
         </div>
-        {/* <Button type='primary'>选择文件夹</Button> */}
       </div>
 
-      <div className=' rounded-lg border-slate-400 border-4 my-4 p-8'>
-        <h2>网络代理：(HTTP_PROXY)</h2>
-        <div className='flex items-center'>
+      <div className='my-4 space-y-4 rounded-lg border border-slate-300 p-8'>
+        <h2 className='text-lg font-semibold'>网络代理：(HTTP_PROXY)</h2>
+        <div className='flex items-center gap-3'>
           <label htmlFor='proxy'>代理服务器地址：</label>
           <Input
             id='proxy'
             value={proxyPath}
             placeholder='例: http://localhost:7890'
             type='text'
-            onChange={(val) => {
-              setProxyPath(val.target.value)
+            onChange={(e) => {
+              setProxyPath(e.target.value)
             }}
-            style={{ width: '200px' }}
+            className='w-[200px]'
           />
-          <Button type='primary' className='ml-4' onClick={setProxy}>
-            修改
-          </Button>
-          <Button type='default' style={{ background: '#34d399', color: 'white' }} loading={loading} className='ml-4' onClick={ping}>
+          <Button onClick={setProxy}>修改</Button>
+          <Button variant='secondary' loading={loading} onClick={ping} className='bg-emerald-400 text-white hover:bg-emerald-500'>
             测试
           </Button>
         </div>

@@ -1,27 +1,22 @@
+import { cn } from '@/lib/utils'
 import { menuRoutes } from '@/routers/index'
-import { SyncOutlined } from '@ant-design/icons'
-import { Menu, message } from 'antd'
 import { ipcRenderer } from 'electron'
+import { RefreshCw } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
 
-message.config({
-  top: 200,
-  duration: 3,
-})
 const MenuBar: React.FC = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [messageApi, contextHolder] = message.useMessage()
   const currentRoute = useLocation()
 
   // 路由跳转
-  function handleMenuClick(e: { key: string }) {
-    console.log(e.key)
-    navigate(e.key)
+  function handleMenuClick(path: string) {
+    navigate(path)
   }
 
   // 刷新窗口
@@ -61,48 +56,46 @@ const MenuBar: React.FC = () => {
       ipcRenderer.send('set-wallpaper', picturePath)
       // 通知主进程关闭动态壁纸
       ipcRenderer.send('close-live-wallpaper')
-      messageApi.success('设置成功！')
+      toast.success('设置成功！')
       setLoading(false)
-      // ipcRenderer.send('asynchronous-message', '设置成功！')
     } catch {
       setLoading(false)
-      messageApi.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
-      // ipcRenderer.send('asynchronous-message', '设置失败，请重新尝试，或检查网络！')
+      toast.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
     }
   }
   return (
-    <div className='no-drag my-[0px] mr-auto flex h-full p-[0px]'>
-      {contextHolder}
-      <Menu
-        style={{ height: '50px', lineHeight: '50px' }}
-        theme='dark'
-        mode='horizontal'
-        onClick={handleMenuClick}
-        // defaultSelectedKeys 表示当前样式所在的选中项的key
-        defaultSelectedKeys={[currentRoute.pathname]}
-        // 菜单项的数据
-        items={menuRoutes.map((item: any) => ({
-          key: item.path,
-          label: item.title,
-          icon: item.icon,
-        }))}
-      />
+    <div className='no-drag my-0 mr-auto flex h-full items-center p-0'>
+      <nav className='flex h-[50px] items-center'>
+        {menuRoutes.map((item: any) => (
+          <button
+            key={item.path}
+            onClick={() => handleMenuClick(item.path)}
+            className={cn(
+              'flex h-[50px] items-center gap-1.5 px-4 text-sm text-slate-300 transition-colors hover:bg-blue-600 hover:text-white',
+              currentRoute.pathname === item.path && 'bg-blue-600 text-white',
+            )}
+          >
+            {item.icon}
+            <span>{item.title}</span>
+          </button>
+        ))}
+      </nav>
       <div
-        className='relative grid w-[100px] cursor-pointer place-content-center bg-teal-950 text-white hover:bg-cyan-800'
+        className='relative grid h-[50px] w-[100px] cursor-pointer place-content-center bg-teal-950 text-white hover:bg-cyan-800'
         onClick={setRandomWallpaper}
       >
         {loading && (
-          <div className='absolute left-0 top-0 flex h-full w-full place-content-center place-items-center bg-black bg-opacity-50'>
+          <div className='absolute left-0 top-0 flex h-full w-full place-content-center place-items-center bg-black/50'>
             <div className='h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-white'></div>
           </div>
         )}
         一键随机
       </div>
       <div
-        className='grid w-[50px]  cursor-pointer place-content-center bg-emerald-600 text-xl font-bold  text-white hover:bg-emerald-400'
+        className='grid h-[50px] w-[50px] cursor-pointer place-content-center bg-emerald-600 text-xl font-bold text-white hover:bg-emerald-400'
         onClick={refreshWindow}
       >
-        <SyncOutlined style={{ fontWeight: 'bold' }} />
+        <RefreshCw className='h-5 w-5' />
       </div>
     </div>
   )

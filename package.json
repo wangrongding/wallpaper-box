@@ -20,28 +20,36 @@
     "dist:dmg": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac dmg",
     "dist:zip": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac zip",
     "electron:start": "rollup -c && cross-env IS_DEV=false electron .",
-    "electron:dev": "rollup -c && cross-env IS_DEV=true electron ."
+    "electron:dev": "rollup -c && cross-env IS_DEV=true electron .",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "@ant-design/cssinjs": "1.9.1",
-    "@ant-design/icons": "5.0.1",
     "@ffmpeg/core": "0.11.0",
     "@ffmpeg/ffmpeg": "0.11.0",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-navigation-menu": "^1.2.14",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
     "ahooks": "3.7.4",
-    "antd": "5.8.4",
     "axios": "1.2.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "electron-store": "8.1.0",
     "fs-extra": "^11.1.0",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.563.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.6.1",
     "redux": "^4.2.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
     "wallpaper": "^7.2.1"
   },
   "devDependencies": {
-    "electron-builder": "^25.1.8",
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/fs-extra": "^9.0.13",
     "@types/lodash": "^4.14.191",
@@ -54,13 +62,16 @@
     "concurrently": "^8.0.1",
     "cross-env": "^7.0.3",
     "electron": "24.2.0",
+    "electron-builder": "^25.1.8",
     "postcss": "^8.4.20",
+    "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.5.3",
     "rollup": "^3.8.1",
     "rollup-plugin-node-polyfills": "^0.2.1",
     "rollup-plugin-typescript2": "^0.34.1",
     "sass": "^1.57.1",
     "tailwindcss": "^3.2.4",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^4.9.3",
     "unplugin-auto-import": "^0.12.1",
     "vite": "^4.0.0",
@@ -81,7 +92,10 @@
     ],
     "mac": {
       "icon": "./public/logo.icns",
-      "target": ["dmg", "zip"]
+      "target": [
+        "dmg",
+        "zip"
+      ]
     },
     "dmg": {
       "title": "wallpaper-box"

@@ -1,4 +1,4 @@
-import { CheckCircleFilled, EyeFilled, DeleteFilled } from '@ant-design/icons'
+import { CheckCircle, Eye, Trash2 } from 'lucide-react'
 
 interface Props {
   src: string
@@ -15,26 +15,40 @@ interface Props {
 
 export function Image({ src, previewSrc, index, style, onPreview, onSet, onDelete, ...props }: Props) {
   return (
-    <div className=' relative'>
-      <img src={src} alt='' style={style} loading='lazy' decoding='async' {...props} />
-      <div className='absolute bottom-0 left-0 right-0 top-0 flex flex-row items-center justify-center gap-4 bg-black bg-opacity-70 text-center opacity-0 hover:opacity-100'>
+    <div className='group relative overflow-hidden rounded-lg'>
+      <img
+        src={src}
+        alt=''
+        style={style}
+        loading='lazy'
+        decoding='async'
+        className='w-full transition-transform duration-300 group-hover:scale-105'
+        {...props}
+      />
+      <div className='absolute inset-0 flex items-center justify-center gap-3 bg-black/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100'>
         {onPreview && (
-          <div
+          <button
             onClick={() => previewSrc && onPreview(previewSrc)}
-            className='grid w-fit cursor-pointer place-content-center rounded-md bg-cyan-500 p-2 text-white shadow-md'
+            className='grid place-content-center rounded-lg bg-cyan-500 p-2.5 text-white shadow-md transition-transform hover:scale-110 hover:bg-cyan-400'
           >
-            <EyeFilled style={{ fontSize: '22px' }} />
-          </div>
+            <Eye className='h-5 w-5' />
+          </button>
         )}
         {onSet && (
-          <div onClick={() => onSet()} className='grid w-fit cursor-pointer place-content-center rounded-md bg-teal-500 p-2 text-white shadow-md'>
-            <CheckCircleFilled style={{ fontSize: '22px' }} />
-          </div>
+          <button
+            onClick={() => onSet()}
+            className='grid place-content-center rounded-lg bg-teal-500 p-2.5 text-white shadow-md transition-transform hover:scale-110 hover:bg-teal-400'
+          >
+            <CheckCircle className='h-5 w-5' />
+          </button>
         )}
         {onDelete && (
-          <div onClick={() => onDelete()} className='grid  w-fit cursor-pointer place-content-center rounded-md bg-red-500 p-2 text-white shadow-md'>
-            <DeleteFilled style={{ fontSize: '22px' }} />
-          </div>
+          <button
+            onClick={() => onDelete()}
+            className='grid place-content-center rounded-lg bg-red-500 p-2.5 text-white shadow-md transition-transform hover:scale-110 hover:bg-red-400'
+          >
+            <Trash2 className='h-5 w-5' />
+          </button>
         )}
       </div>
     </div>

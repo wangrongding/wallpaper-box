@@ -1,6 +1,7 @@
 import { Image as CusImage } from '@/components/Image'
-import { Empty, message } from 'antd'
 import { ipcRenderer } from 'electron'
+import { Inbox } from 'lucide-react'
+import { toast } from 'sonner'
 
 const fs = require('fs')
 const path = require('path')
@@ -12,7 +13,6 @@ if (!fs.existsSync(dir)) {
 
 export default function List() {
   const [wallpaperList, setWallpaperList] = useState<string[]>([])
-  const [messageApi, contextHolder] = message.useMessage()
   // 获取壁纸
   let mounted = false
   // 获取 /wallpaper-box 文件夹中的所有壁纸
@@ -24,11 +24,11 @@ export default function List() {
       const imageFiles = files
         .filter((file: string) => ['.jpg', '.png', '.jpeg'].includes(path.extname(file).toLowerCase()))
         .map((file: string) => path.join(dir, file))
-      
+
       setWallpaperList(imageFiles)
     } catch (error) {
       console.error('Failed to load wallpapers:', error)
-      messageApi.error('加载壁纸失败')
+      toast.error('加载壁纸失败')
     }
   }
 
@@ -39,7 +39,7 @@ export default function List() {
       getWallpaperList()
     } catch (error) {
       console.error('Failed to delete wallpaper:', error)
-      messageApi.error('删除失败')
+      toast.error('删除失败')
     }
   }
 
@@ -49,9 +49,7 @@ export default function List() {
     ipcRenderer.send('set-wallpaper', item)
     // 通知主进程关闭动态壁纸
     ipcRenderer.send('close-live-wallpaper')
-    // 通知主进程设置壁纸完成 (系统弹窗通知)
-    // ipcRenderer.send('asynchronous-message', '设置成功！')
-    messageApi.success('设置成功！')
+    toast.success('设置成功！')
   }
 
   useEffect(() => {
@@ -64,7 +62,6 @@ export default function List() {
 
   return (
     <div className='list-page'>
-      {contextHolder}
       {wallpaperList.length > 0 ? (
         <div className='' style={{ columnCount: 5, columnGap: '6px' }}>
           {wallpaperList.map((item: string, index: number) => {
@@ -81,7 +78,10 @@ export default function List() {
           })}
         </div>
       ) : (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <div className='flex flex-col items-center justify-center py-20 text-slate-400'>
+          <Inbox className='mb-4 h-16 w-16' />
+          <p className='text-lg'>暂无数据</p>
+        </div>
       )}
     </div>
   )

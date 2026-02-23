@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 import stream, { Readable } from 'stream'
 
 const Store = require('electron-store')
@@ -74,10 +74,10 @@ export default function WallPaperPage() {
   }, [])
 
   return (
-    <div className='h-[100vh] w-[100vw] overflow-hidden m-[0px] p-[0px]'>
+    <div className='m-[0px] h-[100vh] w-[100vw] overflow-hidden p-[0px]'>
       {/* <video className='text-white object-cover h-full w-full' src={videoPath || 'https://assets.fedtop.com/bike.mp4'} autoPlay loop muted></video> */}
       {/* <video className='text-white object-cover h-full w-full' src={videoPath || 'https://assets.fedtop.com/home.mp4'} autoPlay loop muted></video> */}
-      {videoPath && <video className='text-white object-cover h-full w-full' src={`file://${videoPath}`} autoPlay loop muted></video>}
+      {videoPath && <video className='h-full w-full object-cover text-white' src={`file://${videoPath}`} autoPlay loop muted></video>}
     </div>
   )
 }

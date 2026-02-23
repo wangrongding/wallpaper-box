@@ -1,7 +1,7 @@
-import { Tray, nativeImage, Menu, shell, BrowserWindow } from 'electron'
-import * as path from 'path'
-import os from 'os'
 import { trays } from './tray-list'
+import { Tray, nativeImage, Menu, shell, BrowserWindow } from 'electron'
+import os from 'os'
+import * as path from 'path'
 
 // 创建原生图像
 export function createNativeImage(path: string) {

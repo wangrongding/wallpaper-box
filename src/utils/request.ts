@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { message } from 'antd'
+import { toast } from 'sonner'
 
 // 创建axios实例
 const request = axios.create({
@@ -40,8 +40,7 @@ async function successCallback(res: any) {
 
 // 请求错误回调
 function errorCallback(error: any) {
-  // console.log('🌸🌸🌸🌸🌸🌸🌸🌸🌸🌸🌸🌸', error)
-  message.error(error)
+  toast.error(error?.message || '请求出错')
   return Promise.reject(error)
 }
 // response返回拦截器
