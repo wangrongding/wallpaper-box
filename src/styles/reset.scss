@@ -1,12 +1,49 @@
 :root {
-  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  line-height: 24px;
+  /* Typography */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
   font-weight: 400;
 
-  /* color: rgba(255, 255, 255, 0.87); */
-  color-scheme: light dark;
-  background-color: #242424;
+  /* Color Palette - Midnight Glass */
+  --bg-deep: #06080f;
+  --bg-base: #0c1021;
+  --bg-surface: #111631;
+  --bg-elevated: #181e3a;
+  --bg-glass: rgba(255, 255, 255, 0.04);
+  --bg-glass-hover: rgba(255, 255, 255, 0.08);
+  --bg-glass-active: rgba(255, 255, 255, 0.12);
+
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-accent: rgba(0, 173, 238, 0.3);
+
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.35);
+
+  --accent-primary: #00adee;
+  --accent-primary-hover: #33c1f5;
+  --accent-primary-glow: rgba(0, 173, 238, 0.15);
+  --accent-secondary: #22d3ee;
+  --accent-secondary-glow: rgba(34, 211, 238, 0.1);
+  --accent-danger: #ef4444;
+  --accent-success: #34d399;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px var(--accent-primary-glow);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  color-scheme: dark;
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,4 +56,5 @@ body {
   margin: 0;
   padding: 0;
   max-height: 100vh;
+  overflow: hidden;
 }

@@ -4,11 +4,9 @@ import Header from './Header'
 
 export default function Container() {
   return (
-    <div className='flex min-h-screen flex-col'>
+    <div className='flex min-h-screen flex-col bg-[var(--bg-deep)]'>
       <Header />
-      {/* 内容区 */}
       <Content />
-      {/* 底部 */}
       <Footer />
     </div>
   )

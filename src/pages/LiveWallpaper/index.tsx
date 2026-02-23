@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron'
-import { Upload } from 'lucide-react'
+import { Upload, Film } from 'lucide-react'
 
 const Store = require('electron-store')
 const store = new Store()
@@ -69,23 +69,39 @@ export default function LiveWallpaper() {
   }, [])
 
   return (
-    <div className='live-wallpaper-page grid content-center px-[100px]'>
-      <h1 className='mb-4 text-2xl font-bold'>视频壁纸</h1>
+    <div className='live-wallpaper-page animate-fade-in-up flex h-full flex-col items-center justify-center px-[80px]'>
+      <div className='mb-6 flex items-center gap-3'>
+        <div className='flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-cyan-500/20 text-purple-400'>
+          <Film className='h-5 w-5' />
+        </div>
+        <div>
+          <h1 className='font-display text-xl font-semibold text-[var(--text-primary)]'>视频壁纸</h1>
+          <p className='text-[13px] text-[var(--text-tertiary)]'>选择一个视频文件作为你的动态桌面壁纸</p>
+        </div>
+      </div>
       <div
         onClick={() => fileInputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 transition-colors ${
-          isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'
+        className={`glow-border flex w-full max-w-lg cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-16 transition-all duration-300 ${
+          isDragging
+            ? 'border-[var(--accent-primary)] bg-[var(--accent-primary-glow)] shadow-[var(--shadow-glow)]'
+            : 'hover:border-[var(--accent-primary)]/50 border-[var(--border-default)] bg-[var(--bg-glass)] hover:bg-[var(--bg-glass-hover)]'
         }`}
       >
-        <Upload className='mb-4 h-12 w-12 text-slate-400' />
-        <p className='text-base text-slate-600'>单击 或 拖动文件到此区域进行设置</p>
-        <p className='mt-2 text-sm text-slate-400'>{filePath || '暂未选择文件'}</p>
+        <div className='mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--bg-glass-active)]'>
+          <Upload className='h-6 w-6 text-[var(--text-secondary)]' />
+        </div>
+        <p className='text-[15px] font-medium text-[var(--text-secondary)]'>点击选择 或 拖拽视频到这里</p>
+        <p className='mt-2 text-[13px] text-[var(--text-tertiary)]'>{filePath ? filePath.split('/').pop() : '支持 MP4、MOV、WebM 等视频格式'}</p>
         <input ref={fileInputRef} type='file' accept='video/*' className='hidden' onChange={handleFileChange} />
       </div>
-      {filePath && <video className='mt-4 h-full w-full rounded-lg object-cover text-white' src={`file://${filePath}`} autoPlay loop muted></video>}
+      {filePath && (
+        <div className='mt-6 w-full max-w-lg overflow-hidden rounded-2xl border border-[var(--border-subtle)] shadow-lg'>
+          <video className='h-full w-full object-cover' src={`file://${filePath}`} autoPlay loop muted />
+        </div>
+      )}
     </div>
   )
 }

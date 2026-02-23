@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { ipcRenderer } from 'electron'
 import { debounce } from 'lodash'
-import { Download, X, Inbox, Search } from 'lucide-react'
+import { Download, X, Inbox, Search, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 const fs = require('fs')
@@ -25,10 +25,6 @@ export default function List() {
     sfw: '0',
     sketchy: '0',
     nsfw: '0',
-    /*
-    categories  100/101/111* /etc  (general/anime/people)     Turn categories on(1) or off(0)
-    purity      100* /110/111/etc  (sfw/sketchy/nsfw)         Turn purities on(1) or off(0)NSFW requires a valid API key
-    */
 
     page: 1,
     sorting: 'toplist',
@@ -196,25 +192,29 @@ export default function List() {
   }, [])
 
   return (
-    <div className='list-page'>
-      <p className='mb-4 box-border rounded bg-amber-200 pl-4 leading-8 text-black'>
-        💡 Tip: 如果加载慢，可以尝试挂梯子🪜 (不挂全局的话，Setting页也支持单独配置网络代理)
-      </p>
+    <div className='list-page animate-fade-in-up'>
+      {/* 提示信息 */}
+      <div className='mb-4 flex items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-4 py-2.5 text-[13px] text-sky-300/80'>
+        <span className='text-base'>💡</span>
+        <span>加载慢？可以挂梯子 🪜 或在设置页配置网络代理</span>
+      </div>
       {/* 筛选条件 */}
-      <div className='mb-[20px] flex items-center gap-4'>
-        {filterList.map((item, index) => {
-          return (
-            <Switch
-              key={index}
-              label={item}
-              onCheckedChange={(val) => {
-                onLimitChange(val, item)
-              }}
-            />
-          )
-        })}
+      <div className='mb-5 flex flex-wrap items-center gap-3'>
+        <div className='flex items-center gap-2 rounded-lg bg-[var(--bg-glass)] p-1.5'>
+          {filterList.map((item, index) => {
+            return (
+              <Switch
+                key={index}
+                label={item}
+                onCheckedChange={(val) => {
+                  onLimitChange(val, item)
+                }}
+              />
+            )
+          })}
+        </div>
         <Select defaultValue='toplist' onValueChange={onSortChange}>
-          <SelectTrigger className='w-[120px]'>
+          <SelectTrigger className='w-[130px]'>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -223,27 +223,22 @@ export default function List() {
             <SelectItem value='favorites'>favorites</SelectItem>
           </SelectContent>
         </Select>
-        <div className='relative w-[300px]'>
+        <div className='relative ml-auto w-[280px]'>
+          <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-tertiary)]' />
           <Input
-            placeholder='input search text'
+            placeholder='搜索壁纸...'
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSearch(searchKeyword)
             }}
-            className='pr-10'
+            className='pl-9'
           />
-          <button
-            onClick={() => onSearch(searchKeyword)}
-            className='absolute right-0 top-0 flex h-full items-center justify-center rounded-r-md bg-blue-600 px-3 text-white transition-colors hover:bg-blue-700'
-          >
-            <Search className='h-4 w-4' />
-          </button>
         </div>
       </div>
       {/* 壁纸列表 */}
       {wallpaperList.length ? (
-        <div className='grid grid-cols-7 gap-2' onScroll={onScroll}>
+        <div className='grid grid-cols-5 gap-3' onScroll={onScroll}>
           {wallpaperList.map((item: any, index: number) => {
             return (
               <CusImage
@@ -258,9 +253,10 @@ export default function List() {
           })}
         </div>
       ) : (
-        <div className='flex flex-col items-center justify-center py-20 text-slate-400'>
-          <Inbox className='mb-4 h-16 w-16' />
-          <p className='text-lg'>暂无数据</p>
+        <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
+          <Inbox className='mb-4 h-14 w-14 opacity-40' />
+          <p className='font-display text-base font-medium'>暂无数据</p>
+          <p className='mt-1 text-[13px] opacity-60'>调整筛选条件或搜索关键词</p>
         </div>
       )}
 
@@ -275,23 +271,27 @@ export default function List() {
         }}
       >
         <DialogPortal>
-          <DialogOverlay />
+          <DialogOverlay className='bg-black/80 backdrop-blur-sm' />
           <div className='fixed inset-0 z-50 flex items-center justify-center'>
-            <div className='relative max-h-[90vh] max-w-[90vw]'>
-              <img src={previewSrc} alt='preview' className='max-h-[85vh] max-w-[85vw] rounded-lg object-contain' />
+            <div className='relative max-h-[90vh] max-w-[90vw] animate-slide-up'>
+              <img src={previewSrc} alt='preview' className='max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl' />
               {/* Toolbar */}
-              <div className='absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full bg-black/50 px-6 py-3'>
-                <button onClick={() => onDownload(previewSrc)} className='text-white transition-colors hover:text-slate-300'>
-                  <Download className='h-5 w-5' />
+              <div className='absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 backdrop-blur-lg'>
+                <button
+                  onClick={() => onDownload(previewSrc)}
+                  className='flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-all hover:bg-white/10 hover:text-white'
+                >
+                  <Download className='h-4 w-4' />
                 </button>
+                <div className='h-4 w-px bg-white/20' />
                 <button
                   onClick={() => {
                     setPreviewSrc('')
                     setVisible(false)
                   }}
-                  className='text-white transition-colors hover:text-slate-300'
+                  className='flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-all hover:bg-white/10 hover:text-white'
                 >
-                  <X className='h-5 w-5' />
+                  <X className='h-4 w-4' />
                 </button>
               </div>
             </div>
@@ -300,10 +300,10 @@ export default function List() {
       </Dialog>
 
       {loading && (
-        <div className='fixed inset-0 z-50 grid h-full w-full place-content-center bg-white/40'>
-          <div className='flex flex-col items-center gap-3'>
-            <div className='h-10 w-10 animate-spin rounded-full border-4 border-slate-300 border-t-blue-600'></div>
-            <span className='text-sm text-slate-500'>Loading...</span>
+        <div className='bg-[var(--bg-deep)]/60 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm'>
+          <div className='flex flex-col items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-8 py-6 shadow-2xl'>
+            <Loader2 className='h-8 w-8 animate-spin text-[var(--accent-primary)]' />
+            <span className='text-sm text-[var(--text-secondary)]'>加载中...</span>
           </div>
         </div>
       )}

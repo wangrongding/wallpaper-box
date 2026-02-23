@@ -18,7 +18,18 @@ const Page401 = lazy(() => import('@/pages/ErrorPage/Page401'))
 
 // 路由懒加载的loading
 const withSuspense = (Component: JSX.Element) => (
-  <Suspense fallback={<div className='text-center text-2xl font-bold'>loading...</div>}>{Component}</Suspense>
+  <Suspense
+    fallback={
+      <div className='flex h-full items-center justify-center'>
+        <div className='flex flex-col items-center gap-3'>
+          <div className='h-7 w-7 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-[var(--accent-primary)]' />
+          <span className='text-[13px] text-[var(--text-tertiary)]'>加载中...</span>
+        </div>
+      </div>
+    }
+  >
+    {Component}
+  </Suspense>
 )
 
 // 菜单路由

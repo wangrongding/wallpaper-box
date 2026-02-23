@@ -5,21 +5,23 @@ import { Loader2 } from 'lucide-react'
 import * as React from 'react'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-lg text-[13px] font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] disabled:pointer-events-none disabled:opacity-40',
   {
     variants: {
       variant: {
-        default: 'bg-blue-600 text-white shadow hover:bg-blue-700',
-        destructive: 'bg-red-600 text-white shadow-sm hover:bg-red-700',
-        outline: 'border border-slate-300 bg-transparent shadow-sm hover:bg-slate-100',
-        secondary: 'bg-slate-200 text-slate-900 shadow-sm hover:bg-slate-300',
-        ghost: 'hover:bg-slate-100',
-        link: 'text-blue-600 underline-offset-4 hover:underline',
+        default:
+          'bg-gradient-to-r from-[var(--accent-primary)] to-sky-400 text-white font-semibold shadow-sm hover:shadow-[var(--shadow-glow)] hover:brightness-110',
+        destructive: 'bg-red-500/80 text-white shadow-sm hover:bg-red-500',
+        outline:
+          'border border-[var(--border-default)] bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)] hover:border-[var(--border-accent)]',
+        secondary: 'bg-[var(--bg-glass-active)] text-[var(--text-primary)] hover:bg-[var(--bg-glass-hover)]',
+        ghost: 'text-[var(--text-secondary)] hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)]',
+        link: 'text-[var(--accent-primary)] underline-offset-4 hover:underline',
       },
       size: {
         default: 'h-9 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-10 rounded-md px-8',
+        sm: 'h-8 rounded-lg px-3 text-[12px]',
+        lg: 'h-10 rounded-lg px-8',
         icon: 'h-9 w-9',
       },
     },

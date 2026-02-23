@@ -7,13 +7,15 @@ export default function Footer() {
   }
 
   return (
-    <footer className='h-[34px] bg-[#001529] text-center text-sm leading-[34px] text-slate-400'>
-      Created by 荣顶，follow me on{' '}
+    <footer className='flex h-[28px] items-center justify-center gap-1 text-[11px] text-[var(--text-tertiary)]'>
+      <span>Built by 荣顶</span>
+      <span className='mx-1 opacity-30'>·</span>
       <a
-        className='inline-flex cursor-pointer items-center justify-center gap-1 text-red-400 transition-colors hover:text-red-300'
+        className='inline-flex cursor-pointer items-center gap-1 text-[var(--text-tertiary)] transition-colors hover:text-[var(--accent-primary)]'
         onClick={() => openLinkInBrowser('https://github.com/wangrongding')}
       >
-        Github 🌸 <Github className='h-4 w-4' />
+        <Github className='h-3 w-3' />
+        <span>GitHub</span>
       </a>
     </footer>
   )

@@ -10,7 +10,7 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, 
   <label className='inline-flex cursor-pointer items-center gap-2'>
     <SwitchPrimitives.Root
       className={cn(
-        'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-slate-300',
+        'focus-visible:ring-[var(--accent-primary)]/50 data-[state=checked]:border-[var(--accent-primary)]/30 peer inline-flex h-[20px] w-[36px] shrink-0 cursor-pointer items-center rounded-full border border-[var(--border-default)] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-40 data-[state=checked]:bg-[var(--accent-primary)] data-[state=unchecked]:bg-[var(--bg-glass-active)]',
         className,
       )}
       {...props}
@@ -18,11 +18,11 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, 
     >
       <SwitchPrimitives.Thumb
         className={cn(
-          'pointer-events-none block h-4 w-4 rounded-full bg-white shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0',
+          'pointer-events-none block h-[16px] w-[16px] rounded-full shadow-sm ring-0 transition-all duration-200 data-[state=checked]:translate-x-[16px] data-[state=unchecked]:translate-x-[1px] data-[state=checked]:bg-[var(--bg-deep)] data-[state=unchecked]:bg-[var(--text-tertiary)]',
         )}
       />
     </SwitchPrimitives.Root>
-    {label && <span className='select-none text-sm'>{label}</span>}
+    {label && <span className='select-none text-[13px] text-[var(--text-secondary)]'>{label}</span>}
   </label>
 ))
 Switch.displayName = 'Switch'
