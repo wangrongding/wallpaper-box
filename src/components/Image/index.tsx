@@ -15,14 +15,13 @@ interface Props {
 
 export function Image({ src, previewSrc, index, style, onPreview, onSet, onDelete, ...props }: Props) {
   return (
-    <div className='group relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)] transition-all duration-300 hover:border-[var(--border-accent)] hover:shadow-[var(--shadow-glow)]'>
+    <div style={style} className='group relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)] transition-all duration-300 hover:border-[var(--border-accent)] hover:shadow-[var(--shadow-glow)]'>
       <img
         src={src}
         alt=''
-        style={style}
         loading='lazy'
         decoding='async'
-        className='w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]'
+        className='block w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]'
         {...props}
       />
       <div className='absolute inset-0 flex items-center justify-center gap-2.5 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 transition-all duration-300 group-hover:opacity-100'>
