@@ -20,11 +20,11 @@ export default function Header() {
   }
 
   return (
-    <header className='sticky top-0 z-10 h-[50px] w-full bg-[#001529] px-5'>
-      <div className='main-header flex h-[50px] items-center justify-between' onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}>
+    <header className='bg-[var(--bg-base)]/80 sticky top-0 z-10 h-[48px] w-full border-b border-[var(--border-subtle)] backdrop-blur-xl'>
+      <div className='main-header flex h-[48px] items-center justify-between px-4' onDoubleClick={isMaximized ? unMaximizeWindow : maximizeWindow}>
         {/* LOGO */}
-        <div className='no-drag h-[40px] text-[28px] font-bold leading-[40px] text-white'>
-          <img src={Logo} className='logo h-[40px]' alt='logo' />
+        <div className='no-drag flex h-[36px] items-center gap-2'>
+          <img src={Logo} className='logo h-full w-[140px]' alt='logo' />
         </div>
         {/* 菜单栏 */}
         <MenuBar />

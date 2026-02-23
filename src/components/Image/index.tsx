@@ -15,39 +15,39 @@ interface Props {
 
 export function Image({ src, previewSrc, index, style, onPreview, onSet, onDelete, ...props }: Props) {
   return (
-    <div className='group relative overflow-hidden rounded-lg'>
+    <div className='group relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)] transition-all duration-300 hover:border-[var(--border-accent)] hover:shadow-[var(--shadow-glow)]'>
       <img
         src={src}
         alt=''
         style={style}
         loading='lazy'
         decoding='async'
-        className='w-full transition-transform duration-300 group-hover:scale-105'
+        className='w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]'
         {...props}
       />
-      <div className='absolute inset-0 flex items-center justify-center gap-3 bg-black/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100'>
+      <div className='absolute inset-0 flex items-center justify-center gap-2.5 bg-gradient-to-t from-black/70 via-black/40 to-transparent opacity-0 transition-all duration-300 group-hover:opacity-100'>
         {onPreview && (
           <button
             onClick={() => previewSrc && onPreview(previewSrc)}
-            className='grid place-content-center rounded-lg bg-cyan-500 p-2.5 text-white shadow-md transition-transform hover:scale-110 hover:bg-cyan-400'
+            className='flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-white/20'
           >
-            <Eye className='h-5 w-5' />
+            <Eye className='h-4 w-4' />
           </button>
         )}
         {onSet && (
           <button
             onClick={() => onSet()}
-            className='grid place-content-center rounded-lg bg-teal-500 p-2.5 text-white shadow-md transition-transform hover:scale-110 hover:bg-teal-400'
+            className='border-[var(--accent-primary)]/30 flex h-9 w-9 items-center justify-center rounded-full border bg-[var(--accent-primary)] text-[var(--bg-deep)] shadow-lg transition-all duration-200 hover:scale-110 hover:brightness-110'
           >
-            <CheckCircle className='h-5 w-5' />
+            <CheckCircle className='h-4 w-4' />
           </button>
         )}
         {onDelete && (
           <button
             onClick={() => onDelete()}
-            className='grid place-content-center rounded-lg bg-red-500 p-2.5 text-white shadow-md transition-transform hover:scale-110 hover:bg-red-400'
+            className='flex h-9 w-9 items-center justify-center rounded-full border border-red-500/20 bg-red-500/80 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-red-500'
           >
-            <Trash2 className='h-5 w-5' />
+            <Trash2 className='h-4 w-4' />
           </button>
         )}
       </div>

@@ -28,30 +28,35 @@ export default function WindowActions() {
   }
 
   return (
-    <>
-      {/* 右边操作栏 */}
-      <div className='no-drag flex cursor-pointer items-center justify-end gap-3 text-white'>
-        {/* 最小化 */}
-        <button className='rounded p-1 transition-colors hover:bg-white/20' onClick={minimizeWindow}>
-          <Minus className='h-5 w-5' />
-        </button>
+    <div className='no-drag flex items-center gap-1.5'>
+      <button
+        className='flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-all duration-200 hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)]'
+        onClick={minimizeWindow}
+      >
+        <Minus className='h-3.5 w-3.5' />
+      </button>
 
-        {isMaximized ? (
-          // 恢复
-          <button className='rounded p-1 transition-colors hover:bg-white/20' onClick={unMaximizeWindow}>
-            <Minimize2 className='h-5 w-5' />
-          </button>
-        ) : (
-          // 最大化
-          <button className='rounded p-1 transition-colors hover:bg-white/20' onClick={maximizeWindow}>
-            <Maximize2 className='h-5 w-5' />
-          </button>
-        )}
-        {/* 关闭按钮 */}
-        <button className='rounded p-1 transition-colors hover:bg-red-500' onClick={closeWindow}>
-          <X className='h-5 w-5' />
+      {isMaximized ? (
+        <button
+          className='flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-all duration-200 hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)]'
+          onClick={unMaximizeWindow}
+        >
+          <Minimize2 className='h-3.5 w-3.5' />
         </button>
-      </div>
-    </>
+      ) : (
+        <button
+          className='flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-all duration-200 hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)]'
+          onClick={maximizeWindow}
+        >
+          <Maximize2 className='h-3.5 w-3.5' />
+        </button>
+      )}
+      <button
+        className='flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-all duration-200 hover:bg-red-500/80 hover:text-white'
+        onClick={closeWindow}
+      >
+        <X className='h-3.5 w-3.5' />
+      </button>
+    </div>
   )
 }

@@ -28,3 +28,6 @@ dist-electron
 test.js
 release
 out/
+
+.agents
+skills-lock.json

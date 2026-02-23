@@ -1,6 +1,6 @@
 import { Image as CusImage } from '@/components/Image'
 import { ipcRenderer } from 'electron'
-import { Inbox } from 'lucide-react'
+import { FolderOpen, Inbox } from 'lucide-react'
 import { toast } from 'sonner'
 
 const fs = require('fs')
@@ -61,9 +61,18 @@ export default function List() {
   }, [])
 
   return (
-    <div className='list-page'>
+    <div className='list-page animate-fade-in-up'>
+      <div className='mb-5 flex items-center gap-3'>
+        <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400'>
+          <FolderOpen className='h-4 w-4' />
+        </div>
+        <div>
+          <h1 className='font-display text-lg font-semibold text-[var(--text-primary)]'>我的壁纸</h1>
+          <p className='text-[12px] text-[var(--text-tertiary)]'>已下载 {wallpaperList.length} 张壁纸</p>
+        </div>
+      </div>
       {wallpaperList.length > 0 ? (
-        <div className='' style={{ columnCount: 5, columnGap: '6px' }}>
+        <div className='columns-5 gap-3'>
           {wallpaperList.map((item: string, index: number) => {
             return (
               <CusImage
@@ -72,15 +81,16 @@ export default function List() {
                 index={index}
                 onSet={() => setAsBackground(item)}
                 onDelete={() => deleteWallpaper(item)}
-                style={{ breakInside: 'avoid-column', marginBottom: '6px' }}
+                style={{ breakInside: 'avoid-column', marginBottom: '12px' }}
               />
             )
           })}
         </div>
       ) : (
-        <div className='flex flex-col items-center justify-center py-20 text-slate-400'>
-          <Inbox className='mb-4 h-16 w-16' />
-          <p className='text-lg'>暂无数据</p>
+        <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
+          <Inbox className='mb-4 h-14 w-14 opacity-40' />
+          <p className='font-display text-base font-medium'>暂无壁纸</p>
+          <p className='mt-1 text-[13px] opacity-60'>去壁纸列表中下载喜欢的壁纸吧</p>
         </div>
       )}
     </div>
