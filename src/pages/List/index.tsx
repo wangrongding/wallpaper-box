@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { ipcRenderer } from 'electron'
 import { debounce } from 'lodash'
-import { Download, X, Inbox, Search, Loader2 } from 'lucide-react'
+import { Download, X, Inbox, Search, Loader2, Monitor, ZoomIn, ZoomOut } from 'lucide-react'
 import { toast } from 'sonner'
 
 const fs = require('fs')
@@ -17,6 +17,7 @@ export default function List() {
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
   const [visible, setVisible] = useState(false)
   const [previewSrc, setPreviewSrc] = useState('')
+  const [previewScale, setPreviewScale] = useState(1)
   const [searchKeyword, setSearchKeyword] = useState('')
   const [query, setQuery] = useState({
     general: '0',
@@ -146,7 +147,14 @@ export default function List() {
 
   const handlePreview = (url: string) => {
     setPreviewSrc(url)
+    setPreviewScale(1)
     setVisible(true)
+  }
+
+  const closePreview = () => {
+    setPreviewSrc('')
+    setPreviewScale(1)
+    setVisible(false)
   }
 
   const onDownload = (src: string) => {
@@ -190,6 +198,17 @@ export default function List() {
       main?.removeEventListener('scroll', onScroll)
     }
   }, [])
+
+  // ESC 关闭预览
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && visible) {
+        closePreview()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [visible])
 
   return (
     <div className='list-page animate-fade-in-up'>
@@ -265,31 +284,72 @@ export default function List() {
         open={visible}
         onOpenChange={(open) => {
           if (!open) {
-            setPreviewSrc('')
-            setVisible(false)
+            closePreview()
           }
         }}
       >
         <DialogPortal>
           <DialogOverlay className='bg-black/80 backdrop-blur-sm' />
-          <div className='fixed inset-0 z-50 flex items-center justify-center'>
+          <div
+            className='fixed inset-0 z-50 flex items-center justify-center'
+            onWheel={(e) => {
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault()
+                setPreviewScale((s) => Math.min(Math.max(0.2, s - e.deltaY * 0.005), 5))
+              }
+            }}
+          >
             <div className='relative max-h-[90vh] max-w-[90vw] animate-slide-up'>
-              <img src={previewSrc} alt='preview' className='max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl' />
+              <img
+                src={previewSrc}
+                alt='preview'
+                className='max-h-[85vh] max-w-[85vw] rounded-xl object-contain shadow-2xl transition-transform duration-150 ease-out'
+                style={{ transform: `scale(${previewScale})` }}
+                draggable={false}
+              />
               {/* Toolbar */}
-              <div className='absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/60 px-5 py-2.5 backdrop-blur-lg'>
+              <div className='absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/10 bg-black/70 px-4 py-2 shadow-2xl backdrop-blur-xl'>
+                <button
+                  onClick={() => {
+                    const item = wallpaperList.find((w) => w.path === previewSrc)
+                    if (item) {
+                      closePreview()
+                      setAsBackground(item)
+                    }
+                  }}
+                  className='flex h-8 w-8 items-center justify-center rounded-full text-emerald-400/90 transition-all hover:bg-emerald-500/15 hover:text-emerald-300'
+                  title='设置壁纸'
+                >
+                  <Monitor className='h-4 w-4' />
+                </button>
+                <div className='h-4 w-px bg-white/15' />
                 <button
                   onClick={() => onDownload(previewSrc)}
-                  className='flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-all hover:bg-white/10 hover:text-white'
+                  className='flex h-8 w-8 items-center justify-center rounded-full text-sky-400/90 transition-all hover:bg-sky-500/15 hover:text-sky-300'
+                  title='下载'
                 >
                   <Download className='h-4 w-4' />
                 </button>
-                <div className='h-4 w-px bg-white/20' />
+                <div className='h-4 w-px bg-white/15' />
                 <button
-                  onClick={() => {
-                    setPreviewSrc('')
-                    setVisible(false)
-                  }}
+                  onClick={() => setPreviewScale((s) => Math.min(s + 0.25, 5))}
                   className='flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-all hover:bg-white/10 hover:text-white'
+                  title='放大'
+                >
+                  <ZoomIn className='h-4 w-4' />
+                </button>
+                <button
+                  onClick={() => setPreviewScale((s) => Math.max(s - 0.25, 0.2))}
+                  className='flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition-all hover:bg-white/10 hover:text-white'
+                  title='缩小'
+                >
+                  <ZoomOut className='h-4 w-4' />
+                </button>
+                <div className='h-4 w-px bg-white/15' />
+                <button
+                  onClick={closePreview}
+                  className='flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition-all hover:bg-red-500/15 hover:text-red-400'
+                  title='关闭 (Esc)'
                 >
                   <X className='h-4 w-4' />
                 </button>
