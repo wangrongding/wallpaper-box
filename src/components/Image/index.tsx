@@ -1,4 +1,4 @@
-import { CheckCircle, Eye, Trash2 } from 'lucide-react'
+import { Monitor, Eye, Trash2 } from 'lucide-react'
 
 interface Props {
   src: string
@@ -28,7 +28,7 @@ export function Image({ src, previewSrc, index, style, onPreview, onSet, onDelet
         {onPreview && (
           <button
             onClick={() => previewSrc && onPreview(previewSrc)}
-            className='flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-white/20'
+            className='flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/90 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-white/20 hover:text-white'
           >
             <Eye className='h-4 w-4' />
           </button>
@@ -36,15 +36,15 @@ export function Image({ src, previewSrc, index, style, onPreview, onSet, onDelet
         {onSet && (
           <button
             onClick={() => onSet()}
-            className='border-[var(--accent-primary)]/30 flex h-9 w-9 items-center justify-center rounded-full border bg-[var(--accent-primary)] text-[var(--bg-deep)] shadow-lg transition-all duration-200 hover:scale-110 hover:brightness-110'
+            className='flex h-9 w-9 items-center justify-center rounded-full border border-emerald-400/30 bg-emerald-500/80 text-white shadow-lg shadow-emerald-500/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-emerald-500 hover:shadow-emerald-500/30'
           >
-            <CheckCircle className='h-4 w-4' />
+            <Monitor className='h-4 w-4' />
           </button>
         )}
         {onDelete && (
           <button
             onClick={() => onDelete()}
-            className='flex h-9 w-9 items-center justify-center rounded-full border border-red-500/20 bg-red-500/80 text-white backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-red-500'
+            className='flex h-9 w-9 items-center justify-center rounded-full border border-red-400/20 bg-red-500/80 text-white shadow-lg shadow-red-500/20 backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:bg-red-500 hover:shadow-red-500/30'
           >
             <Trash2 className='h-4 w-4' />
           </button>
