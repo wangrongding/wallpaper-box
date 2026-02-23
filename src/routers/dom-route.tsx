@@ -1,6 +1,5 @@
 // 组件形式的写法
 import App from '../App'
-
 import Dashboard from '@/pages/Dashboard'
 import List from '@/pages/List'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'

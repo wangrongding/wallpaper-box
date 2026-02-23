@@ -1,17 +1,16 @@
-import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut } from 'electron'
-import { setTrayIcon } from './tray'
-import { initMenu } from './menu'
-import { initKeyboard } from './keyboard'
-import { initDock } from './dock'
-import { setProxy, removeProxy } from './proxy'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
 import { createWebLiveWallpaper, closeWebLiveWallpaper } from './create-web-live-wallpaper'
-import path from 'path'
+import { initDock } from './dock'
+import { initKeyboard } from './keyboard'
+import { initMenu } from './menu'
+import { setProxy, removeProxy } from './proxy'
+import { setTrayIcon } from './tray'
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
+import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut } from 'electron'
 import Store from 'electron-store'
 import fs from 'fs/promises'
 import os from 'os'
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
-
+import path from 'path'
 
 const ffmpeg = createFFmpeg({
   log: false,
@@ -22,7 +21,7 @@ let ffmpegLoaded = false
 
 async function loadFFmpegOnce() {
   if (!ffmpegLoaded) {
-    await ffmpeg.load()  // 它会自动用内置的 ffmpeg-core.js（已打包进 node_modules）
+    await ffmpeg.load() // 它会自动用内置的 ffmpeg-core.js（已打包进 node_modules）
     ffmpegLoaded = true
   }
 }
@@ -40,7 +39,7 @@ async function getVideoFrame(videoPath: string): Promise<string> {
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wallpaper-'))
   const framePath = path.join(tempDir, outputName)
 
-  await fs.writeFile(framePath, data)  // 0.11 版本直接就是 Buffer，完美兼容
+  await fs.writeFile(framePath, data) // 0.11 版本直接就是 Buffer，完美兼容
 
   // 清理内存
   try {
@@ -136,7 +135,7 @@ const createWindow = () => {
 
 async function setWallPaper(picturePath: string) {
   const wallpaper = await import('wallpaper')
-  await wallpaper.setWallpaper(picturePath, { scale: 'auto',screen: 'all' })
+  await wallpaper.setWallpaper(picturePath, { scale: 'auto', screen: 'all' })
   // await wallpaper.setSolidColorWallpaper('000000')
 }
 

@@ -1,6 +1,6 @@
 import { routes } from './index'
 import { useRoutes, useLocation, useNavigate } from 'react-router-dom'
-import { message } from 'antd'
+import { toast } from 'sonner'
 
 // 去往登录页的组件
 function ToLogin() {
@@ -9,7 +9,7 @@ function ToLogin() {
   useEffect(() => {
     // 加载完组件之后执行这里的代码
     navigateTo('/login')
-    message.warning('您还没有登录，请登录后再访问！')
+    toast.warning('您还没有登录，请登录后再访问！')
   }, [])
   return <div></div>
 }
@@ -20,7 +20,7 @@ function ToPage1() {
   useEffect(() => {
     // 加载完组件之后执行这里的代码
     navigateTo('/page1')
-    message.warning('您已经登录过了！')
+    toast.warning('您已经登录过了！')
   }, [])
   return <div></div>
 }

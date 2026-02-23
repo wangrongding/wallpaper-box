@@ -1,6 +1,6 @@
 import { app } from 'electron'
-import path from 'path'
 import fs from 'fs-extra'
+import path from 'path'
 
 // 应用配置和持久化
 export const appConfig = () => {

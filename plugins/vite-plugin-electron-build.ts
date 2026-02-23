@@ -1,6 +1,6 @@
 //plugins\buildPlugin.ts
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 
 class BuildObj {
   //编译主进程代码

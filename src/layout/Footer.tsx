@@ -1,7 +1,5 @@
 import { ipcRenderer } from 'electron'
-import { GithubFilled } from '@ant-design/icons'
-import { Layout } from 'antd'
-const { Header, Footer: FooterLayout, Content } = Layout
+import { Github } from 'lucide-react'
 
 export default function Footer() {
   function openLinkInBrowser(url: string) {
@@ -9,13 +7,14 @@ export default function Footer() {
   }
 
   return (
-    <>
-      <FooterLayout className='text-center h-[34px] leading-[34px] p-[0px]' style={{ padding: 0, margin: 0 }}>
-        Created by 荣顶，follow me on{' '}
-        <a className='text-red-400 inline-flex justify-center items-center' onClick={() => openLinkInBrowser('https://github.com/wangrongding')}>
-          Github 🌸 <GithubFilled />
-        </a>
-      </FooterLayout>
-    </>
+    <footer className='h-[34px] bg-[#001529] text-center text-sm leading-[34px] text-slate-400'>
+      Created by 荣顶，follow me on{' '}
+      <a
+        className='inline-flex cursor-pointer items-center justify-center gap-1 text-red-400 transition-colors hover:text-red-300'
+        onClick={() => openLinkInBrowser('https://github.com/wangrongding')}
+      >
+        Github 🌸 <Github className='h-4 w-4' />
+      </a>
+    </footer>
   )
 }

@@ -1,13 +1,15 @@
-import { useState } from 'react'
-import { Input, message } from 'antd'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ipcRenderer } from 'electron'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 const WebWallpaper = () => {
   const [url, setUrl] = useState('')
 
   const handleSetWallpaper = () => {
     if (!url) {
-      message.warning('请输入网址或文件路径')
+      toast.warning('请输入网址或文件路径')
       return
     }
     let targetUrl = url.trim()
@@ -22,58 +24,53 @@ const WebWallpaper = () => {
 
       if (isWinPath || isUnixPath) {
         targetUrl = `file://${targetUrl}`
-      } else if (
-        /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}/.test(targetUrl) ||
-        targetUrl.startsWith('localhost')
-      ) {
-        // 如果看起来像域名 (例如 google.com, localhost)，默认添加 http://
+      } else if (/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}/.test(targetUrl) || targetUrl.startsWith('localhost')) {
         targetUrl = `http://${targetUrl}`
       } else {
-        // 其他情况，默认尝试作为 file 协议处理
         targetUrl = `file://${targetUrl}`
       }
     }
-    
+
     ipcRenderer.send('create-web-live-wallpaper', targetUrl)
-    message.success('网页壁纸设置成功')
+    toast.success('网页壁纸设置成功')
   }
 
   const handleCloseWallpaper = () => {
     ipcRenderer.send('close-web-live-wallpaper')
-    message.success('网页壁纸已关闭')
+    toast.success('网页壁纸已关闭')
   }
 
   return (
-    <div className='flex h-full flex-col items-center justify-center p-10 text-white'>
+    <div className='flex h-full flex-col items-center justify-center p-10'>
       <h1 className='mb-8 text-3xl font-bold'>网页壁纸</h1>
-      <div className='mb-4 w-full max-w-md'>
+      <div className='text-gray-400'>
+        <p>提示：</p>
+        <ul className='list-disc pl-5'>
+          <li>1.支持在线网址，如：https://threejs.org/examples/#webgl_animation_keyframes</li>
+          <li>
+            2.支持本地 HTML 文件 (需要输入完整路径) ,如：
+            <br />
+            Windows: D:\path\to\your\file.html <br />
+            MacOS或Linux: /path/to/your/file.html
+          </li>
+        </ul>
+      </div>
+
+      <div className='mb-4 mt-8 w-full max-w-2xl'>
         <Input
           placeholder='请输入网址 (http://...) 或本地 HTML 文件路径'
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          size='large'
+          className='h-10 text-base text-black'
         />
       </div>
       <div className='flex gap-4'>
-        <button
-          className='rounded-lg bg-blue-600 px-8 py-2 text-lg font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800'
-          onClick={handleSetWallpaper}
-        >
+        <Button onClick={handleSetWallpaper} className='px-8 py-2 text-lg'>
           设置壁纸
-        </button>
-        <button
-          className='rounded-lg bg-red-600 px-8 py-2 text-lg font-medium text-white transition-colors hover:bg-red-700 active:bg-red-800'
-          onClick={handleCloseWallpaper}
-        >
+        </Button>
+        <Button variant='destructive' onClick={handleCloseWallpaper} className='px-8 py-2 text-lg'>
           关闭壁纸
-        </button>
-      </div>
-      <div className='mt-8 text-gray-400'>
-        <p>提示：</p>
-        <ul className='list-disc pl-5'>
-          <li>支持在线网址，如：https://threejs.org/examples/#webgl_animation_keyframes</li>
-          <li>支持本地 HTML 文件，请输入完整路径,如：C:\path\to\your\file.html 或 /path/to/your/file.html</li>
-        </ul>
+        </Button>
       </div>
     </div>
   )

@@ -36,7 +36,7 @@ export function createWebLiveWallpaper(url: string) {
         roundedCorners: false,
       }),
     )
-    
+
     try {
       await webWallWindow[index].loadURL(url)
       webWallWindow[index].show()

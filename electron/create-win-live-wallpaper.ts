@@ -1,7 +1,7 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron'
+import os from 'os'
 // import { WinWin, ffi, CPP, L, NULL } from 'win-win-api'
 import { WinWin, ffi, CPP, L, NULL, Win32ffi } from 'win32-ffi'
-import os from 'os'
 
 let wallWindow: BrowserWindow[] = []
 // 创建窗口

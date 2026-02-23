@@ -2,3 +2,6 @@
 **/*.svg
 **/*.ejs
 **/*.html
+
+auto-imports.d.ts
+.eslintrc-auto-import.json

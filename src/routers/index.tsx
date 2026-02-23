@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react'
-import { PictureFilled, SettingOutlined, VideoCameraOutlined, FolderOpenFilled, GlobalOutlined } from '@ant-design/icons'
 import Container from '@/layout'
+import { Image, Settings, Video, FolderOpen, Globe } from 'lucide-react'
+import { lazy, Suspense } from 'react'
 import { Navigate } from 'react-router-dom'
+
 // import Dashboard from '@/pages/Dashboard'
 
 // 路由懒加载
@@ -17,7 +18,7 @@ const Page401 = lazy(() => import('@/pages/ErrorPage/Page401'))
 
 // 路由懒加载的loading
 const withSuspense = (Component: JSX.Element) => (
-  <Suspense fallback={<div className='text-2xl font-bold text-center'>loading...</div>}>{Component}</Suspense>
+  <Suspense fallback={<div className='text-center text-2xl font-bold'>loading...</div>}>{Component}</Suspense>
 )
 
 // 菜单路由
@@ -25,31 +26,31 @@ export const menuRoutes = [
   {
     path: '/list',
     title: '壁纸列表',
-    icon: <PictureFilled />,
+    icon: <Image className='h-4 w-4' />,
     element: withSuspense(<List />),
   },
   {
     path: '/video-wallpaper',
     title: '视频壁纸',
-    icon: <VideoCameraOutlined />,
+    icon: <Video className='h-4 w-4' />,
     element: withSuspense(<LiveWallpaper />),
   },
   {
     path: '/web-wallpaper',
     title: '网页壁纸',
-    icon: <GlobalOutlined />,
+    icon: <Globe className='h-4 w-4' />,
     element: withSuspense(<WebWallpaper />),
   },
   {
     path: '/my-list',
     title: '我的壁纸',
-    icon: <FolderOpenFilled />,
+    icon: <FolderOpen className='h-4 w-4' />,
     element: withSuspense(<ListLocal />),
   },
   {
     path: '/setting',
     title: '设置',
-    icon: <SettingOutlined />,
+    icon: <Settings className='h-4 w-4' />,
     element: withSuspense(<Setting />),
   },
   // {

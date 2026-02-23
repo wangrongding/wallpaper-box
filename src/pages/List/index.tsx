@@ -1,29 +1,23 @@
 import { Image as CusImage } from '@/components/Image'
-import { DownloadOutlined, CloseOutlined } from '@ant-design/icons'
-import { Select, Empty, Switch, Spin, message, Image as AntImage, Input, Space } from 'antd'
+import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { ipcRenderer } from 'electron'
 import { debounce } from 'lodash'
+import { Download, X, Inbox, Search } from 'lucide-react'
+import { toast } from 'sonner'
 
-// import path from 'path'
-// import os from 'os'
-// import fs from 'fs'
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
 
-const { Search } = Input
-
-// TODO 不生效
-message.config({
-  top: 100,
-  duration: 3,
-})
 export default function List() {
-  const [messageApi, contextHolder] = message.useMessage()
   const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
   const [visible, setVisible] = useState(false)
   const [previewSrc, setPreviewSrc] = useState('')
+  const [searchKeyword, setSearchKeyword] = useState('')
   const [query, setQuery] = useState({
     general: '0',
     anime: '0',
@@ -69,7 +63,7 @@ export default function List() {
         fs.writeFileSync(picturePath, Buffer.from(buffer))
         console.log('Image downloaded successfully!')
       } catch {
-        messageApi.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
+        toast.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
         setLoading(false)
       }
     }
@@ -79,7 +73,7 @@ export default function List() {
     ipcRenderer.send('close-live-wallpaper')
     // 通知主进程设置壁纸完成 (系统弹窗通知)
     // ipcRenderer.send('asynchronous-message', '设置成功！')
-    messageApi.success('设置成功！')
+    toast.success('设置成功！')
     setLoading(false)
   }
 
@@ -148,7 +142,7 @@ export default function List() {
           }),
       )
     } catch {
-      query.nsfw === '1' ? messageApi.error('该分区暂时被限制，可能访问人次过多，请晚点重试') : messageApi.error('请检查网络，刷新重试')
+      query.nsfw === '1' ? toast.error('该分区暂时被限制，可能访问人次过多，请晚点重试') : toast.error('请检查网络，刷新重试')
     } finally {
       setLoading(false)
     }
@@ -203,37 +197,49 @@ export default function List() {
 
   return (
     <div className='list-page'>
-      {contextHolder}
-      <p className='mb-4 box-border bg-amber-200 pl-4 leading-8 text-black'>
+      <p className='mb-4 box-border rounded bg-amber-200 pl-4 leading-8 text-black'>
         💡 Tip: 如果加载慢，可以尝试挂梯子🪜 (不挂全局的话，Setting页也支持单独配置网络代理)
       </p>
       {/* 筛选条件 */}
-      <div className='mb-[20px] flex gap-4'>
+      <div className='mb-[20px] flex items-center gap-4'>
         {filterList.map((item, index) => {
           return (
             <Switch
               key={index}
-              size='default'
-              checkedChildren={item}
-              unCheckedChildren={item}
-              onChange={(val) => {
+              label={item}
+              onCheckedChange={(val) => {
                 onLimitChange(val, item)
               }}
             />
           )
         })}
-        <Select
-          defaultValue='toplist'
-          size='small'
-          style={{ width: 120 }}
-          onChange={onSortChange}
-          options={[
-            { value: 'toplist', label: 'toplist' },
-            { value: 'views', label: 'views' },
-            { value: 'favorites', label: 'favorites' },
-          ]}
-        />
-        <Search placeholder='input search text' style={{ width: 300 }} onSearch={onSearch} enterButton='Search' size='small' />
+        <Select defaultValue='toplist' onValueChange={onSortChange}>
+          <SelectTrigger className='w-[120px]'>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='toplist'>toplist</SelectItem>
+            <SelectItem value='views'>views</SelectItem>
+            <SelectItem value='favorites'>favorites</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className='relative w-[300px]'>
+          <Input
+            placeholder='input search text'
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onSearch(searchKeyword)
+            }}
+            className='pr-10'
+          />
+          <button
+            onClick={() => onSearch(searchKeyword)}
+            className='absolute right-0 top-0 flex h-full items-center justify-center rounded-r-md bg-blue-600 px-3 text-white transition-colors hover:bg-blue-700'
+          >
+            <Search className='h-4 w-4' />
+          </button>
+        </div>
       </div>
       {/* 壁纸列表 */}
       {wallpaperList.length ? (
@@ -252,46 +258,53 @@ export default function List() {
           })}
         </div>
       ) : (
-        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <div className='flex flex-col items-center justify-center py-20 text-slate-400'>
+          <Inbox className='mb-4 h-16 w-16' />
+          <p className='text-lg'>暂无数据</p>
+        </div>
       )}
 
-      <AntImage
-        style={{ display: 'none !important' }}
-        preview={{
-          visible: visible,
-          scaleStep: 0.2,
-          src: previewSrc,
-          onVisibleChange: () => {
+      {/* Image Preview Dialog */}
+      <Dialog
+        open={visible}
+        onOpenChange={(open) => {
+          if (!open) {
             setPreviewSrc('')
             setVisible(false)
-          },
-          toolbarRender: (_, previewEl) => {
-            return (
-              <Space size={12} className='img-toolbar-wrapper'>
-                <DownloadOutlined
-                  onClick={() => {
-                    onDownload(previewSrc)
-                  }}
-                />
-                {..._.props.children.map((item: any) => {
-                  return <span>{item}</span>
-                })}
-                <CloseOutlined
+          }
+        }}
+      >
+        <DialogPortal>
+          <DialogOverlay />
+          <div className='fixed inset-0 z-50 flex items-center justify-center'>
+            <div className='relative max-h-[90vh] max-w-[90vw]'>
+              <img src={previewSrc} alt='preview' className='max-h-[85vh] max-w-[85vw] rounded-lg object-contain' />
+              {/* Toolbar */}
+              <div className='absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full bg-black/50 px-6 py-3'>
+                <button onClick={() => onDownload(previewSrc)} className='text-white transition-colors hover:text-slate-300'>
+                  <Download className='h-5 w-5' />
+                </button>
+                <button
                   onClick={() => {
                     setPreviewSrc('')
                     setVisible(false)
                   }}
-                />
-              </Space>
-            )
-          },
-        }}
-      />
+                  className='text-white transition-colors hover:text-slate-300'
+                >
+                  <X className='h-5 w-5' />
+                </button>
+              </div>
+            </div>
+          </div>
+        </DialogPortal>
+      </Dialog>
+
       {loading && (
-        <div className='fixed bottom-0 left-0 right-0 top-0 grid h-full w-full place-content-center bg-white bg-opacity-40'>
-          <Spin size='large'>
-            <span>Loading</span>
-          </Spin>
+        <div className='fixed inset-0 z-50 grid h-full w-full place-content-center bg-white/40'>
+          <div className='flex flex-col items-center gap-3'>
+            <div className='h-10 w-10 animate-spin rounded-full border-4 border-slate-300 border-t-blue-600'></div>
+            <span className='text-sm text-slate-500'>Loading...</span>
+          </div>
         </div>
       )}
     </div>
