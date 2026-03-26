@@ -41,7 +41,7 @@ export default function List() {
     const fileName = item.path.split('/').pop()
     const dir = path.join(os.homedir(), '/wallpaper-box')
     if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir)
+      fs.mkdirSync(dir, { recursive: true })
     }
     const picturePath = path.join(dir, fileName)
     // 判断文件是否存在
@@ -62,14 +62,19 @@ export default function List() {
       } catch {
         toast.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
         setLoading(false)
+        return
       }
     }
-    // 设置壁纸
-    ipcRenderer.send('set-wallpaper', picturePath)
-    // 通知主进程关闭动态壁纸
+
+    const result = await ipcRenderer.invoke('set-wallpaper', picturePath)
+
+    if (!result?.success) {
+      toast.error(result?.message || '设置壁纸失败')
+      setLoading(false)
+      return
+    }
+
     ipcRenderer.send('close-live-wallpaper')
-    // 通知主进程设置壁纸完成 (系统弹窗通知)
-    // ipcRenderer.send('asynchronous-message', '设置成功！')
     toast.success('设置成功！')
     setLoading(false)
   }

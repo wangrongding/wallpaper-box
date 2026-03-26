@@ -45,9 +45,13 @@ export default function List() {
 
   // 设置壁纸
   const setAsBackground = async (item: string) => {
-    // 设置壁纸
-    ipcRenderer.send('set-wallpaper', item)
-    // 通知主进程关闭动态壁纸
+    const result = await ipcRenderer.invoke('set-wallpaper', item)
+
+    if (!result?.success) {
+      toast.error(result?.message || '设置壁纸失败')
+      return
+    }
+
     ipcRenderer.send('close-live-wallpaper')
     toast.success('设置成功！')
   }

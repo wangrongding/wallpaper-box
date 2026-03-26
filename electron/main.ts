@@ -6,11 +6,15 @@ import { initMenu } from './menu'
 import { setProxy, removeProxy } from './proxy'
 import { setTrayIcon } from './tray'
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
+import { execFile as execFileCallback } from 'child_process'
 import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut } from 'electron'
 import Store from 'electron-store'
 import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
+import { promisify } from 'util'
+
+const execFile = promisify(execFileCallback)
 
 const ffmpeg = createFFmpeg({
   log: false,
@@ -134,9 +138,33 @@ const createWindow = () => {
 }
 
 async function setWallPaper(picturePath: string) {
+  if (!picturePath || typeof picturePath !== 'string') {
+    throw new Error('壁纸路径无效')
+  }
+
+  const resolvedPath = path.resolve(picturePath)
+  await fs.access(resolvedPath)
+
+  if (process.platform === 'darwin') {
+    const binaryPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'wallpaper', 'source', 'macos-wallpaper')
+      : path.join(app.getAppPath(), 'node_modules', 'wallpaper', 'source', 'macos-wallpaper')
+
+    await fs.access(binaryPath)
+    await execFile(binaryPath, ['set', resolvedPath, '--screen', 'all', '--scale', 'auto'])
+    return
+  }
+
   const wallpaper = await import('wallpaper')
-  await wallpaper.setWallpaper(picturePath, { scale: 'auto', screen: 'all' })
-  // await wallpaper.setSolidColorWallpaper('000000')
+  await wallpaper.setWallpaper(resolvedPath, { scale: 'auto', screen: 'all' })
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  return String(error)
 }
 
 // ===== 只替换你原来的 createLiveWallpaperWindow 函数，完整替换成下面这个 =====
@@ -256,8 +284,17 @@ ipcMain.on('set-auto-launch', (_, arg) => {
 })
 
 // 设置图片壁纸
-ipcMain.on('set-wallpaper', (_, arg) => {
-  setWallPaper(arg)
+ipcMain.handle('set-wallpaper', async (_, arg) => {
+  try {
+    await setWallPaper(arg)
+    return { success: true }
+  } catch (error) {
+    console.error('Failed to set wallpaper:', error)
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
 })
 
 // 在默认浏览器中打开 a 标签
