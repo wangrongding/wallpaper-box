@@ -5,12 +5,14 @@
   "version": "1.0.1",
   "main": "./dist-electron/main.js",
   "description": "让桌面真正活起来：静态壁纸、视频壁纸、网页壁纸和 RunCat 托盘动画，一个客户端全搞定。",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "scripts": {
+    "prepare": "node ./scripts/prepare-video-downloader-binaries.mjs",
     "dev": "concurrently --kill-others-on-fail \"yarn dev:web \" \"wait-on tcp:1234 && yarn dev:electron\"",
     "dev:web": "vite",
     "dev:electron": "cross-env IS_DEV=true node ./dev-electron.mjs",
     "dev:sort": "vite --mode sort",
+    "prepare:video-downloader": "node ./scripts/prepare-video-downloader-binaries.mjs --force",
     "preview": "vite preview",
     "build": "yarn build:mac:universal",
     "build:web": "tsc && vite build",
@@ -100,6 +102,13 @@
       {
         "from": "public",
         "to": "public",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "resources/bin",
+        "to": "bin",
         "filter": [
           "**/*"
         ]

@@ -31,3 +31,5 @@ out/
 
 .agents
 skills-lock.json
+
+resources/bin

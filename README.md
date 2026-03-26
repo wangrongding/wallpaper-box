@@ -13,6 +13,7 @@
 - [x] 下载壁纸到本地
 - [x] 设置静态壁纸
 - [x] 设置视频壁纸（在 MacOS 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
+- [x] 支持通过 `yt-dlp` 下载 YouTube / Bilibili 视频后直接设为视频壁纸
 - [x] 设置网页壁纸
 - [x] 支持通过提示词生成 AI 壁纸
 - [x] 支持在线 URL 和本地 HTML 文件作为网页壁纸
@@ -46,11 +47,20 @@
 
 ### 动态壁纸
 
-目前支持将本地视频文件设置为桌面动态壁纸。
+目前支持将本地视频文件设置为桌面动态壁纸，也支持通过 `yt-dlp` 下载在线视频后直接作为壁纸。
 
 - 支持点击选择或拖拽视频文件。
+- 支持粘贴 `YouTube / Bilibili` 链接下载视频。
 - 常见格式如 `MP4`、`MOV`、`WebM` 均可尝试。
 - macOS 下动态壁纸窗口的铺满效果仍有继续优化空间，欢迎 PR。
+
+说明：
+
+- 视频下载默认保存到 `~/wallpaper-box/videos`
+- 下载完成后会自动设为视频壁纸
+- 当前仓库默认按 macOS 打包，发布包里可以直接内置 `yt-dlp` 与 `Deno`，用户无需手动安装
+- 某些 `Bilibili / YouTube` 视频只提供分离音视频流，这类链接还需要把 `ffmpeg` 和 `ffprobe` 一起打进 `resources/bin/`
+- 如果你使用官方 `yt-dlp_macos` 二进制，视频下载功能的有效最低系统版本会更接近 `macOS 10.15+`
 
 <table>
   <tr>
@@ -145,6 +155,36 @@
 ```sh
 yarn install
 ```
+
+说明：
+
+- `yarn install` 期间会自动执行 `prepare`，把 `yt-dlp / Deno / ffmpeg / ffprobe` 下载到 `resources/bin/`
+- 如果这些资源已经存在，就会直接跳过，不会重复下载
+- 如果你想手动强制刷新这些二进制，可以执行 `yarn prepare:video-downloader`
+
+### 准备视频下载二进制
+
+如果你想手动强制刷新视频下载相关二进制，可以执行：
+
+```sh
+yarn prepare:video-downloader
+```
+
+这个脚本会把下面这些二进制下载到 `resources/bin/`：
+
+- `yt-dlp_macos`
+- `deno-aarch64-apple-darwin`
+- `deno-x86_64-apple-darwin`
+- `ffmpeg-darwin-arm64`
+- `ffprobe-darwin-arm64`
+- `ffmpeg-darwin-x64`
+- `ffprobe-darwin-x64`
+
+说明：
+
+- 打包时会通过 `electron-builder.extraResources` 一起带进 `.app`
+- `yt-dlp` 遇到分离音视频流时，会自动按当前机器架构选中对应的 `ffmpeg / ffprobe`
+- 开发环境也支持通过环境变量覆盖二进制路径：`WALLPAPER_BOX_YT_DLP_PATH`、`WALLPAPER_BOX_DENO_PATH`、`WALLPAPER_BOX_FFMPEG_PATH`、`WALLPAPER_BOX_FFPROBE_PATH`
 
 ### 本地开发
 
