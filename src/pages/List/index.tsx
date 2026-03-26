@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@/components
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { WALLHAVEN_API_KEY_STORE_KEY, buildWallhavenSearchUrl } from '@/lib/wallhaven'
 import { ipcRenderer } from 'electron'
 import { debounce } from 'lodash'
 import { Download, X, Inbox, Search, Loader2, Monitor, ZoomIn, ZoomOut } from 'lucide-react'
@@ -11,6 +12,8 @@ import { toast } from 'sonner'
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const Store = require('electron-store')
+const store = new Store()
 
 export default function List() {
   const [loading, setLoading] = useState(false)
@@ -125,16 +128,20 @@ export default function List() {
     const purity = query.sfw + query.sketchy + query.nsfw
 
     try {
-      const res = await fetch(
-        `https://wallhaven.cc/api/v1/search?apikey=cClHHdiiE4mLTht8yhzdky3beMhGX3rf&q=${query.keyword}&sorting=${query.sorting}&topRange=1y&page=${query.page}&categories=${categories}&purity=${purity}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-          mode: 'no-cors',
+      const res = await fetch(buildWallhavenSearchUrl({
+        apiKey: store.get(WALLHAVEN_API_KEY_STORE_KEY) || '',
+        categories,
+        keyword: query.keyword,
+        page: query.page,
+        purity,
+        sorting: query.sorting,
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
-      )
+        mode: 'no-cors',
+      })
       const list = await res.json()
       setWallpaperList((prev) => [...prev, ...list.data])
       setQuery(
@@ -177,7 +184,6 @@ export default function List() {
       })
   }
 
-  // TODO api key 需要做持久化配置
   // 没有 api key 时，每次请求只有 24 条数据，所以需要多次请求
   async function getWallpaperListWithNoApiKey(times: number = 3) {
     for (let i = 0; i < times - 1; i++) {

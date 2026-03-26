@@ -1,13 +1,9 @@
+import { buildWallhavenSearchUrl } from '@/lib/wallhaven'
 import request from '@/utils/request'
 
 // 获取wallhaven.cc的图片列表
-export function getWallHavenAssets(data?: object) {
-  return request.get(
-    // "https://wallhaven.cc/api/v1/search?apikey=SrJFwIqcWTCYMdRuSiF6LBzEqexFAuoB&sorting=favorites",
-    'https://wallhaven.cc/api/v1/search?apikey=5RTfusrTnRbHBHs2oWWggQERAzHO2XTO&sorting=toplist&topRange=1y',
-    // 'https://wallhaven.cc/api/v1/search?sorting=toplist',
-    { data },
-  )
+export function getWallHavenAssets(data?: object & { apiKey?: string }) {
+  return request.get(buildWallhavenSearchUrl({ apiKey: data?.apiKey }), { data })
 }
 
 // 获取 bing 壁纸列表
