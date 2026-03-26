@@ -7,6 +7,7 @@ import * as rollup from 'rollup'
 
 const httpAddress = 'http://localhost:1234'
 let electronProcess
+let isRestarting = false
 async function build() {
   try {
     const bundle = await rollup.rollup(rollupConfig)
@@ -15,6 +16,7 @@ async function build() {
     createElectronProcess()
   } catch (error) {
     console.error(error)
+    isRestarting = false
   }
 }
 
@@ -24,8 +26,8 @@ async function createElectronProcess() {
     cwd: process.cwd(),
     // stdio: 'inherit',
   })
-  electronProcess.on('close', closeElectronProcess)
-  electronProcess.on('error', closeElectronProcess)
+  electronProcess.on('close', handleElectronProcessClose)
+  electronProcess.on('error', handleElectronProcessError)
   electronProcess.stdout.on('data', (data) => {
     console.log(data.toString())
   })
@@ -34,22 +36,54 @@ async function createElectronProcess() {
   })
 }
 
-// 退出进程
-function closeElectronProcess(code) {
-  if (electronProcess && electronProcess.kill) {
-    console.log(`🤖 electron 进程退出，退出码 ${code}`)
-    process.kill(electronProcess.pid)
+function clearElectronProcess(referenceProcess) {
+  if (electronProcess === referenceProcess) {
     electronProcess = null
   }
-  // 退出进程
-  // process.exit()
+}
+
+function handleElectronProcessClose(code) {
+  const closedProcess = electronProcess
+  console.log(`🤖 electron 进程退出，退出码 ${code}`)
+  clearElectronProcess(closedProcess)
+  isRestarting = false
+}
+
+function handleElectronProcessError(error) {
+  const erroredProcess = electronProcess
+  console.error('🤖 electron 进程异常退出：', error)
+  clearElectronProcess(erroredProcess)
+  isRestarting = false
+}
+
+function stopElectronProcess() {
+  if (!electronProcess || electronProcess.killed) {
+    return
+  }
+
+  const processToStop = electronProcess
+  processToStop.removeListener('close', handleElectronProcessClose)
+  processToStop.removeListener('error', handleElectronProcessError)
+
+  try {
+    processToStop.kill()
+  } catch (error) {
+    console.warn('Failed to stop existing electron process:', error)
+  }
+
+  clearElectronProcess(processToStop)
 }
 
 // 文件变化时，重新构建
 function onFileChange() {
+  if (isRestarting) {
+    return
+  }
+
+  isRestarting = true
   console.log('🏃🏃🏃🏃🏃🏃🏃文件更改，正在重新构建...')
   // 退出上一个 electron 进程
-  closeElectronProcess()
+  stopElectronProcess()
   build()
 }
 
