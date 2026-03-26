@@ -1,5 +1,5 @@
 import Container from '@/layout'
-import { Image, Settings, Video, FolderOpen, Globe } from 'lucide-react'
+import { Image, Settings, Video, FolderOpen, Globe, Sparkles } from 'lucide-react'
 import { lazy, Suspense } from 'react'
 import { Navigate } from 'react-router-dom'
 
@@ -11,6 +11,7 @@ const List = lazy(() => import('@/pages/List'))
 const ListLocal = lazy(() => import('@/pages/ListLocal'))
 const LiveWallpaper = lazy(() => import('@/pages/LiveWallpaper'))
 const WebWallpaper = lazy(() => import('@/pages/WebWallpaper'))
+const AIWallpaper = lazy(() => import('@/pages/AIWallpaper'))
 const Setting = lazy(() => import('@/pages/Setting'))
 const WallPaperPage = lazy(() => import('@/pages/WallPaper'))
 const Page404 = lazy(() => import('@/pages/ErrorPage/Page404'))
@@ -45,6 +46,12 @@ export const menuRoutes = [
     title: '视频壁纸',
     icon: <Video className='h-4 w-4' />,
     element: withSuspense(<LiveWallpaper />),
+  },
+  {
+    path: '/ai-wallpaper',
+    title: 'AI 壁纸',
+    icon: <Sparkles className='h-4 w-4' />,
+    element: withSuspense(<AIWallpaper />),
   },
   {
     path: '/web-wallpaper',
