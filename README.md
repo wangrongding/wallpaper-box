@@ -54,6 +54,8 @@
 - 常见格式如 `MP4`、`MOV`、`WebM` 均可尝试。
 - macOS 下动态壁纸窗口的铺满效果仍有继续优化空间，欢迎 PR。
 
+<img width="1441" height="900" alt="image" src="https://github.com/user-attachments/assets/ad7e851d-6c14-4780-87d4-bf0c4d1651da" />
+
 说明：
 
 - 视频下载默认保存到 `~/wallpaper-box/videos`
