@@ -4,27 +4,37 @@
   </a>
 </p>
 
-🏞️ 一个桌面壁纸客户端，可以设置静态 / 动态壁纸，集成了 RunCat 的功能。(A desktop wallpaper client to set static / dynamic wallpapers, integrated with RunCat's features.)
+🏞️ `wallpaper-box` 是一个基于 Electron 的桌面壁纸客户端，支持静态壁纸、视频壁纸、网页壁纸，并集成了类似 RunCat 的动态托盘图标能力。
 
-支持的功能：
+## 功能
 
-- [x] 壁纸列表
-- [x] 下载壁纸
+- [x] 浏览和搜索在线壁纸
+- [x] 下载壁纸到本地
 - [x] 设置静态壁纸
-- [x] 设置动态壁纸（在 MacOs 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
+- [x] 设置视频壁纸（在 MacOs 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
+- [x] 设置网页壁纸
+- [x] 支持在线 URL 和本地 HTML 文件作为网页壁纸
 - [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
-- [x] 支持修改代理
-- [x] 网页 url 壁纸（指定一个线上网页成为桌面壁纸）
-- [x] 支持用户自定义网页壁纸（指定一个本地 html 文件成为桌面壁纸）
+- [x] 支持开机自启
+- [x] 支持 HTTP 代理配置
 - [ ] 支持大模型文生图，用户输入文字描述，创造壁纸
+
+## 平台说明
+
+- 当前仓库内置的打包脚本以 macOS 为主。
+- 默认构建产物是 `universal`，同时兼容 Apple Silicon 和 Intel Mac。
+- 也提供单独的 `x64` / `arm64` 构建命令。
+- 当前构建配置的最低 macOS 版本是 `10.13`。
+- 应用未做开发者签名，首次打开需要手动放行。
 
 ## 使用
 
 ### 壁纸列表
 
-壁纸来源于 wallhaven.cc ，最喜欢的一个壁纸网站。
+壁纸来源于 wallhaven.cc。
 
-可以直接设置成桌面壁纸，也可以下载到本地或者预览。
+- 支持搜索、筛选、预览、下载和直接设置。
+- 下载的静态壁纸默认保存在 `~/wallpaper-box`。
 
 <table>
   <tr>
@@ -35,7 +45,11 @@
 
 ### 动态壁纸
 
-目前支持视频作为动态壁纸，正在开发：自定义页面壁纸和自定义动效壁纸
+目前支持将本地视频文件设置为桌面动态壁纸。
+
+- 支持点击选择或拖拽视频文件。
+- 常见格式如 `MP4`、`MOV`、`WebM` 均可尝试。
+- macOS 下动态壁纸窗口的铺满效果仍有继续优化空间，欢迎 PR。
 
 <table>
   <tr>
@@ -52,21 +66,16 @@
 
 可以将任意网页设置为桌面壁纸，支持在线网址和本地 HTML 文件。
 
-- **在线网址**：支持 `http://` 或 `https://` 开头的网址。
+- **在线网址**：支持直接输入 URL。
   - 例如：`https://wangrongding.github.io/jellyfish/`
-  - 智能识别：输入 `google.com` 会自动识别为 `http://google.com`。
-- **本地文件**：支持本地 HTML 文件的绝对路径。
-  - Windows：例如 `C:\Users\wangrongding\Coding\jellyfish\index.html`
-  - macOS/Linux：例如 `/Users/wangrongding/Coding/jellyfish/index.html`
-  - 智能识别：输入路径时会自动添加 `file://` 协议头。
+  - 输入 `google.com`、`localhost:3000` 这类地址时会自动补全协议。
+- **本地文件**：支持选择或拖拽本地 `HTML/HTM/SVG` 文件。
+  - macOS/Linux 示例：`/Users/your-name/Coding/jellyfish/index.html`
+  - Windows 示例：`C:\Users\your-name\Coding\jellyfish\index.html`
 
 ### RunCat
 
-由于 RunCat 更换高级的猫猫要收费，所以就在这个软件中加一个类似的功能。
-
-通过图标的变换速度，来动态表示 cpu 的使用情况。
-
-可以在托盘菜单中切换动态图标。
+托盘图标会根据 CPU 使用情况动态切换速度，支持在托盘菜单里切换不同动画主题。
 
 <table>
   <tr>
@@ -75,79 +84,107 @@
   </tr>
 </table>
 
-可爱的超级马里奥~
-
-过几天弄下自定义动态图标。 直接选取本地准备好的帧动画相关的图片，然后就可以自定义动态图标了。（目前你可以使用这几款内置的图标，或者你也可以在 [icons 文件夹](./public/icons) 中添加你的图标，[修改 tray 配置文件](./electron/tray-list.ts) 即可）
+如果你想添加自定义图标，可以直接往 [public/icons](/Users/rongding/Coding/wallpaper-box/public/icons) 里补素材，并在 [electron/tray-list.ts](/Users/rongding/Coding/wallpaper-box/electron/tray-list.ts) 里注册。
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030045464.gif" width="600" />
 
-支持设置开机自启 ,支持设置网络代理
+### 设置
+
+- 支持开机自启
+- 支持 HTTP 代理
+- 代理测试会尝试访问 Google
+- 当前壁纸下载目录默认是 `~/wallpaper-box`
 
 <img width="600" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/91b0d5ac-eecc-4061-b630-3b0e2bef4744">
 
 ## 常见问题
 
-### 1.无法打开应用程序
+### 1. 无法打开应用程序
 
-因为作者不想花钱做数字签名 🥲，一年的费用好高(这个项目做着玩的，没有收益 👀)，所以你需要按照如下方式安装
+因为应用没有做 Apple 开发者签名，macOS 可能会拦截首次打开。可以按下面方式放行：
 
 打开终端：
 
 ```sh
-# 命令一
 sudo spctl  --master-disable
-# 命令二
-sudo xattr -r -d com.apple.quarantine <这里是一个空格> <打开 “访达”（Finder）进入 “应用程序” 目录，找到 wallpaper-box，拖进终端>
-
-# 然后回车
+sudo xattr -r -d com.apple.quarantine /Applications/wallpaper-box.app
 ```
 
-具体的步骤可以参考：[👉🏻 解决方案](https://zhuanlan.zhihu.com/p/135948430)
+如果你的应用不在 `/Applications`，请把命令里的路径替换成实际 `.app` 路径（打开 “访达”（Finder）进入 “应用程序” 目录，找到 wallpaper-box，拖进终端）。
 
-如果你对技术非常热爱，很希望和你成为朋友，可以和我们一起交流技术一起变强。
+### 2. 老款 Mac 打不开
 
-<table>
-  <tr>
-     <td><img src="https://assets.fedtop.com/picbed/202302090947704.png"/></td>
-     <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202305190931902.png"/></td>
-  </tr>
-</table>
+如果看到类似“这台 Mac 不支持此应用程序”的提示，请先确认两件事：
+
+- 你的系统版本是否低于 `macOS 10.13`
+- 你拿到的是不是错误架构的包
+
+建议优先使用默认的 `universal` 包；如果需要单独发包，可以分别构建 `x64` 和 `arm64` 版本。
 
 ## 开发
 
-### 安装依赖 Install dependencies
+### 安装依赖
 
 ```sh
-yarn i
+yarn install
 ```
 
-### 开发预览 Developer Preview
+### 本地开发
 
-直接运行下面的命令，即可启动客户端项目。
+直接运行下面的命令即可同时启动 Web 和 Electron：
 
 ```sh
 yarn dev
-
 ```
 
-如果你想要分别调试 web 和 electron 端，可以使用下面的命令：
+如果你想分开调试：
 
 ```sh
-# 只启动 web 服务
 yarn dev:web
-# 只调试 electron
 yarn dev:electron
-# or
-yarn electron:dev
 ```
 
-### 打包 Build
-
-构建后的产物在 out 文件夹中。
+如果你想基于本地构建结果启动 Electron：
 
 ```sh
-# 打包
-yarn make
+yarn build:web
+yarn build:electron
+yarn electron:start
+```
+
+### 打包
+
+构建产物默认输出到 `out/` 目录。
+
+- `universal`：一个包同时包含 `Intel(x64)` 和 `Apple Silicon(arm64)` 两种架构。
+- 如果你不确定对方的 Mac 是哪种芯片，优先发 `universal`。
+- `x64`：给 Intel Mac 用。
+- `arm64`：给 Apple Silicon 机器用，比如 `M1 / M2 / M3 / M4`。
+
+```sh
+# 默认打包推荐版本：
+# 一个包同时支持 Intel Mac 和 Apple Silicon Mac
+yarn build
+
+# 显式打包 universal 版本
+# 适合发给大多数用户，不用区分芯片型号
+yarn build:mac:universal
+
+# 单独打包 Intel Mac 版本
+# 适合老款 Mac 或明确知道对方是 Intel 芯片
+yarn build:mac:x64
+
+# 单独打包 Apple Silicon 版本
+# 适合 M1 / M2 / M3 / M4 等 Apple 芯片设备
+yarn build:mac:arm64
+
+# 构建 dmg 安装包
+# 默认也是 universal 版本
+yarn build:dmg
+
+# 构建 zip 压缩包
+# 默认也是 universal 版本
+yarn build:zip
 ```
 
 ## 最后
