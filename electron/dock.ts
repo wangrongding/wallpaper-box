@@ -1,10 +1,17 @@
+import { getPublicAssetPath } from './paths'
 import { app } from 'electron'
-import path from 'path'
+import fs from 'fs'
 
 // 设置 dock 图标
 export const setDockIcon = () => {
   if (process.platform === 'darwin') {
-    app.dock.setIcon(path.join(__dirname, '../public/logo.png'))
+    const iconPath = getPublicAssetPath('logo.png')
+
+    if (fs.existsSync(iconPath)) {
+      app.dock.setIcon(iconPath)
+    } else {
+      console.warn(`[dock] icon not found: ${iconPath}`)
+    }
   }
 }
 

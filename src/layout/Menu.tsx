@@ -39,13 +39,21 @@ const MenuBar: React.FC = () => {
 
       const dir = path.join(os.homedir(), '/wallpaper-box')
       if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir)
+        fs.mkdirSync(dir, { recursive: true })
       }
       const picturePath = path.join(dir, new Date().getTime() + '.jpg')
       const buffer = await response.arrayBuffer()
       fs.writeFileSync(picturePath, Buffer.from(buffer))
       console.log('Image downloaded successfully!')
-      ipcRenderer.send('set-wallpaper', picturePath)
+
+      const result = await ipcRenderer.invoke('set-wallpaper', picturePath)
+
+      if (!result?.success) {
+        toast.error(result?.message || '设置壁纸失败')
+        setLoading(false)
+        return
+      }
+
       ipcRenderer.send('close-live-wallpaper')
       toast.success('设置成功！')
       setLoading(false)

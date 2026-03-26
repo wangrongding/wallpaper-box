@@ -16,9 +16,13 @@
     "build:web": "tsc && vite build",
     "build:electron": "rollup -c",
     "electron": "electron .",
-    "dist": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac",
-    "dist:dmg": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac dmg",
-    "dist:zip": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac zip",
+    "dist": "yarn dist:mac:universal",
+    "dist:dmg": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac dmg --universal",
+    "dist:zip": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac zip --universal",
+    "dist:mac": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac",
+    "dist:mac:universal": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac --universal",
+    "dist:mac:x64": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac --x64",
+    "dist:mac:arm64": "rm -rf ./out && yarn build:web && yarn build:electron && electron-builder --mac --arm64",
     "electron:start": "rollup -c && cross-env IS_DEV=false electron .",
     "electron:dev": "rollup -c && cross-env IS_DEV=true electron .",
     "lint": "eslint . --ext .ts,.tsx",
@@ -90,8 +94,21 @@
       "dist-electron/**/*",
       "dist-web/**/*"
     ],
+    "asarUnpack": [
+      "node_modules/wallpaper/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "public",
+        "to": "public",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
     "mac": {
       "icon": "./public/logo.icns",
+      "minimumSystemVersion": "10.13",
       "target": [
         "dmg",
         "zip"
