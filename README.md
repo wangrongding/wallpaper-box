@@ -94,6 +94,8 @@
 - 生成结果会自动保存到 `~/wallpaper-box`
 - 生成完成后可直接设为壁纸或打开所在位置
 
+<img width="1441" height="900" alt="image" src="https://github.com/user-attachments/assets/cf239b2a-e9c7-4a59-9ec0-9c36689af1a6" />
+
 当前已经适配两类常见接法：
 
 - OpenAI Images API 兼容接口
