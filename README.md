@@ -150,7 +150,7 @@
 - 代理测试当前会尝试访问 `Google`
 - AI 接口配置不在这里，而是在 `AI 壁纸` 页面里单独设置
 
-<img width="600" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/91b0d5ac-eecc-4061-b630-3b0e2bef4744">
+<img width="1000" alt="531b7f4d-270e-4233-8a14-fbc2d4d4c2ff" src="https://github.com/user-attachments/assets/2987e3fa-08f5-4251-bd06-8d0a451d30f7" />
 
 ## 开发
 
