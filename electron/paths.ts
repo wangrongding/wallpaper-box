@@ -32,6 +32,10 @@ export function getWallpaperRootPath() {
   return path.join(os.homedir(), 'wallpaper-box')
 }
 
+export function getWallpaperThumbnailDirectory() {
+  return path.join(getWallpaperRootPath(), '.thumbnails')
+}
+
 export function getWallpaperVideoDirectory() {
   return path.join(getWallpaperRootPath(), 'videos')
 }
