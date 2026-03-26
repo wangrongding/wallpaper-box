@@ -1,3 +1,4 @@
+import { generateAiWallpaper } from './ai-wallpaper'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
 import { createWebLiveWallpaper, closeWebLiveWallpaper } from './create-web-live-wallpaper'
 import { initDock } from './dock'
@@ -109,8 +110,10 @@ protocol.registerSchemesAsPrivileged([
 const createWindow = () => {
   // 创建窗口
   mainWindow = new BrowserWindow({
-    width: 1300,
+    width: isDev ? 1600 : 1300,
+    minWidth: 950,
     height: 900,
+    minHeight: 900,
     frame: false, //是否显示边缘框
     // titleBarStyle: 'hiddenInset', //标题栏样式
     fullscreen: false, //是否全屏显示
@@ -148,7 +151,7 @@ async function setWallPaper(picturePath: string) {
   if (process.platform === 'darwin') {
     const binaryPath = app.isPackaged
       ? path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'wallpaper', 'source', 'macos-wallpaper')
-      : path.join(app.getAppPath(), 'node_modules', 'wallpaper', 'source', 'macos-wallpaper')
+      : path.join(path.dirname(require.resolve('wallpaper')), 'source', 'macos-wallpaper')
 
     await fs.access(binaryPath)
     await execFile(binaryPath, ['set', resolvedPath, '--screen', 'all', '--scale', 'auto'])
@@ -165,6 +168,14 @@ function getErrorMessage(error: unknown) {
   }
 
   return String(error)
+}
+
+function getAiConfig() {
+  return {
+    apiBaseUrl: ((store.get('ai-api-base-url') as string) || 'https://api.openai.com/v1').trim(),
+    apiKey: ((store.get('ai-api-key') as string) || '').trim(),
+    model: ((store.get('ai-model') as string) || 'gpt-image-1').trim(),
+  }
 }
 
 // ===== 只替换你原来的 createLiveWallpaperWindow 函数，完整替换成下面这个 =====
@@ -290,6 +301,34 @@ ipcMain.handle('set-wallpaper', async (_, arg) => {
     return { success: true }
   } catch (error) {
     console.error('Failed to set wallpaper:', error)
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('generate-ai-wallpaper', async (_, arg) => {
+  try {
+    const result = await generateAiWallpaper(getAiConfig(), arg)
+    return {
+      success: true,
+      ...result,
+    }
+  } catch (error) {
+    console.error('Failed to generate AI wallpaper:', error)
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('show-item-in-folder', async (_, arg) => {
+  try {
+    shell.showItemInFolder(arg)
+    return { success: true }
+  } catch (error) {
     return {
       success: false,
       message: getErrorMessage(error),

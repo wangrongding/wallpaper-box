@@ -6,9 +6,14 @@ import { Settings2, Shield, FolderOpen, Wifi } from 'lucide-react'
 import { toast } from 'sonner'
 
 const Store = require('electron-store')
+const os = require('os')
+const path = require('path')
 const store = new Store()
+
+const defaultRootPath = path.join(os.homedir(), 'wallpaper-box')
+
 export default function Setting() {
-  const [rootPath, setRootPath] = useState('/wallpaper-box')
+  const [rootPath, setRootPath] = useState(defaultRootPath)
   const [proxyPath, setProxyPath] = useState('')
   const [autoLaunch, setAutoLaunch] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -55,11 +60,11 @@ export default function Setting() {
 
   useEffect(() => {
     // 读取代理地址
-    setProxyPath(store.get('proxy-path'))
+    setProxyPath(store.get('proxy-path') || '')
     // 读取图片存储位置
-    setRootPath(store.get('root-path'))
+    setRootPath(store.get('root-path') || defaultRootPath)
     // 读取开机自启
-    setAutoLaunch(store.get('auto-launch'))
+    setAutoLaunch(store.get('auto-launch') || false)
     return () => {}
   }, [])
 
