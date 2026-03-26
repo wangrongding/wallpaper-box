@@ -4,12 +4,14 @@ import { createWebLiveWallpaper, closeWebLiveWallpaper } from './create-web-live
 import { initDock } from './dock'
 import { initKeyboard } from './keyboard'
 import { initMenu } from './menu'
+import { getWallpaperRootPath, getWallpaperThumbnailDirectory } from './paths'
 import { setProxy, removeProxy } from './proxy'
 import { setTrayIcon } from './tray'
 import { startVideoDownload } from './video-downloader'
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
 import { execFile as execFileCallback, type ChildProcess } from 'child_process'
-import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut } from 'electron'
+import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut, nativeImage } from 'electron'
+import { createHash } from 'crypto'
 import Store from 'electron-store'
 import fs from 'fs/promises'
 import os from 'os'
@@ -68,6 +70,7 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 // 保持window对象的全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let mainWindow: BrowserWindow
 let activeVideoDownload: ChildProcess | null = null
+const supportedLocalWallpaperExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.bmp'])
 
 // 初始化应用
 const initApp = () => {
@@ -182,6 +185,79 @@ function getAiConfig() {
 
 function getProxyPath() {
   return ((store.get('proxy-path') as string) || '').trim()
+}
+
+async function pathExists(targetPath: string) {
+  try {
+    await fs.access(targetPath)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function isSupportedLocalWallpaperFile(fileName: string) {
+  return supportedLocalWallpaperExtensions.has(path.extname(fileName).toLowerCase())
+}
+
+function getLocalWallpaperThumbnailPath(filePath: string, modifiedAt: number, size: number) {
+  const hash = createHash('sha1').update(`${filePath}:${modifiedAt}:${size}`).digest('hex')
+  return path.join(getWallpaperThumbnailDirectory(), `${hash}.jpg`)
+}
+
+async function ensureLocalWallpaperThumbnail(filePath: string) {
+  const stat = await fs.stat(filePath)
+  const thumbnailPath = getLocalWallpaperThumbnailPath(filePath, stat.mtimeMs, stat.size)
+  if (await pathExists(thumbnailPath)) {
+    return thumbnailPath
+  }
+
+  await fs.mkdir(getWallpaperThumbnailDirectory(), { recursive: true })
+
+  const image = nativeImage.createFromPath(filePath)
+  if (image.isEmpty()) {
+    throw new Error('无法读取本地壁纸预览')
+  }
+
+  const { width, height } = image.getSize()
+  const maxWidth = 640
+  const maxHeight = 400
+  const resizeRatio = Math.min(maxWidth / Math.max(width, 1), maxHeight / Math.max(height, 1), 1)
+  const resized = resizeRatio < 1
+    ? image.resize({
+        width: Math.max(1, Math.round(width * resizeRatio)),
+        height: Math.max(1, Math.round(height * resizeRatio)),
+        quality: 'good',
+      })
+    : image
+
+  await fs.writeFile(thumbnailPath, resized.toJPEG(82))
+  return thumbnailPath
+}
+
+async function listLocalWallpapers() {
+  const wallpaperDirectory = getWallpaperRootPath()
+  await fs.mkdir(wallpaperDirectory, { recursive: true })
+
+  const entries = await fs.readdir(wallpaperDirectory, { withFileTypes: true })
+  const files = entries.filter((entry) => entry.isFile() && isSupportedLocalWallpaperFile(entry.name))
+
+  const wallpapers = await Promise.all(
+    files.map(async (entry) => {
+      const filePath = path.join(wallpaperDirectory, entry.name)
+      const stat = await fs.stat(filePath)
+      const thumbnailPath = getLocalWallpaperThumbnailPath(filePath, stat.mtimeMs, stat.size)
+
+      return {
+        modifiedAt: stat.mtimeMs,
+        path: filePath,
+        size: stat.size,
+        thumbnailPath: (await pathExists(thumbnailPath)) ? thumbnailPath : '',
+      }
+    }),
+  )
+
+  return wallpapers.sort((left, right) => right.modifiedAt - left.modifiedAt)
 }
 
 function sendVideoDownloadProgress(payload: Record<string, unknown>) {
@@ -357,6 +433,38 @@ ipcMain.handle('show-item-in-folder', async (_, arg) => {
   try {
     shell.showItemInFolder(arg)
     return { success: true }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('list-local-wallpapers', async () => {
+  try {
+    return {
+      success: true,
+      items: await listLocalWallpapers(),
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('get-local-wallpaper-thumbnail', async (_, arg) => {
+  try {
+    if (typeof arg !== 'string' || !arg.trim()) {
+      throw new Error('壁纸路径无效')
+    }
+
+    return {
+      success: true,
+      path: await ensureLocalWallpaperThumbnail(arg),
+    }
   } catch (error) {
     return {
       success: false,

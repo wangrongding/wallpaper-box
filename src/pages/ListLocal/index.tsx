@@ -4,46 +4,148 @@ import { FolderOpen, Inbox } from 'lucide-react'
 import { toast } from 'sonner'
 
 const fs = require('fs')
-const path = require('path')
-const os = require('os')
-const dir = path.join(os.homedir(), '/wallpaper-box')
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir)
+
+type LocalWallpaperItem = {
+  modifiedAt: number
+  path: string
+  size: number
+  thumbnailPath?: string
+}
+
+function LocalWallpaperImage({
+  index,
+  item,
+  onDelete,
+  onSet,
+}: {
+  index: number
+  item: LocalWallpaperItem
+  onDelete: () => void
+  onSet: () => void
+}) {
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  const [shouldLoadThumbnail, setShouldLoadThumbnail] = useState(Boolean(item.thumbnailPath))
+  const [thumbnailSrc, setThumbnailSrc] = useState(item.thumbnailPath ? `file://${item.thumbnailPath}?t=${item.modifiedAt}` : '')
+
+  useEffect(() => {
+    if (thumbnailSrc) {
+      return
+    }
+
+    const currentNode = cardRef.current
+    if (!currentNode) {
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShouldLoadThumbnail(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '240px' },
+    )
+
+    observer.observe(currentNode)
+    return () => observer.disconnect()
+  }, [thumbnailSrc])
+
+  useEffect(() => {
+    let disposed = false
+
+    async function loadThumbnail() {
+      if (!shouldLoadThumbnail || thumbnailSrc) {
+        return
+      }
+
+      try {
+        const response = await ipcRenderer.invoke('get-local-wallpaper-thumbnail', item.path)
+        if (disposed) {
+          return
+        }
+
+        if (response?.success && response.path) {
+          setThumbnailSrc(`file://${response.path}?t=${item.modifiedAt}`)
+          return
+        }
+
+        setThumbnailSrc(`file://${item.path}?t=${item.modifiedAt}`)
+      } catch {
+        if (!disposed) {
+          setThumbnailSrc(`file://${item.path}?t=${item.modifiedAt}`)
+        }
+      }
+    }
+
+    loadThumbnail()
+    return () => {
+      disposed = true
+    }
+  }, [item.modifiedAt, item.path, shouldLoadThumbnail, thumbnailSrc])
+
+  if (!thumbnailSrc) {
+    return (
+      <div
+        ref={cardRef}
+        style={{
+          breakInside: 'avoid-column',
+          contentVisibility: 'auto',
+          containIntrinsicSize: '260px',
+          marginBottom: '12px',
+        }}
+        className='overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)]'
+      >
+        <div className='aspect-[16/10] animate-pulse bg-[var(--bg-surface)]' />
+      </div>
+    )
+  }
+
+  return (
+    <div
+      ref={cardRef}
+      style={{
+        breakInside: 'avoid-column',
+        contentVisibility: 'auto',
+        containIntrinsicSize: '260px',
+        marginBottom: '12px',
+      }}
+    >
+      <CusImage src={thumbnailSrc} index={index} onSet={onSet} onDelete={onDelete} />
+    </div>
+  )
 }
 
 export default function List() {
-  const [wallpaperList, setWallpaperList] = useState<string[]>([])
-  // 获取壁纸
-  let mounted = false
-  // 获取 /wallpaper-box 文件夹中的所有壁纸
+  const [wallpaperList, setWallpaperList] = useState<LocalWallpaperItem[]>([])
+  const [loaded, setLoaded] = useState(false)
+
   async function getWallpaperList() {
     try {
-      // 使用异步方式读取目录，避免阻塞 UI
-      const files = await fs.promises.readdir(dir)
-      // 对文件进行过滤, 只保留图片
-      const imageFiles = files
-        .filter((file: string) => ['.jpg', '.png', '.jpeg'].includes(path.extname(file).toLowerCase()))
-        .map((file: string) => path.join(dir, file))
+      const response = await ipcRenderer.invoke('list-local-wallpapers')
+      if (!response?.success) {
+        throw new Error(response?.message || '加载壁纸失败')
+      }
 
-      setWallpaperList(imageFiles)
+      setWallpaperList(response.items || [])
     } catch (error) {
       console.error('Failed to load wallpapers:', error)
-      toast.error('加载壁纸失败')
+      toast.error(error instanceof Error ? error.message : '加载壁纸失败')
+    } finally {
+      setLoaded(true)
     }
   }
 
-  // 删除壁纸
   async function deleteWallpaper(filePath: string) {
     try {
       await fs.promises.unlink(filePath)
-      getWallpaperList()
+      setWallpaperList((previous) => previous.filter((item: LocalWallpaperItem) => item.path !== filePath))
     } catch (error) {
       console.error('Failed to delete wallpaper:', error)
       toast.error('删除失败')
     }
   }
 
-  // 设置壁纸
   const setAsBackground = async (item: string) => {
     const result = await ipcRenderer.invoke('set-wallpaper', item)
 
@@ -58,10 +160,6 @@ export default function List() {
 
   useEffect(() => {
     getWallpaperList()
-
-    return () => {
-      mounted = true
-    }
   }, [])
 
   return (
@@ -77,26 +175,25 @@ export default function List() {
       </div>
       {wallpaperList.length > 0 ? (
         <div className='columns-5 gap-3'>
-          {wallpaperList.map((item: string, index: number) => {
+          {wallpaperList.map((item: LocalWallpaperItem, index: number) => {
             return (
-              <CusImage
-                key={index}
-                src={`file://${item}`}
+              <LocalWallpaperImage
+                key={item.path}
+                item={item}
                 index={index}
-                onSet={() => setAsBackground(item)}
-                onDelete={() => deleteWallpaper(item)}
-                style={{ breakInside: 'avoid-column', marginBottom: '12px' }}
+                onSet={() => setAsBackground(item.path)}
+                onDelete={() => deleteWallpaper(item.path)}
               />
             )
           })}
         </div>
-      ) : (
+      ) : loaded ? (
         <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
           <Inbox className='mb-4 h-14 w-14 opacity-40' />
           <p className='font-display text-base font-medium'>暂无壁纸</p>
           <p className='mt-1 text-[13px] opacity-60'>去壁纸列表中下载喜欢的壁纸吧</p>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
