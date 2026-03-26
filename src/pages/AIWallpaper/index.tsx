@@ -107,6 +107,7 @@ const promptPresets = [
 ]
 
 const customSizeOption = { value: 'custom', label: '自定义宽高' }
+const minimumGenerationLoadingMs = 50_000
 
 type GenerateResult = {
   outputFormat?: string
@@ -140,6 +141,7 @@ export default function AIWallpaper() {
   const [prompt, setPrompt] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [isApplying, setIsApplying] = useState(false)
+  const [generationProgress, setGenerationProgress] = useState(0)
   const [result, setResult] = useState<GenerateResult | null>(null)
   const [previewToken, setPreviewToken] = useState<number>(Date.now())
   const [isConfigOpen, setIsConfigOpen] = useState(false)
@@ -147,6 +149,7 @@ export default function AIWallpaper() {
   const [size, setSize] = useState('1536x1024')
   const [customWidth, setCustomWidth] = useState('2048')
   const [customHeight, setCustomHeight] = useState('1152')
+  const generationStartedAtRef = useRef(0)
 
   useEffect(() => {
     setAiConfig(readAiConfig())
@@ -162,6 +165,21 @@ export default function AIWallpaper() {
       setSize(defaultSize)
     }
   }, [defaultSize, generationSizeOptions, size])
+
+  useEffect(() => {
+    if (!isGenerating) {
+      return
+    }
+
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - generationStartedAtRef.current
+      const progressRatio = Math.min(elapsed / minimumGenerationLoadingMs, 1)
+      const nextProgress = Math.min(92, Math.round(7 + progressRatio * 85))
+      setGenerationProgress((current) => Math.max(current, nextProgress))
+    }, 240)
+
+    return () => clearInterval(timer)
+  }, [isGenerating])
 
   const apiReady = Boolean(aiConfig.apiKey.trim())
 
@@ -208,7 +226,10 @@ export default function AIWallpaper() {
       return
     }
 
+    generationStartedAtRef.current = Date.now()
     setIsGenerating(true)
+    setGenerationProgress(7)
+    setResult(null)
 
     try {
       const response = await ipcRenderer.invoke('generate-ai-wallpaper', {
@@ -221,6 +242,13 @@ export default function AIWallpaper() {
         return
       }
 
+      const elapsed = Date.now() - generationStartedAtRef.current
+      const remaining = Math.max(0, minimumGenerationLoadingMs - elapsed)
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining))
+      }
+
+      setGenerationProgress(100)
       setResult(response)
       setPreviewToken(Date.now())
       toast.success('壁纸生成完成')
@@ -393,11 +421,23 @@ export default function AIWallpaper() {
                   <div className='h-18 w-18 mx-auto mb-5 flex items-center justify-center text-sky-100'>
                     {isGenerating ? <RefreshCw className='h-7 w-7 animate-spin' /> : <Sparkles className='h-7 w-7' />}
                   </div>
-                  <h3 className='font-display text-2xl font-semibold text-white'>{isGenerating ? '正在生成壁纸' : ''}</h3>
-                  <p className='mt-3 text-[13px] leading-7 text-slate-400'>
-                    {isGenerating ? '通常需要几十秒到两分钟。' : '写好提示词并选择分辨率后，点击生成按钮就可以了。'}
-                    <br />
-                  </p>
+                  <h3 className='font-display text-2xl font-semibold text-white'>{isGenerating ? '正在生成壁纸' : '结果会出现在这里'}</h3>
+                  {isGenerating ? (
+                    <div className='mt-5 w-full'>
+                      <div className='mb-2 flex items-center justify-between text-[12px] text-slate-400'>
+                        <span>正在生成新的画面</span>
+                        <span>{generationProgress}%</span>
+                      </div>
+                      <div className='bg-white/8 h-2 overflow-hidden rounded-full'>
+                        <div
+                          className='h-full rounded-full bg-[linear-gradient(90deg,rgba(56,189,248,0.9),rgba(125,211,252,0.95),rgba(251,191,36,0.8))] transition-[width] duration-300 ease-out'
+                          style={{ width: `${generationProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <p className='mt-3 text-[13px] leading-7 text-slate-400'>写好提示词并选择分辨率后，点击生成按钮就可以了。</p>
+                  )}
                 </div>
               )}
             </div>
