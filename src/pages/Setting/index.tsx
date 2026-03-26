@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { WALLHAVEN_API_KEY_HELP_URL, WALLHAVEN_API_KEY_STORE_KEY, resolveWallhavenApiKey } from '@/lib/wallhaven'
 import { ipcRenderer } from 'electron'
-import { Settings2, Shield, FolderOpen, Wifi } from 'lucide-react'
+import { ExternalLink, Image, Settings2, Shield, Wifi } from 'lucide-react'
 import { toast } from 'sonner'
 
 const Store = require('electron-store')
@@ -15,6 +16,7 @@ const defaultRootPath = path.join(os.homedir(), 'wallpaper-box')
 export default function Setting() {
   const [rootPath, setRootPath] = useState(defaultRootPath)
   const [proxyPath, setProxyPath] = useState('')
+  const [wallhavenApiKey, setWallhavenApiKey] = useState('')
   const [autoLaunch, setAutoLaunch] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -36,6 +38,23 @@ export default function Setting() {
     store.set('proxy-path', proxyPath)
     ipcRenderer.send('set-proxy', proxyPath)
     handleSetSuccess()
+  }
+
+  function saveWallhavenApiKey() {
+    const nextValue = wallhavenApiKey.trim()
+
+    if (nextValue) {
+      store.set(WALLHAVEN_API_KEY_STORE_KEY, nextValue)
+      toast.success('Wallhaven API Key 已保存')
+      return
+    }
+
+    store.delete(WALLHAVEN_API_KEY_STORE_KEY)
+    toast.success('已切回内置默认 Wallhaven API Key')
+  }
+
+  function openWallhavenAccount() {
+    ipcRenderer.send('open-link-in-browser', WALLHAVEN_API_KEY_HELP_URL)
   }
 
   // 测试网络代理
@@ -61,6 +80,7 @@ export default function Setting() {
   useEffect(() => {
     // 读取代理地址
     setProxyPath(store.get('proxy-path') || '')
+    setWallhavenApiKey(store.get(WALLHAVEN_API_KEY_STORE_KEY) || '')
     // 读取图片存储位置
     setRootPath(store.get('root-path') || defaultRootPath)
     // 读取开机自启
@@ -113,6 +133,44 @@ export default function Setting() {
                 修改
               </Button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className='mb-4 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)]'>
+        <div className='flex items-center gap-2 border-b border-[var(--border-subtle)] px-5 py-3'>
+          <Image className='h-4 w-4 text-[var(--text-tertiary)]' />
+          <span className='text-[13px] font-medium text-[var(--text-secondary)]'>壁纸源</span>
+        </div>
+        <div className='space-y-4 px-5 py-4'>
+          <div>
+            <div className='mb-2 flex items-center justify-between gap-3'>
+              <label className='text-[13px] text-[var(--text-secondary)]'>Wallhaven API Key</label>
+              <Button variant='ghost' size='sm' className='h-7 px-2 text-[12px]' onClick={openWallhavenAccount}>
+                <ExternalLink className='mr-1.5 h-3.5 w-3.5' />
+                获取 ApiKey
+              </Button>
+            </div>
+            <Input
+              value={wallhavenApiKey}
+              placeholder='留空则使用内置默认 Key'
+              type='text'
+              onChange={(e) => {
+                setWallhavenApiKey(e.target.value)
+              }}
+              className='text-[13px]'
+            />
+            <p className='mt-2 text-[12px] leading-5 text-[var(--text-tertiary)]'>
+              当前生效：
+              <span className='ml-1 text-[var(--text-secondary)]'>
+                {wallhavenApiKey.trim() ? '使用你自己的 Wallhaven API Key' : `使用内置默认 Key（使用人数较多时，可能会遇到访问限制）)`}
+              </span>
+            </p>
+          </div>
+          <div className='flex gap-2'>
+            <Button onClick={saveWallhavenApiKey} size='sm'>
+              保存 Key
+            </Button>
           </div>
         </div>
       </div>
