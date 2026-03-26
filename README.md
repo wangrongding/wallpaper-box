@@ -1,23 +1,24 @@
 <p align="center">
-  <a href="https://vuejs.org" target="_blank" rel="noopener noreferrer">
+  <a href="https://github.com/wangrongding/wallpaper-box" target="_blank">
     <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021532343.svg" width="300" alt="wallpaper-box logo"/>
   </a>
 </p>
 
-🏞️ `wallpaper-box` 想做的不只是另一个壁纸下载器，而是一个让桌面真正活起来的客户端：静态壁纸、视频壁纸、网页壁纸，再加上会跑的 RunCat 托盘动画。
+🏞️ `wallpaper-box` 想做的不只是另一个壁纸下载器，而是一个让桌面真正活起来的客户端：静态壁纸、视频壁纸、网页壁纸、AI 壁纸，再加上会跑的 RunCat 托盘动画。
 
-## 功能
+## 功能概览
 
+- [x] AI 文生图壁纸
 - [x] 浏览和搜索在线壁纸
 - [x] 下载壁纸到本地
 - [x] 设置静态壁纸
 - [x] 设置视频壁纸（在 MacOS 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
 - [x] 设置网页壁纸
+- [x] 支持通过提示词生成 AI 壁纸
 - [x] 支持在线 URL 和本地 HTML 文件作为网页壁纸
 - [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
 - [x] 支持开机自启
 - [x] 支持 HTTP 代理配置
-- [ ] 支持大模型文生图，用户输入文字描述，创造壁纸
 
 ## 平台说明
 
@@ -73,6 +74,39 @@
   - macOS/Linux 示例：`/Users/your-name/Coding/jellyfish/index.html`
   - Windows 示例：`C:\Users\your-name\Coding\jellyfish\index.html`
 
+### AI 壁纸
+
+支持直接通过提示词生成壁纸。
+
+- AI 配置入口在 `AI 壁纸` 页面里，不在全局设置页
+- 生成结果会自动保存到 `~/wallpaper-box`
+- 生成完成后可直接设为壁纸或打开所在位置
+
+当前已经适配两类常见接法：
+
+- OpenAI Images API 兼容接口
+- 智谱 `glm-image`
+
+推荐配置示例：
+
+- OpenAI
+  - `API Base URL`: `https://api.openai.com/v1`
+  - `Model`: `gpt-image-1`
+- 智谱 BigModel
+  - `API Base URL`: `https://open.bigmodel.cn/api/paas/v4`
+  - `Model`: `glm-image`
+
+说明：
+
+- 如果你填的是智谱完整地址 `https://open.bigmodel.cn/api/paas/v4/images/generations`，当前版本也能兼容
+- `glm-image` 支持自定义宽高
+- 自定义宽高限制是：`512-2048`，且宽高都必须是 `32` 的整数倍
+
+提示词建议：
+
+- 推荐按这个结构来写：`主体场景 + 风格质感 + 光线时间 + 镜头构图 + 壁纸要求`
+- 例如：`未来海岸线城市，黄昏逆光，电影感广角构图，干净留白，适合作为宽屏桌面壁纸，无人物无文字无水印`
+
 ### RunCat
 
 托盘图标会根据 CPU 使用情况动态切换速度，支持在托盘菜单里切换不同动画主题。
@@ -84,42 +118,25 @@
   </tr>
 </table>
 
-如果你想添加自定义图标，可以直接往 [public/icons](/Users/rongding/Coding/wallpaper-box/public/icons) 里补素材，并在 [electron/tray-list.ts](/Users/rongding/Coding/wallpaper-box/electron/tray-list.ts) 里注册。
+如果你想添加自定义图标，可以直接往 [public/icons](./public/icons) 里补素材，并在 [electron/tray-list.ts](./electron/tray-list.ts) 里注册。
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030045464.gif" width="600" />
 
 ### 设置
 
-- 支持开机自启
-- 支持 HTTP 代理
-- 代理测试会尝试访问 Google
-- 当前壁纸下载目录默认是 `~/wallpaper-box`
+当前全局设置页主要保留通用设置：
+
+- 开机自启
+- HTTP 代理
+- 代理连通性测试
+- 壁纸默认存储位置显示, 当前壁纸下载目录默认是 `~/wallpaper-box`
+
+说明：
+
+- 代理测试当前会尝试访问 `Google`
+- AI 接口配置不在这里，而是在 `AI 壁纸` 页面里单独设置
 
 <img width="600" alt="image" src="https://github.com/wangrongding/wallpaper-box/assets/42437658/91b0d5ac-eecc-4061-b630-3b0e2bef4744">
-
-## 常见问题
-
-### 1. 无法打开应用程序
-
-因为应用没有做 Apple 开发者签名，macOS 可能会拦截首次打开。可以按下面方式放行：
-
-打开终端：
-
-```sh
-sudo spctl  --master-disable
-sudo xattr -r -d com.apple.quarantine /Applications/wallpaper-box.app
-```
-
-如果你的应用不在 `/Applications`，请把命令里的路径替换成实际 `.app` 路径（打开 “访达”（Finder）进入 “应用程序” 目录，找到 wallpaper-box，拖进终端）。
-
-### 2. 老款 Mac 打不开
-
-如果看到类似“这台 Mac 不支持此应用程序”的提示，请先确认两件事：
-
-- 你的系统版本是否低于 `macOS 10.13`
-- 你拿到的是不是错误架构的包
-
-建议优先使用默认的 `universal` 包；如果需要单独发包，可以分别构建 `x64` 和 `arm64` 版本。
 
 ## 开发
 
@@ -131,13 +148,13 @@ yarn install
 
 ### 本地开发
 
-直接运行下面的命令即可同时启动 Web 和 Electron：
+同时启动 Web 和 Electron：
 
 ```sh
 yarn dev
 ```
 
-如果你想分开调试：
+分开启动：
 
 ```sh
 yarn dev:web
@@ -152,9 +169,11 @@ yarn build:electron
 yarn electron:start
 ```
 
-### 打包
+## 打包
 
 构建产物默认输出到 `out/` 目录。
+
+架构说明：
 
 - `universal`：一个包同时包含 `Intel(x64)` 和 `Apple Silicon(arm64)` 两种架构。
 - 如果你不确定对方的 Mac 是哪种芯片，优先发 `universal`。
@@ -186,6 +205,61 @@ yarn build:dmg
 # 默认也是 universal 版本
 yarn build:zip
 ```
+
+## 常见问题
+
+### 1. macOS 提示无法打开应用
+
+因为应用没有做 Apple 开发者签名，macOS 可能会拦截首次打开。可以按下面方式放行：
+
+打开终端：
+
+```sh
+sudo spctl  --master-disable
+sudo xattr -r -d com.apple.quarantine /Applications/wallpaper-box.app
+```
+
+如果你的应用不在 `/Applications`，请把命令里的路径替换成实际 `.app` 路径（打开 “访达”（Finder）进入 “应用程序” 目录，找到 wallpaper-box，拖进终端）。
+
+### 2. 老款 Mac 提示“不支持此应用程序”
+
+如果看到类似“这台 Mac 不支持此应用程序”的提示，请先确认两件事：
+
+- 你的系统版本是否低于 `macOS 10.13`
+- 你拿到的是不是错误架构的包
+
+建议优先使用默认的 `universal` 包；如果需要单独发包，可以分别构建 `x64` 和 `arm64` 版本。
+
+### 3. AI 生成时报 `404 not found`
+
+如果你接的是智谱 BigModel，当前版本既兼容：
+
+- `https://open.bigmodel.cn/api/paas/v4`
+- `https://open.bigmodel.cn/api/paas/v4/images/generations`
+
+如果仍然报错，优先检查：
+
+- `API Key`
+- `Model` 是否填成了 `glm-image`
+- `API Base URL` 是否有明显拼写错误
+
+### 4. AI 自定义宽高报错
+
+当前 `glm-image` 的自定义宽高限制是：
+
+- 范围必须在 `512-2048`
+- 宽和高都必须是 `32` 的整数倍
+
+例如这些是合法的：
+
+- `2048x1152`
+- `2048x1280`
+- `1792x1024`
+
+## 目录提示
+
+- 静态壁纸、AI 壁纸默认保存目录：`~/wallpaper-box`
+- AI 配置入口：`AI 壁纸` 页面右上角 `设置`
 
 ## 最后
 
