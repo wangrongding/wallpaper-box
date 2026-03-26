@@ -6,8 +6,9 @@ import { initKeyboard } from './keyboard'
 import { initMenu } from './menu'
 import { setProxy, removeProxy } from './proxy'
 import { setTrayIcon } from './tray'
+import { startVideoDownload } from './video-downloader'
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
-import { execFile as execFileCallback } from 'child_process'
+import { execFile as execFileCallback, type ChildProcess } from 'child_process'
 import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut } from 'electron'
 import Store from 'electron-store'
 import fs from 'fs/promises'
@@ -66,6 +67,7 @@ const isDev = process.env.IS_DEV === 'true'
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 // 保持window对象的全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let mainWindow: BrowserWindow
+let activeVideoDownload: ChildProcess | null = null
 
 // 初始化应用
 const initApp = () => {
@@ -178,6 +180,34 @@ function getAiConfig() {
   }
 }
 
+function getProxyPath() {
+  return ((store.get('proxy-path') as string) || '').trim()
+}
+
+function sendVideoDownloadProgress(payload: Record<string, unknown>) {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return
+  }
+
+  mainWindow.webContents.send('video-download-progress', payload)
+}
+
+async function cleanupTemporaryWallpaperFrame(framePath: string) {
+  if (!framePath) {
+    return
+  }
+
+  try {
+    await fs.unlink(framePath)
+  } catch {}
+
+  try {
+    await fs.rm(path.dirname(framePath), { force: true, recursive: true })
+  } catch (error) {
+    console.warn('Failed to cleanup temporary wallpaper frame directory:', error)
+  }
+}
+
 // ===== 只替换你原来的 createLiveWallpaperWindow 函数，完整替换成下面这个 =====
 async function createLiveWallpaperWindow() {
   const videoPath = store.get('video-path') as string
@@ -196,8 +226,7 @@ async function createLiveWallpaperWindow() {
   // 10秒后自动删除临时图片，防止壁纸还没生效就被删掉
   if (tempFramePath) {
     setTimeout(() => {
-      fs.unlink(tempFramePath)
-      fs.rmdir(path.dirname(tempFramePath))
+      void cleanupTemporaryWallpaperFrame(tempFramePath)
     }, 10000)
   }
 
@@ -333,6 +362,54 @@ ipcMain.handle('show-item-in-folder', async (_, arg) => {
       success: false,
       message: getErrorMessage(error),
     }
+  }
+})
+
+ipcMain.handle('download-video-wallpaper', async (_, arg) => {
+  if (activeVideoDownload) {
+    return {
+      success: false,
+      message: '已有视频正在下载，请等待当前任务完成',
+    }
+  }
+
+  try {
+    sendVideoDownloadProgress({
+      line: '正在启动 yt-dlp 下载器',
+      percent: 0,
+      phase: 'prepare',
+    })
+
+    const controller = await startVideoDownload(
+      {
+        proxy: getProxyPath(),
+        url: typeof arg?.url === 'string' ? arg.url : '',
+      },
+      (progress) => {
+        sendVideoDownloadProgress(progress)
+      },
+    )
+
+    activeVideoDownload = controller.child
+    const result = await controller.result
+
+    return {
+      success: true,
+      ...result,
+    }
+  } catch (error) {
+    const message = getErrorMessage(error)
+    sendVideoDownloadProgress({
+      line: message,
+      phase: 'error',
+    })
+
+    return {
+      success: false,
+      message,
+    }
+  } finally {
+    activeVideoDownload = null
   }
 })
 
