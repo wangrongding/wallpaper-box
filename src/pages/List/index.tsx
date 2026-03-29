@@ -6,8 +6,9 @@ import { Switch } from '@/components/ui/switch'
 import { WALLHAVEN_API_KEY_STORE_KEY, buildWallhavenSearchUrl } from '@/lib/wallhaven'
 import { ipcRenderer } from 'electron'
 import { debounce } from 'lodash'
-import { Download, X, Inbox, Search, Loader2, Monitor, ZoomIn, ZoomOut } from 'lucide-react'
+import { Download, X, Inbox, Search, Loader2, Monitor, ZoomIn, ZoomOut, Key, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 
 const fs = require('fs')
 const os = require('os')
@@ -16,12 +17,14 @@ const Store = require('electron-store')
 const store = new Store()
 
 export default function List() {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
   const [visible, setVisible] = useState(false)
   const [previewSrc, setPreviewSrc] = useState('')
   const [previewScale, setPreviewScale] = useState(1)
   const [searchKeyword, setSearchKeyword] = useState('')
+  const [hasApiKey, setHasApiKey] = useState(true)
   const [query, setQuery] = useState({
     general: '0',
     anime: '0',
@@ -203,6 +206,7 @@ export default function List() {
 
   useEffect(() => {
     main.addEventListener('scroll', onScroll)
+    setHasApiKey(!!store.get(WALLHAVEN_API_KEY_STORE_KEY))
     getWallpaperList()
 
     return () => {
@@ -223,10 +227,29 @@ export default function List() {
 
   return (
     <div className='list-page animate-fade-in-up'>
+      {/* API Key 引导横幅 */}
+      {!hasApiKey && (
+        <div className='mb-4 flex items-center gap-3 rounded-lg border border-amber-500/25 bg-amber-500/8 px-4 py-3 text-[13px]'>
+          <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400'>
+            <Key className='h-3.5 w-3.5' />
+          </div>
+          <div className='flex-1 text-amber-300/90'>
+            <span className='font-medium'>未配置 Wallhaven API Key</span>
+            <span className='ml-1.5 text-amber-300/60'>— 使用内置共享 Key 时，访问人数较多可能遇到限速。建议前往设置页配置你自己的 Key。</span>
+          </div>
+          <button
+            onClick={() => navigate('/setting')}
+            className='flex shrink-0 items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[12px] text-amber-300/90 transition-colors hover:bg-amber-500/20 hover:text-amber-200'
+          >
+            前往设置
+            <ArrowRight className='h-3 w-3' />
+          </button>
+        </div>
+      )}
       {/* 提示信息 */}
       <div className='mb-4 flex items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-4 py-2.5 text-[13px] text-sky-300/80'>
         <span className='text-base'>💡</span>
-        <span>加载慢？可以挂梯子 🪜 或在设置页配置网络代理</span>
+        <span>加载慢？可以挂全局梯子 🪜 或在设置页配置自定义的网络代理</span>
       </div>
       {/* 筛选条件 */}
       <div className='mb-5 flex flex-wrap items-center gap-3'>
