@@ -16,30 +16,6 @@ const defaultConfig = {
   plugins: [
     // 使用typescript2插件
     typescript2(),
-    // 解析node_modules中的模块
-    // nodeResolve({ preferBuiltins: false }), // or `true`
-    // 解析json文件
-    // json(),
-
-    // 打包结束后执行的钩子函数
-    // {
-    //   buildEnd: (error) => {
-    //     if (error) {
-    //       console.log(error)
-    //     } else {
-    //       console.log('打包成功')
-
-    //       let electronProcess = spawn(require('electron').toString(), ['./dist-electron/main.js', httpAddress], {
-    //         cwd: process.cwd(),
-    //         stdio: 'inherit',
-    //       })
-    //       electronProcess.on('close', () => {
-    //         server.close()
-    //         process.exit()
-    //       })
-    //     }
-    //   },
-    // },
   ],
 }
 

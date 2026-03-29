@@ -7,7 +7,7 @@
   "description": "让桌面真正活起来：静态壁纸、视频壁纸、网页壁纸和 RunCat 托盘动画，一个客户端全搞定。",
   "license": "GPL-3.0-or-later",
   "scripts": {
-    "prepare": "node ./scripts/prepare-video-downloader-binaries.mjs",
+    "prepare": "node ./scripts/prepare-video-downloader-binaries.mjs && husky",
     "dev": "concurrently --kill-others-on-fail \"yarn dev:web \" \"wait-on tcp:1234 && yarn dev:electron\"",
     "dev:web": "vite",
     "dev:electron": "cross-env IS_DEV=true node ./dev-electron.mjs",
@@ -26,8 +26,17 @@
     "electron": "electron .",
     "electron:start": "rollup -c && cross-env IS_DEV=false electron .",
     "electron:dev": "rollup -c && cross-env IS_DEV=true electron .",
-    "lint": "eslint . --ext .ts,.tsx",
+    "lint": "eslint .",
     "format": "prettier --write ."
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,css,scss,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@ffmpeg/core": "0.11.0",
@@ -55,12 +64,15 @@
     "wallpaper": "^7.2.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/fs-extra": "^9.0.13",
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.11.17",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
     "@vitejs/plugin-react": "^3.0.0",
     "autoprefixer": "^10.4.13",
     "chokidar": "^3.5.3",
@@ -68,6 +80,11 @@
     "cross-env": "^7.0.3",
     "electron": "24.2.0",
     "electron-builder": "^25.1.8",
+    "eslint": "^10.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "postcss": "^8.4.20",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.5.3",
