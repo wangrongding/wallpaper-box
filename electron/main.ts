@@ -1,6 +1,7 @@
 import { generateAiWallpaper } from './ai-wallpaper'
 import { createMacLiveWallpaper, closeLiveWallpaper } from './create-mac-live-wallpaper'
 import { createWebLiveWallpaper, closeWebLiveWallpaper } from './create-web-live-wallpaper'
+import { getDevServerUrl } from './dev-server'
 import { initDock } from './dock'
 import { initKeyboard } from './keyboard'
 import { initMenu } from './menu'
@@ -8,10 +9,10 @@ import { getWallpaperRootPath, getWallpaperThumbnailDirectory } from './paths'
 import { setProxy, removeProxy } from './proxy'
 import { setTrayIcon } from './tray'
 import { startVideoDownload } from './video-downloader'
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
-import { execFile as execFileCallback, type ChildProcess } from 'child_process'
-import { protocol, app, BrowserWindow, Notification, ipcMain, shell, globalShortcut, nativeImage } from 'electron'
+import { execFile as execFileCallback } from 'child_process'
+import type { ChildProcess } from 'child_process'
 import { createHash } from 'crypto'
+import { protocol, app, BrowserWindow, Notification, ipcMain, shell, nativeImage } from 'electron'
 import Store from 'electron-store'
 import fs from 'fs/promises'
 import os from 'os'
@@ -20,21 +21,52 @@ import { promisify } from 'util'
 
 const execFile = promisify(execFileCallback)
 
-const ffmpeg = createFFmpeg({
-  log: false,
-  // 删掉 corePath 这行！就是这一行害的你
-})
+type FFmpegInstance = {
+  load: () => Promise<void>
+  FS: (method: string, ...args: unknown[]) => Uint8Array
+  run: (...args: string[]) => Promise<void>
+}
+
+type FFmpegModule = {
+  createFFmpeg: (options: { log: boolean }) => FFmpegInstance
+  fetchFile: (input: string) => Promise<Uint8Array>
+}
 
 let ffmpegLoaded = false
+let ffmpegInstance: FFmpegInstance | null = null
+let ffmpegModulePromise: Promise<FFmpegModule> | null = null
+
+async function getFFmpegModule() {
+  if (!ffmpegModulePromise) {
+    ffmpegModulePromise = import('@ffmpeg/ffmpeg') as Promise<FFmpegModule>
+  }
+
+  return ffmpegModulePromise
+}
+
+async function getFFmpegInstance() {
+  if (!ffmpegInstance) {
+    const { createFFmpeg } = await getFFmpegModule()
+    ffmpegInstance = createFFmpeg({
+      log: false,
+    })
+  }
+
+  return ffmpegInstance
+}
 
 async function loadFFmpegOnce() {
   if (!ffmpegLoaded) {
+    const ffmpeg = await getFFmpegInstance()
     await ffmpeg.load() // 它会自动用内置的 ffmpeg-core.js（已打包进 node_modules）
     ffmpegLoaded = true
   }
 }
 
 async function getVideoFrame(videoPath: string): Promise<string> {
+  const ffmpeg = await getFFmpegInstance()
+  const { fetchFile } = await getFFmpegModule()
+
   await loadFFmpegOnce()
 
   const inputName = 'input.mp4'
@@ -53,7 +85,9 @@ async function getVideoFrame(videoPath: string): Promise<string> {
   try {
     ffmpeg.FS('unlink', inputName)
     ffmpeg.FS('unlink', outputName)
-  } catch {}
+  } catch {
+    // Ignore ffmpeg virtual FS cleanup failures.
+  }
 
   return framePath
 }
@@ -85,7 +119,9 @@ const initApp = () => {
   // 设置dock
   initDock()
   // 设置代理
-  proxyPath && setProxy(mainWindow, proxyPath)
+  if (proxyPath) {
+    setProxy(mainWindow, proxyPath)
+  }
   // 创建动态壁纸
   if (videoPath) {
     createLiveWallpaperWindow()
@@ -137,7 +173,7 @@ const createWindow = () => {
 
   if (isDev) {
     // mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
-    mainWindow.loadURL(process.argv[2] || 'http://localhost:1234')
+    mainWindow.loadURL(getDevServerUrl())
     mainWindow.webContents.openDevTools({ mode: 'right' })
   } else {
     // mainWindow.loadFile(...fileRoute)
@@ -223,13 +259,14 @@ async function ensureLocalWallpaperThumbnail(filePath: string) {
   const maxWidth = 640
   const maxHeight = 400
   const resizeRatio = Math.min(maxWidth / Math.max(width, 1), maxHeight / Math.max(height, 1), 1)
-  const resized = resizeRatio < 1
-    ? image.resize({
-        width: Math.max(1, Math.round(width * resizeRatio)),
-        height: Math.max(1, Math.round(height * resizeRatio)),
-        quality: 'good',
-      })
-    : image
+  const resized =
+    resizeRatio < 1
+      ? image.resize({
+          width: Math.max(1, Math.round(width * resizeRatio)),
+          height: Math.max(1, Math.round(height * resizeRatio)),
+          quality: 'good',
+        })
+      : image
 
   await fs.writeFile(thumbnailPath, resized.toJPEG(82))
   return thumbnailPath
@@ -275,7 +312,9 @@ async function cleanupTemporaryWallpaperFrame(framePath: string) {
 
   try {
     await fs.unlink(framePath)
-  } catch {}
+  } catch {
+    // Ignore missing temporary frame files during cleanup.
+  }
 
   try {
     await fs.rm(path.dirname(framePath), { force: true, recursive: true })

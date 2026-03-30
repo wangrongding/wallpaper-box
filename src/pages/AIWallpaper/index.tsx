@@ -2,13 +2,12 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { createStore, ipcRenderer } from '@/lib/electron-runtime'
 import { cn } from '@/lib/utils'
-import { ipcRenderer } from 'electron'
 import { FolderOpen, ImagePlus, Maximize2, RefreshCw, Settings2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
 
-const Store = require('electron-store')
-const store = new Store()
+const store = createStore()
 
 const defaultAiConfig = {
   apiBaseUrl: 'https://api.openai.com/v1',
@@ -218,7 +217,7 @@ export default function AIWallpaper() {
       return
     }
 
-    let resolvedSize = size
+    let resolvedSize: string
     try {
       resolvedSize = resolveSizeForRequest()
     } catch (error) {

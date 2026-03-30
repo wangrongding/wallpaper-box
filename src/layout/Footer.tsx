@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/lib/electron-runtime'
 import { Github } from 'lucide-react'
 
 export default function Footer() {

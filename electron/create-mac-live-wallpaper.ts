@@ -1,3 +1,4 @@
+import { getDevServerUrl } from './dev-server'
 import { app, BrowserWindow, screen, ipcMain } from 'electron'
 import path from 'path'
 
@@ -41,7 +42,7 @@ export function createMacLiveWallpaper() {
     // 加载页面
     if (isDev) {
       // wallWindow[index].webContents.openDevTools({ mode: 'right' })
-      await wallWindow[index].loadURL('http://localhost:1234/#/wallpaper')
+      await wallWindow[index].loadURL(`${getDevServerUrl()}/#/wallpaper`)
     } else {
       // await wallWindow[index].loadFile(path.join(__dirname, '../dist-web/index.html#/wallpaper'))
       await wallWindow[index].loadURL(`file://${path.join(__dirname, '../dist-web/index.html')}#/wallpaper`)

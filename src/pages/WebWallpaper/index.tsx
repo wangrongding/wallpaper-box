@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/lib/electron-runtime'
 import { Globe, ExternalLink, Upload, FileCode2, X } from 'lucide-react'
 import { toast } from 'sonner'
 

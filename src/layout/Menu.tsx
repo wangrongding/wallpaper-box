@@ -1,13 +1,9 @@
+import { fs, ipcRenderer, os, path } from '@/lib/electron-runtime'
 import { cn } from '@/lib/utils'
 import { menuRoutes } from '@/routers/index'
-import { ipcRenderer } from 'electron'
 import { Dice5, RefreshCw } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
 
 const MenuBar: React.FC = () => {
   const navigate = useNavigate()
