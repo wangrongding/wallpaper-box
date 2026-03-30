@@ -1,4 +1,5 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent, app, BrowserWindow } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
+import type { IpcRendererEvent } from 'electron'
 
 export type Channels = 'ipc-example'
 

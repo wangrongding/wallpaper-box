@@ -1,3 +1,4 @@
+import { getDevServerUrl } from './dev-server'
 import { app, BrowserWindow, screen, ipcMain } from 'electron'
 import os from 'os'
 // import { WinWin, ffi, CPP, L, NULL } from 'win-win-api'
@@ -24,7 +25,7 @@ export function createWinLiveWallpaper() {
         },
       }),
     )
-    wallWindow[index].loadURL('http://localhost:1234/wallpaper')
+    wallWindow[index].loadURL(`${getDevServerUrl()}/wallpaper`)
     wallWindow[index].setIgnoreMouseEvents(true)
     // 窗口设置在壁纸上层
     setUnderLayer(wallWindow[index])

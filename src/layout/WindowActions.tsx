@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/lib/electron-runtime'
 import { Minus, Maximize2, Minimize2, X } from 'lucide-react'
 
 export default function WindowActions() {

@@ -1,24 +1,22 @@
 import { Image as CusImage } from '@/components/Image'
-import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@/components/ui/dialog'
+import { Dialog, DialogOverlay, DialogPortal } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { createStore, fs, ipcRenderer, os, path } from '@/lib/electron-runtime'
 import { WALLHAVEN_API_KEY_STORE_KEY, buildWallhavenSearchUrl } from '@/lib/wallhaven'
-import { ipcRenderer } from 'electron'
 import { debounce } from 'lodash'
 import { Download, X, Inbox, Search, Loader2, Monitor, ZoomIn, ZoomOut, Key, ArrowRight } from 'lucide-react'
-import { toast } from 'sonner'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
-const fs = require('fs')
-const os = require('os')
-const path = require('path')
-const Store = require('electron-store')
-const store = new Store()
+const store = createStore()
 
 export default function List() {
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+  const [listLoading, setListLoading] = useState(false)
+  const [applyingWallpaper, setApplyingWallpaper] = useState(false)
   const [wallpaperList, setWallpaperList] = useState<any[]>([])
   const [visible, setVisible] = useState(false)
   const [previewSrc, setPreviewSrc] = useState('')
@@ -42,47 +40,53 @@ export default function List() {
 
   // 设置壁纸
   const setAsBackground = async (item: any) => {
-    setLoading(true)
-    // 下载图片
-    const fileName = item.path.split('/').pop()
-    const dir = path.join(os.homedir(), '/wallpaper-box')
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true })
-    }
-    const picturePath = path.join(dir, fileName)
-    // 判断文件是否存在
-    if (!fs.existsSync(picturePath)) {
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 60 * 1000)
-        const response = await fetch(item.path, { signal: controller.signal })
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          throw new Error(`Failed to download image: ${response.status} ${response.statusText}`)
-        }
-
-        const buffer = await response.arrayBuffer()
-        fs.writeFileSync(picturePath, Buffer.from(buffer))
-        console.log('Image downloaded successfully!')
-      } catch {
-        toast.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
-        setLoading(false)
-        return
-      }
-    }
-
-    const result = await ipcRenderer.invoke('set-wallpaper', picturePath)
-
-    if (!result?.success) {
-      toast.error(result?.message || '设置壁纸失败')
-      setLoading(false)
+    if (applyingWallpaper) {
       return
     }
 
-    ipcRenderer.send('close-live-wallpaper')
-    toast.success('设置成功！')
-    setLoading(false)
+    setApplyingWallpaper(true)
+
+    try {
+      // 下载图片
+      const fileName = item.path.split('/').pop()
+      const dir = path.join(os.homedir(), '/wallpaper-box')
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true })
+      }
+      const picturePath = path.join(dir, fileName)
+      // 判断文件是否存在
+      if (!fs.existsSync(picturePath)) {
+        try {
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 60 * 1000)
+          const response = await fetch(item.path, { signal: controller.signal })
+          clearTimeout(timeoutId)
+
+          if (!response.ok) {
+            throw new Error(`Failed to download image: ${response.status} ${response.statusText}`)
+          }
+
+          const buffer = await response.arrayBuffer()
+          fs.writeFileSync(picturePath, Buffer.from(buffer))
+          console.log('Image downloaded successfully!')
+        } catch {
+          toast.error('请重新尝试，或检查网络，一直不行可尝试全局挂个梯子或者在设置页面配置该应用的代理。')
+          return
+        }
+      }
+
+      const result = await ipcRenderer.invoke('set-wallpaper', picturePath)
+
+      if (!result?.success) {
+        toast.error(result?.message || '设置壁纸失败')
+        return
+      }
+
+      ipcRenderer.send('close-live-wallpaper')
+      toast.success('设置成功！')
+    } finally {
+      setApplyingWallpaper(false)
+    }
   }
 
   // 排序方式改变
@@ -125,38 +129,46 @@ export default function List() {
 
   // 获取壁纸列表
   async function getWallpaperList(): Promise<void> {
-    setLoading(true)
+    setListLoading(true)
     // await getWallHavenAssets(query)
     const categories = query.general + query.anime + query.people
     const purity = query.sfw + query.sketchy + query.nsfw
 
     try {
-      const res = await fetch(buildWallhavenSearchUrl({
-        apiKey: store.get(WALLHAVEN_API_KEY_STORE_KEY) || '',
-        categories,
-        keyword: query.keyword,
-        page: query.page,
-        purity,
-        sorting: query.sorting,
-      }), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
+      const res = await fetch(
+        buildWallhavenSearchUrl({
+          apiKey: store.get(WALLHAVEN_API_KEY_STORE_KEY) || '',
+          categories,
+          keyword: query.keyword,
+          page: query.page,
+          purity,
+          sorting: query.sorting,
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+          mode: 'no-cors',
         },
-        mode: 'no-cors',
-      })
+      )
       const list = await res.json()
       setWallpaperList((prev) => [...prev, ...list.data])
-      setQuery(
-        list.data.length &&
+      if (list.data.length) {
+        setQuery(
           Object.assign(query, {
             page: query.page + 1,
           }),
-      )
+        )
+      }
     } catch {
-      query.nsfw === '1' ? toast.error('该分区暂时被限制，可能访问人次过多，请晚点重试') : toast.error('请检查网络，刷新重试')
+      if (query.nsfw === '1') {
+        toast.error('该分区暂时被限制，可能访问人次过多，请晚点重试')
+      } else {
+        toast.error('请检查网络，刷新重试')
+      }
     } finally {
-      setLoading(false)
+      setListLoading(false)
     }
   }
 
@@ -187,17 +199,10 @@ export default function List() {
       })
   }
 
-  // 没有 api key 时，每次请求只有 24 条数据，所以需要多次请求
-  async function getWallpaperListWithNoApiKey(times: number = 3) {
-    for (let i = 0; i < times - 1; i++) {
-      await getWallpaperList()
-    }
-  }
-
   // 滚动加载更多
   const main = document.querySelector('#main-content')!
   const onScroll = debounce(() => {
-    if (loading) return
+    if (listLoading) return
     const { scrollTop, scrollHeight, clientHeight } = main
     if (scrollTop + clientHeight >= scrollHeight - 100) {
       getWallpaperList()
@@ -225,11 +230,24 @@ export default function List() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [visible])
 
+  const applyingWallpaperOverlay =
+    applyingWallpaper && typeof document !== 'undefined'
+      ? createPortal(
+          <div className='bg-[var(--bg-deep)]/60 fixed inset-0 z-[60] flex items-center justify-center backdrop-blur-sm'>
+            <div className='flex flex-col items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-8 py-6 shadow-2xl'>
+              <Loader2 className='h-8 w-8 animate-spin text-[var(--accent-primary)]' />
+              <span className='text-sm text-[var(--text-secondary)]'>正在设置壁纸...</span>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null
+
   return (
     <div className='list-page animate-fade-in-up'>
       {/* API Key 引导横幅 */}
       {!hasApiKey && (
-        <div className='mb-4 flex items-center gap-3 rounded-lg border border-amber-500/25 bg-amber-500/8 px-4 py-3 text-[13px]'>
+        <div className='bg-amber-500/8 mb-4 flex items-center gap-3 rounded-lg border border-amber-500/25 px-4 py-3 text-[13px]'>
           <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400'>
             <Key className='h-3.5 w-3.5' />
           </div>
@@ -291,19 +309,33 @@ export default function List() {
       </div>
       {/* 壁纸列表 */}
       {wallpaperList.length ? (
-        <div className='grid grid-cols-5 gap-3' onScroll={onScroll}>
-          {wallpaperList.map((item: any, index: number) => {
-            return (
-              <CusImage
-                key={index}
-                src={item.thumbs.small}
-                previewSrc={item.path}
-                index={index}
-                onPreview={handlePreview}
-                onSet={() => setAsBackground(item)}
-              />
-            )
-          })}
+        <>
+          <div className='grid grid-cols-5 gap-3' onScroll={onScroll}>
+            {wallpaperList.map((item: any, index: number) => {
+              return (
+                <CusImage
+                  key={index}
+                  src={item.thumbs.small}
+                  previewSrc={item.path}
+                  index={index}
+                  onPreview={handlePreview}
+                  onSet={() => setAsBackground(item)}
+                />
+              )
+            })}
+          </div>
+          {listLoading && (
+            <div className='flex items-center justify-center gap-2 py-6 text-[var(--text-tertiary)]'>
+              <Loader2 className='h-4 w-4 animate-spin' />
+              <span className='text-sm'>加载中...</span>
+            </div>
+          )}
+        </>
+      ) : listLoading ? (
+        <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
+          <Loader2 className='mb-4 h-8 w-8 animate-spin text-[var(--accent-primary)]' />
+          <p className='font-display text-base font-medium'>正在加载壁纸</p>
+          <p className='mt-1 text-[13px] opacity-60'>首次加载可能需要一点时间</p>
         </div>
       ) : (
         <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
@@ -393,14 +425,7 @@ export default function List() {
         </DialogPortal>
       </Dialog>
 
-      {loading && (
-        <div className='bg-[var(--bg-deep)]/60 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm'>
-          <div className='flex flex-col items-center gap-3 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-8 py-6 shadow-2xl'>
-            <Loader2 className='h-8 w-8 animate-spin text-[var(--accent-primary)]' />
-            <span className='text-sm text-[var(--text-secondary)]'>加载中...</span>
-          </div>
-        </div>
-      )}
+      {applyingWallpaperOverlay}
     </div>
   )
 }

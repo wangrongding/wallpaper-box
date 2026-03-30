@@ -1,7 +1,7 @@
 import MenuBar from './Menu'
 import WindowActions from './WindowActions'
 import Logo from '/logo-full.svg'
-import { ipcRenderer } from 'electron'
+import { ipcRenderer } from '@/lib/electron-runtime'
 
 export default function Header() {
   // 窗口是否最大化

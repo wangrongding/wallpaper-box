@@ -1,9 +1,7 @@
 import { Image as CusImage } from '@/components/Image'
-import { ipcRenderer } from 'electron'
+import { fs, ipcRenderer } from '@/lib/electron-runtime'
 import { FolderOpen, Inbox } from 'lucide-react'
 import { toast } from 'sonner'
-
-const fs = require('fs')
 
 type LocalWallpaperItem = {
   modifiedAt: number
@@ -12,17 +10,7 @@ type LocalWallpaperItem = {
   thumbnailPath?: string
 }
 
-function LocalWallpaperImage({
-  index,
-  item,
-  onDelete,
-  onSet,
-}: {
-  index: number
-  item: LocalWallpaperItem
-  onDelete: () => void
-  onSet: () => void
-}) {
+function LocalWallpaperImage({ index, item, onDelete, onSet }: { index: number; item: LocalWallpaperItem; onDelete: () => void; onSet: () => void }) {
   const cardRef = useRef<HTMLDivElement | null>(null)
   const [shouldLoadThumbnail, setShouldLoadThumbnail] = useState(Boolean(item.thumbnailPath))
   const [thumbnailSrc, setThumbnailSrc] = useState(item.thumbnailPath ? `file://${item.thumbnailPath}?t=${item.modifiedAt}` : '')

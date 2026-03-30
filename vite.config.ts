@@ -1,9 +1,8 @@
-import { electronDev, getReplacer } from './plugins/vite-plugin-electron-dev'
+import { getReplacer } from './plugins/vite-plugin-electron-dev'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-import esModule from 'vite-plugin-esmodule'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
 // import nodeStdlibBrowser from 'node-stdlib-browser'
@@ -12,14 +11,12 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 // const commonjsPackages = ['fs', 'os', 'node:process', 'node:util', 'node:child_process', 'path', ...builtinModules] as const
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode, ssrBuild }) => {
+export default defineConfig(({ command, mode }) => {
   return {
     base: './',
     // vite 插件配置
     plugins: [
-      mode === 'sort' && electronDev(),
       getReplacer(),
-      esModule(['wallpaper']),
       // commonjsExternals({ externals: commonjsPackages }),
       react(),
       // Api自动导入
@@ -47,7 +44,6 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     ],
     // 服务配置
     server: {
-      port: 1234,
       open: false,
       host: '0.0.0.0',
       proxy: {

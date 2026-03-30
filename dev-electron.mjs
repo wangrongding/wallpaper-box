@@ -1,38 +1,33 @@
-// 引入 rollup 配置文件
-import rollupConfig from './rollup.config.js'
 import { spawn } from 'child_process'
 import chokidar from 'chokidar'
 import electron from 'electron'
-import * as rollup from 'rollup'
+import path from 'path'
 
-const httpAddress = 'http://localhost:1234'
-let electronProcess
-let isRestarting = false
-async function build() {
-  try {
-    const bundle = await rollup.rollup(rollupConfig)
-    await bundle.write(rollupConfig.output)
-    // 创建 electron 进程
-    createElectronProcess()
-  } catch (error) {
-    console.error(error)
-    isRestarting = false
-  }
-}
+process.env.IS_DEV ??= 'true'
 
-// 创建 electron 进程
-async function createElectronProcess() {
-  electronProcess = await spawn(electron, ['./dist-electron/main.js', httpAddress], {
-    cwd: process.cwd(),
-    // stdio: 'inherit',
-  })
-  electronProcess.on('close', handleElectronProcessClose)
-  electronProcess.on('error', handleElectronProcessError)
-  electronProcess.stdout.on('data', (data) => {
-    console.log(data.toString())
-  })
-  electronProcess.stderr.on('data', (data) => {
-    console.error(data.toString())
+const viteDevServerUrl = (process.env.VITE_DEV_SERVER_URL || process.argv[2] || 'http://localhost:5173').replace(/\/$/, '')
+const tscBin = path.join(process.cwd(), 'node_modules', 'typescript', 'bin', 'tsc')
+
+let electronProcess = null
+let isBuilding = false
+let hasPendingRebuild = false
+
+function runTypeScriptBuild() {
+  return new Promise((resolve, reject) => {
+    const buildProcess = spawn(process.execPath, [tscBin, '-p', 'tsconfig.electron.json'], {
+      cwd: process.cwd(),
+      stdio: 'inherit',
+    })
+
+    buildProcess.on('error', reject)
+    buildProcess.on('close', (code) => {
+      if (code === 0) {
+        resolve()
+        return
+      }
+
+      reject(new Error(`Electron TypeScript build failed with exit code ${code ?? 'unknown'}`))
+    })
   })
 }
 
@@ -46,14 +41,12 @@ function handleElectronProcessClose(code) {
   const closedProcess = electronProcess
   console.log(`🤖 electron 进程退出，退出码 ${code}`)
   clearElectronProcess(closedProcess)
-  isRestarting = false
 }
 
 function handleElectronProcessError(error) {
   const erroredProcess = electronProcess
   console.error('🤖 electron 进程异常退出：', error)
   clearElectronProcess(erroredProcess)
-  isRestarting = false
 }
 
 function stopElectronProcess() {
@@ -74,25 +67,57 @@ function stopElectronProcess() {
   clearElectronProcess(processToStop)
 }
 
-// 文件变化时，重新构建
-function onFileChange() {
-  if (isRestarting) {
+function startElectronProcess() {
+  const electronEnv = { ...process.env }
+  delete electronEnv.ELECTRON_RUN_AS_NODE
+
+  electronProcess = spawn(electron, ['./dist-electron/main.js', viteDevServerUrl], {
+    cwd: process.cwd(),
+    env: electronEnv,
+    stdio: 'inherit',
+  })
+
+  electronProcess.on('close', handleElectronProcessClose)
+  electronProcess.on('error', handleElectronProcessError)
+}
+
+async function buildAndRestartElectron() {
+  if (isBuilding) {
+    hasPendingRebuild = true
     return
   }
 
-  isRestarting = true
-  console.log('🏃🏃🏃🏃🏃🏃🏃文件更改，正在重新构建...')
-  // 退出上一个 electron 进程
-  stopElectronProcess()
-  build()
+  isBuilding = true
+
+  try {
+    await runTypeScriptBuild()
+    stopElectronProcess()
+    startElectronProcess()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    isBuilding = false
+
+    if (hasPendingRebuild) {
+      hasPendingRebuild = false
+      await buildAndRestartElectron()
+    }
+  }
 }
 
-// 监听 src中所有文件的变化
+function onFileChange(filePath) {
+  console.log(`🏃 检测到 Electron 文件变化，正在重建: ${filePath}`)
+  void buildAndRestartElectron()
+}
+
 const chokidarWatcher = chokidar.watch(['electron/**/*'], {
-  ignored: /(^|[\/\\])\../, // 忽略以点开头的文件
-  persistent: true, // 保持监听状态
+  ignored: /(^|[\/\\])\../,
+  ignoreInitial: true,
+  persistent: true,
 })
 
-// 当文件变化时，重新构建
+chokidarWatcher.on('add', onFileChange)
 chokidarWatcher.on('change', onFileChange)
-build()
+chokidarWatcher.on('unlink', onFileChange)
+
+void buildAndRestartElectron()

@@ -1,12 +1,11 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { createStore, ipcRenderer } from '@/lib/electron-runtime'
 import { cn } from '@/lib/utils'
-import { ipcRenderer } from 'electron'
 import { CheckCircle2, Download, ExternalLink, Film, FolderOpen, Link2, Loader2, Upload, Video } from 'lucide-react'
 import { toast } from 'sonner'
 
-const Store = require('electron-store')
-const store = new Store()
+const store = createStore()
 
 type VideoDownloadProgress = {
   destination?: string

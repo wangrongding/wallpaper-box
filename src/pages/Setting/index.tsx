@@ -1,15 +1,12 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
+import { createStore, ipcRenderer, os, path } from '@/lib/electron-runtime'
 import { WALLHAVEN_API_KEY_HELP_URL, WALLHAVEN_API_KEY_STORE_KEY, resolveWallhavenApiKey } from '@/lib/wallhaven'
-import { ipcRenderer } from 'electron'
 import { ExternalLink, Image, Settings2, Shield, Wifi } from 'lucide-react'
 import { toast } from 'sonner'
 
-const Store = require('electron-store')
-const os = require('os')
-const path = require('path')
-const store = new Store()
+const store = createStore()
 
 const defaultRootPath = path.join(os.homedir(), 'wallpaper-box')
 

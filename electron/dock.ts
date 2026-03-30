@@ -6,9 +6,10 @@ import fs from 'fs'
 export const setDockIcon = () => {
   if (process.platform === 'darwin') {
     const iconPath = getPublicAssetPath('logo.png')
+    const dock = app.dock
 
     if (fs.existsSync(iconPath)) {
-      app.dock.setIcon(iconPath)
+      dock?.setIcon(iconPath)
     } else {
       console.warn(`[dock] icon not found: ${iconPath}`)
     }
