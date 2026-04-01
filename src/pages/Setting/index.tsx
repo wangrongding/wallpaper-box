@@ -102,6 +102,73 @@ export default function Setting() {
         <span>部分功能开发中，敬请期待</span>
       </div>
 
+      {/* 网络代理 */}
+      <div className='mb-4 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)]'>
+        <div className='flex items-center gap-2 border-b border-[var(--border-subtle)] px-5 py-3'>
+          <Wifi className='h-4 w-4 text-[var(--text-tertiary)]' />
+          <span className='text-[13px] font-medium text-[var(--text-secondary)]'>网络代理 (HTTP_PROXY)</span>
+        </div>
+        <div className='px-5 py-4'>
+          <label className='mb-1.5 block text-[13px] text-[var(--text-secondary)]'>代理服务器地址</label>
+          <div className='flex gap-2'>
+            <Input
+              id='proxy'
+              value={proxyPath}
+              placeholder='例: http://localhost:7890'
+              type='text'
+              onChange={(e) => {
+                setProxyPath(e.target.value)
+              }}
+              className='text-[13px]'
+            />
+            <Button onClick={setProxy} size='sm' className='shrink-0'>
+              保存代理
+            </Button>
+            <Button variant='outline' size='sm' loading={loading} onClick={ping} className='shrink-0'>
+              测试连接
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className='mb-4 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)]'>
+        <div className='flex items-center gap-2 border-b border-[var(--border-subtle)] px-5 py-3'>
+          <Image className='h-4 w-4 text-[var(--text-tertiary)]' />
+          <span className='text-[13px] font-medium text-[var(--text-secondary)]'>壁纸源</span>
+        </div>
+        <div className='space-y-4 px-5 py-4'>
+          <div>
+            <div className='mb-1.5 flex items-center justify-between gap-3'>
+              <label className='text-[13px] text-[var(--text-secondary)]'>Wallhaven API Key</label>
+              <Button variant='ghost' size='sm' className='h-7 px-2 text-[12px]' onClick={openWallhavenAccount}>
+                <ExternalLink className='mr-1.5 h-3.5 w-3.5' />
+                获取 ApiKey
+              </Button>
+            </div>
+            <div className='flex gap-2'>
+              <Input
+                value={wallhavenApiKey}
+                placeholder='留空则使用内置默认 Key'
+                type='text'
+                onChange={(e) => {
+                  setWallhavenApiKey(e.target.value)
+                }}
+                className='text-[13px]'
+              />
+              <Button onClick={saveWallhavenApiKey} size='sm' className='shrink-0'>
+                保存 Key
+              </Button>
+            </div>
+            <p className='mt-2 text-[12px] leading-5 text-[var(--text-tertiary)]'>
+              当前生效：
+              <span className='ml-1 text-[var(--text-secondary)]'>
+                {wallhavenApiKey.trim() ? '使用你自己的 Wallhaven API Key' : `使用内置默认 Key（使用人数较多时，可能会遇到访问限制）)`}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* 常规设置 */}
       <div className='mb-4 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)]'>
         <div className='flex items-center gap-2 border-b border-[var(--border-subtle)] px-5 py-3'>
@@ -130,75 +197,6 @@ export default function Setting() {
                 修改
               </Button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div className='mb-4 overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)]'>
-        <div className='flex items-center gap-2 border-b border-[var(--border-subtle)] px-5 py-3'>
-          <Image className='h-4 w-4 text-[var(--text-tertiary)]' />
-          <span className='text-[13px] font-medium text-[var(--text-secondary)]'>壁纸源</span>
-        </div>
-        <div className='space-y-4 px-5 py-4'>
-          <div>
-            <div className='mb-2 flex items-center justify-between gap-3'>
-              <label className='text-[13px] text-[var(--text-secondary)]'>Wallhaven API Key</label>
-              <Button variant='ghost' size='sm' className='h-7 px-2 text-[12px]' onClick={openWallhavenAccount}>
-                <ExternalLink className='mr-1.5 h-3.5 w-3.5' />
-                获取 ApiKey
-              </Button>
-            </div>
-            <Input
-              value={wallhavenApiKey}
-              placeholder='留空则使用内置默认 Key'
-              type='text'
-              onChange={(e) => {
-                setWallhavenApiKey(e.target.value)
-              }}
-              className='text-[13px]'
-            />
-            <p className='mt-2 text-[12px] leading-5 text-[var(--text-tertiary)]'>
-              当前生效：
-              <span className='ml-1 text-[var(--text-secondary)]'>
-                {wallhavenApiKey.trim() ? '使用你自己的 Wallhaven API Key' : `使用内置默认 Key（使用人数较多时，可能会遇到访问限制）)`}
-              </span>
-            </p>
-          </div>
-          <div className='flex gap-2'>
-            <Button onClick={saveWallhavenApiKey} size='sm'>
-              保存 Key
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* 网络代理 */}
-      <div className='overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-glass)]'>
-        <div className='flex items-center gap-2 border-b border-[var(--border-subtle)] px-5 py-3'>
-          <Wifi className='h-4 w-4 text-[var(--text-tertiary)]' />
-          <span className='text-[13px] font-medium text-[var(--text-secondary)]'>网络代理 (HTTP_PROXY)</span>
-        </div>
-        <div className='space-y-4 px-5 py-4'>
-          <div>
-            <label className='mb-1.5 block text-[13px] text-[var(--text-secondary)]'>代理服务器地址</label>
-            <Input
-              id='proxy'
-              value={proxyPath}
-              placeholder='例: http://localhost:7890'
-              type='text'
-              onChange={(e) => {
-                setProxyPath(e.target.value)
-              }}
-              className='text-[13px]'
-            />
-          </div>
-          <div className='flex gap-2'>
-            <Button onClick={setProxy} size='sm'>
-              保存代理
-            </Button>
-            <Button variant='outline' size='sm' loading={loading} onClick={ping}>
-              测试连接
-            </Button>
           </div>
         </div>
       </div>
