@@ -1,4 +1,4 @@
-export const DEFAULT_WALLHAVEN_API_KEY = 'cClHHdiiE4mLTht8yhzdky3beMhGX3rf'
+export const DEFAULT_WALLHAVEN_API_KEY = 'ZdHkLbFRBQk496GqNwIxUEmZMoRZ1ta8'
 export const WALLHAVEN_API_KEY_HELP_URL = 'https://wallhaven.cc/settings/account'
 export const WALLHAVEN_API_KEY_STORE_KEY = 'wallhaven-api-key'
 
