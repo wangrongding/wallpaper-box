@@ -15,82 +15,10 @@ import { createHash } from 'crypto'
 import { protocol, app, BrowserWindow, Notification, ipcMain, shell, nativeImage } from 'electron'
 import Store from 'electron-store'
 import fs from 'fs/promises'
-import os from 'os'
 import path from 'path'
 import { promisify } from 'util'
 
 const execFile = promisify(execFileCallback)
-
-type FFmpegInstance = {
-  load: () => Promise<void>
-  FS: (method: string, ...args: unknown[]) => Uint8Array
-  run: (...args: string[]) => Promise<void>
-}
-
-type FFmpegModule = {
-  createFFmpeg: (options: { log: boolean }) => FFmpegInstance
-  fetchFile: (input: string) => Promise<Uint8Array>
-}
-
-let ffmpegLoaded = false
-let ffmpegInstance: FFmpegInstance | null = null
-let ffmpegModulePromise: Promise<FFmpegModule> | null = null
-
-async function getFFmpegModule() {
-  if (!ffmpegModulePromise) {
-    ffmpegModulePromise = import('@ffmpeg/ffmpeg') as Promise<FFmpegModule>
-  }
-
-  return ffmpegModulePromise
-}
-
-async function getFFmpegInstance() {
-  if (!ffmpegInstance) {
-    const { createFFmpeg } = await getFFmpegModule()
-    ffmpegInstance = createFFmpeg({
-      log: false,
-    })
-  }
-
-  return ffmpegInstance
-}
-
-async function loadFFmpegOnce() {
-  if (!ffmpegLoaded) {
-    const ffmpeg = await getFFmpegInstance()
-    await ffmpeg.load() // 它会自动用内置的 ffmpeg-core.js（已打包进 node_modules）
-    ffmpegLoaded = true
-  }
-}
-
-async function getVideoFrame(videoPath: string): Promise<string> {
-  const ffmpeg = await getFFmpegInstance()
-  const { fetchFile } = await getFFmpegModule()
-
-  await loadFFmpegOnce()
-
-  const inputName = 'input.mp4'
-  const outputName = 'frame.png'
-
-  ffmpeg.FS('writeFile', inputName, await fetchFile(videoPath))
-  await ffmpeg.run('-i', inputName, '-ss', '00:00:08', '-vframes', '1', '-q:v', '2', outputName)
-
-  const data = ffmpeg.FS('readFile', outputName)
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'wallpaper-'))
-  const framePath = path.join(tempDir, outputName)
-
-  await fs.writeFile(framePath, data) // 0.11 版本直接就是 Buffer，完美兼容
-
-  // 清理内存
-  try {
-    ffmpeg.FS('unlink', inputName)
-    ffmpeg.FS('unlink', outputName)
-  } catch {
-    // Ignore ffmpeg virtual FS cleanup failures.
-  }
-
-  return framePath
-}
 
 Store.initRenderer()
 const store = new Store()
@@ -305,45 +233,9 @@ function sendVideoDownloadProgress(payload: Record<string, unknown>) {
   mainWindow.webContents.send('video-download-progress', payload)
 }
 
-async function cleanupTemporaryWallpaperFrame(framePath: string) {
-  if (!framePath) {
-    return
-  }
-
-  try {
-    await fs.unlink(framePath)
-  } catch {
-    // Ignore missing temporary frame files during cleanup.
-  }
-
-  try {
-    await fs.rm(path.dirname(framePath), { force: true, recursive: true })
-  } catch (error) {
-    console.warn('Failed to cleanup temporary wallpaper frame directory:', error)
-  }
-}
-
-// ===== 只替换你原来的 createLiveWallpaperWindow 函数，完整替换成下面这个 =====
 async function createLiveWallpaperWindow() {
   const videoPath = store.get('video-path') as string
   if (!videoPath) return
-
-  let tempFramePath = ''
-
-  try {
-    tempFramePath = await getVideoFrame(videoPath)
-    await setWallPaper(tempFramePath)
-    console.log('视频帧壁纸设置成功')
-  } catch (error) {
-    console.error('Failed to set wallpaper from video frame:', error)
-  }
-
-  // 10秒后自动删除临时图片，防止壁纸还没生效就被删掉
-  if (tempFramePath) {
-    setTimeout(() => {
-      void cleanupTemporaryWallpaperFrame(tempFramePath)
-    }, 10000)
-  }
 
   if (process.platform === 'darwin') {
     // 创建 mac 端动态壁纸窗口
