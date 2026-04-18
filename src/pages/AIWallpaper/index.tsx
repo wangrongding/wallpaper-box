@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { createStore, ipcRenderer } from '@/lib/electron-runtime'
+import { createStore, ipcRenderer, toRendererFileUrl } from '@/lib/electron-runtime'
 import { cn } from '@/lib/utils'
 import { FolderOpen, ImagePlus, Maximize2, RefreshCw, Settings2, Sparkles } from 'lucide-react'
 import { toast } from 'sonner'
@@ -409,7 +409,7 @@ export default function AIWallpaper() {
               {result?.path ? (
                 <div className='relative w-full overflow-hidden rounded-[24px] border border-white/10 bg-black/40 shadow-[0_24px_60px_rgba(2,6,23,0.42)]'>
                   <img
-                    src={`file://${result.path}?t=${previewToken}`}
+                    src={toRendererFileUrl(result.path, { t: previewToken })}
                     alt='Generated wallpaper'
                     className='h-full max-h-[640px] w-full bg-black/30 object-contain'
                   />

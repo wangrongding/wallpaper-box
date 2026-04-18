@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ipcRenderer } from '@/lib/electron-runtime'
+import { getRendererFilePath, ipcRenderer, toRendererFileUrl } from '@/lib/electron-runtime'
 import { Globe, ExternalLink, Upload, FileCode2, X } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -37,14 +37,19 @@ const WebWallpaper = () => {
 
   const handleLocalFile = (path: string) => {
     setLocalPath(path)
-    applyWallpaper(`file://${path}`)
+    applyWallpaper(toRendererFileUrl(path))
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const path = (file as any).path
-      if (path) handleLocalFile(path)
+      const filePath = getRendererFilePath(file)
+      if (!filePath) {
+        toast.error('没有读取到本地文件路径')
+        return
+      }
+
+      handleLocalFile(filePath)
     }
   }
 
@@ -53,8 +58,13 @@ const WebWallpaper = () => {
     setIsDragging(false)
     const file = e.dataTransfer.files[0]
     if (file) {
-      const path = (file as any).path
-      if (path) handleLocalFile(path)
+      const filePath = getRendererFilePath(file)
+      if (!filePath) {
+        toast.error('没有读取到本地文件路径')
+        return
+      }
+
+      handleLocalFile(filePath)
     }
   }
 

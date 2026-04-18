@@ -1,5 +1,5 @@
 import { Image as CusImage } from '@/components/Image'
-import { fs, ipcRenderer } from '@/lib/electron-runtime'
+import { fs, ipcRenderer, toRendererFileUrl } from '@/lib/electron-runtime'
 import { FolderOpen, Inbox } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -13,7 +13,7 @@ type LocalWallpaperItem = {
 function LocalWallpaperImage({ index, item, onDelete, onSet }: { index: number; item: LocalWallpaperItem; onDelete: () => void; onSet: () => void }) {
   const cardRef = useRef<HTMLDivElement | null>(null)
   const [shouldLoadThumbnail, setShouldLoadThumbnail] = useState(Boolean(item.thumbnailPath))
-  const [thumbnailSrc, setThumbnailSrc] = useState(item.thumbnailPath ? `file://${item.thumbnailPath}?t=${item.modifiedAt}` : '')
+  const [thumbnailSrc, setThumbnailSrc] = useState(item.thumbnailPath ? toRendererFileUrl(item.thumbnailPath, { t: item.modifiedAt }) : '')
 
   useEffect(() => {
     if (thumbnailSrc) {
@@ -54,14 +54,14 @@ function LocalWallpaperImage({ index, item, onDelete, onSet }: { index: number; 
         }
 
         if (response?.success && response.path) {
-          setThumbnailSrc(`file://${response.path}?t=${item.modifiedAt}`)
+          setThumbnailSrc(toRendererFileUrl(response.path, { t: item.modifiedAt }))
           return
         }
 
-        setThumbnailSrc(`file://${item.path}?t=${item.modifiedAt}`)
+        setThumbnailSrc(toRendererFileUrl(item.path, { t: item.modifiedAt }))
       } catch {
         if (!disposed) {
-          setThumbnailSrc(`file://${item.path}?t=${item.modifiedAt}`)
+          setThumbnailSrc(toRendererFileUrl(item.path, { t: item.modifiedAt }))
         }
       }
     }
