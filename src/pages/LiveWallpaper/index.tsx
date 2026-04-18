@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { createStore, ipcRenderer } from '@/lib/electron-runtime'
+import { createStore, getRendererFilePath, ipcRenderer, toRendererFileUrl } from '@/lib/electron-runtime'
 import { cn } from '@/lib/utils'
 import { CheckCircle2, Download, ExternalLink, Film, FolderOpen, Link2, Loader2, Upload, Video } from 'lucide-react'
 import { toast } from 'sonner'
@@ -79,7 +79,7 @@ export default function LiveWallpaper() {
       return
     }
 
-    const targetPath = (file as File & { path?: string }).path
+    const targetPath = getRendererFilePath(file)
     if (!targetPath) {
       toast.error('没有读取到本地视频路径')
       return
@@ -144,7 +144,7 @@ export default function LiveWallpaper() {
     }
   }, [])
 
-  const previewSrc = filePath ? encodeURI(`file://${filePath}`) : ''
+  const previewSrc = toRendererFileUrl(filePath)
   const currentFileName = filePath ? getFileName(filePath) : ''
   const progressPercent = Math.max(0, Math.min(100, Math.round(downloadProgress?.percent ?? 0)))
   const progressTone =
