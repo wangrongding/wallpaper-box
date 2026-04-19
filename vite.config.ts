@@ -1,4 +1,4 @@
-import { getReplacer } from './plugins/vite-plugin-electron-dev'
+import { devInspectPlugin } from './plugins/vite-plugin-dev-inspect'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -16,9 +16,8 @@ export default defineConfig(({ command, mode }) => {
     base: './',
     // vite 插件配置
     plugins: [
-      getReplacer(),
-      // commonjsExternals({ externals: commonjsPackages }),
       react(),
+      command === 'serve' && devInspectPlugin(),
       // Api自动导入
       AutoImport({
         dts: true,
@@ -67,11 +66,6 @@ export default defineConfig(({ command, mode }) => {
     // 打包配置
     build: {
       outDir: 'dist-web',
-      rollupOptions: {
-        plugins: [
-          // buildPlugin()
-        ],
-      },
     },
   }
 })

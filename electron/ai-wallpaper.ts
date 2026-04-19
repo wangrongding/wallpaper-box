@@ -140,7 +140,9 @@ function detectOutputFormatFromUrl(url: string, contentType?: string) {
     if (pathname.endsWith('.jpg') || pathname.endsWith('.jpeg')) return 'jpeg'
     if (pathname.endsWith('.webp')) return 'webp'
     if (pathname.endsWith('.png')) return 'png'
-  } catch {}
+  } catch {
+    return undefined
+  }
 
   return undefined
 }
@@ -243,7 +245,7 @@ export async function generateAiWallpaper(config: AiWallpaperConfig, payload: Ge
     }
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('图片生成超时，请稍后重试')
+      throw Object.assign(new Error('图片生成超时，请稍后重试'), { cause: error })
     }
 
     throw error

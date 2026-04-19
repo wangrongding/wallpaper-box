@@ -213,6 +213,17 @@ yarn build:electron
 yarn electron:start
 ```
 
+### 开发态 Inspect
+
+开发环境下，renderer 已接入基于 Vite 的源码定位能力，在 Electron 开发窗口里也能直接使用。
+
+- 触发方式：在页面上按住 `Option` 后直接点击目标 DOM。
+- 命中范围：优先跳到当前项目 `src/` 下最接近你点击位置的源码层级，避免优先命中三方组件内部实现。
+- 跳转效果：点击后会直接在本机 IDE 中打开源码并跳转到对应行列。
+- 生效环境：只在 `yarn dev` / `yarn dev:web` 这类开发环境生效，生产构建不会注入 inspect 脚本。
+- macOS 兜底：开发服务器会优先复用当前已运行的 `VS Code / Cursor / Zed / WebStorm` 的应用可执行路径，减少对 `code` / `cursor` 命令是否安装到 PATH 的依赖。
+- 编辑器选择：默认复用 Vite 的 launch-editor 机制自动探测当前编辑器；如果需要显式指定，可以在启动前设置 `LAUNCH_EDITOR`，例如 `LAUNCH_EDITOR=cursor yarn dev` 或 `LAUNCH_EDITOR=code yarn dev`。
+
 ## 打包
 
 构建产物默认输出到 `out/` 目录。
