@@ -3,6 +3,32 @@ import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 import reactHooks from 'eslint-plugin-react-hooks'
 
+const sharedGlobals = {
+  URL: 'readonly',
+  clearInterval: 'readonly',
+  clearTimeout: 'readonly',
+  console: 'readonly',
+  setInterval: 'readonly',
+  setTimeout: 'readonly',
+}
+
+const nodeGlobals = {
+  ...sharedGlobals,
+  Buffer: 'readonly',
+  __dirname: 'readonly',
+  module: 'readonly',
+  process: 'readonly',
+  require: 'readonly',
+}
+
+const browserGlobals = {
+  ...sharedGlobals,
+  HTMLElement: 'readonly',
+  document: 'readonly',
+  fetch: 'readonly',
+  window: 'readonly',
+}
+
 export default [
   {
     ignores: [
@@ -12,16 +38,31 @@ export default [
       'node_modules/**',
       '.eslintrc-auto-import.json',
       'auto-imports.d.ts',
-      'rollup.config.js',
       'vite.config.ts',
-      'vite.config.electron.ts',
       'postcss.config.js',
       'tailwind.config.js',
       'dev-electron.mjs',
       'test.js',
+      'resources/**',
     ],
   },
   js.configs.recommended,
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: nodeGlobals,
+    },
+  },
+  {
+    files: ['plugins/dev-inspect-client.js'],
+    languageOptions: {
+      globals: {
+        ...browserGlobals,
+        __WBX_BASE__: 'readonly',
+        __WBX_ROOT__: 'readonly',
+      },
+    },
+  },
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -32,20 +73,8 @@ export default [
         ecmaFeatures: { jsx: true },
       },
       globals: {
-        window: 'readonly',
-        document: 'readonly',
-        console: 'readonly',
-        process: 'readonly',
-        require: 'readonly',
-        module: 'readonly',
-        __dirname: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        Buffer: 'readonly',
-        URL: 'readonly',
-        fetch: 'readonly',
+        ...nodeGlobals,
+        ...browserGlobals,
         React: 'readonly',
         useState: 'readonly',
         useEffect: 'readonly',

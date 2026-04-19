@@ -128,7 +128,9 @@ async function adHocSign(targetPath) {
 
   try {
     await execFile('xattr', ['-cr', targetPath])
-  } catch {}
+  } catch {
+    // xattr is optional; continue even if it is unavailable.
+  }
 
   try {
     await execFile('codesign', ['-s', '-', targetPath])

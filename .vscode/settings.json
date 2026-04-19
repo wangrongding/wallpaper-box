@@ -1,4 +1,5 @@
 {
   "files.autoSave": "afterDelay",
-  "files.autoSaveDelay": 10000
+  "files.autoSaveDelay": 10000,
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

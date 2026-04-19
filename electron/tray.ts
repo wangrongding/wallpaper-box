@@ -97,13 +97,12 @@ export function cpuUsage() {
 
 //这里获取的是CPU总信息
 function getCPUInfo() {
-  let cpus = os.cpus()
+  const cpus = os.cpus()
   let user = 0
   let nice = 0
   let sys = 0
   let idle = 0
   let irq = 0
-  let total = 0
   for (let cpu in cpus) {
     user += cpus[cpu].times.user
     nice += cpus[cpu].times.nice
@@ -111,7 +110,7 @@ function getCPUInfo() {
     irq += cpus[cpu].times.irq
     idle += cpus[cpu].times.idle
   }
-  total = user + nice + sys + idle + irq
+  const total = user + nice + sys + idle + irq
   // 空闲 cpu，总 cpu
   return { idle, total }
 }

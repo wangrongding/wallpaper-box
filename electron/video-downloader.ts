@@ -1,9 +1,9 @@
+import { getBundledBinaryPath, getWallpaperVideoDirectory } from './paths'
 import { spawn, type ChildProcess } from 'child_process'
 import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
 import { Readable } from 'stream'
-import { getBundledBinaryPath, getWallpaperVideoDirectory } from './paths'
 
 export type DownloadVideoPayload = {
   proxy?: string
@@ -40,10 +40,7 @@ const BINARY_CANDIDATES: Partial<Record<NodeJS.Platform, Partial<Record<RuntimeB
   aix: {},
   android: {},
   darwin: {
-    deno: [
-      process.arch === 'arm64' ? 'deno-aarch64-apple-darwin' : 'deno-x86_64-apple-darwin',
-      'deno',
-    ],
+    deno: [process.arch === 'arm64' ? 'deno-aarch64-apple-darwin' : 'deno-x86_64-apple-darwin', 'deno'],
     ffmpeg: [process.arch === 'arm64' ? 'ffmpeg-darwin-arm64' : 'ffmpeg-darwin-x64', 'ffmpeg'],
     ffprobe: [process.arch === 'arm64' ? 'ffprobe-darwin-arm64' : 'ffprobe-darwin-x64', 'ffprobe'],
     'yt-dlp': ['yt-dlp_macos', 'yt-dlp'],
@@ -51,10 +48,7 @@ const BINARY_CANDIDATES: Partial<Record<NodeJS.Platform, Partial<Record<RuntimeB
   freebsd: {},
   haiku: {},
   linux: {
-    deno: [
-      process.arch === 'arm64' ? 'deno-aarch64-unknown-linux-gnu' : 'deno-x86_64-unknown-linux-gnu',
-      'deno',
-    ],
+    deno: [process.arch === 'arm64' ? 'deno-aarch64-unknown-linux-gnu' : 'deno-x86_64-unknown-linux-gnu', 'deno'],
     ffmpeg: ['ffmpeg'],
     ffprobe: ['ffprobe'],
     'yt-dlp': ['yt-dlp_linux', 'yt-dlp'],
@@ -62,10 +56,7 @@ const BINARY_CANDIDATES: Partial<Record<NodeJS.Platform, Partial<Record<RuntimeB
   openbsd: {},
   sunos: {},
   win32: {
-    deno: [
-      process.arch === 'arm64' ? 'deno-aarch64-pc-windows-msvc.exe' : 'deno-x86_64-pc-windows-msvc.exe',
-      'deno.exe',
-    ],
+    deno: [process.arch === 'arm64' ? 'deno-aarch64-pc-windows-msvc.exe' : 'deno-x86_64-pc-windows-msvc.exe', 'deno.exe'],
     ffmpeg: ['ffmpeg.exe', 'ffmpeg'],
     ffprobe: ['ffprobe.exe', 'ffprobe'],
     'yt-dlp': ['yt-dlp.exe', 'yt-dlp'],
@@ -88,7 +79,9 @@ async function fileExists(targetPath: string) {
 async function ensureExecutable(targetPath: string) {
   try {
     await fs.chmod(targetPath, 0o755)
-  } catch {}
+  } catch {
+    // Ignore chmod failures for filesystems that do not preserve executable bits.
+  }
 }
 
 async function resolveBundledBinary(name: RuntimeBinaryName) {
@@ -225,7 +218,9 @@ async function cleanupTemporaryDirectory(targetPath?: string) {
 
   try {
     await fs.rm(targetPath, { force: true, recursive: true })
-  } catch {}
+  } catch {
+    // Best-effort cleanup only.
+  }
 }
 
 async function buildSpawnConfig(payload: DownloadVideoPayload) {
