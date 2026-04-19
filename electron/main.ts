@@ -7,7 +7,8 @@ import { initKeyboard } from './keyboard'
 import { initMenu } from './menu'
 import { getWallpaperRootPath, getWallpaperThumbnailDirectory } from './paths'
 import { setProxy, removeProxy } from './proxy'
-import { setTrayIcon } from './tray'
+import { getTrayIconState, refreshTrayIconLibrary, setActiveTrayIcon, setTrayIcon } from './tray'
+import { importTrayIconSet } from './tray-list'
 import { startVideoDownload } from './video-downloader'
 import { execFile as execFileCallback } from 'child_process'
 import type { ChildProcess } from 'child_process'
@@ -449,6 +450,82 @@ ipcMain.handle('download-video-wallpaper', async (_, arg) => {
     }
   } finally {
     activeVideoDownload = null
+  }
+})
+
+ipcMain.handle('list-tray-icons', async () => {
+  try {
+    return {
+      success: true,
+      ...getTrayIconState(),
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('set-tray-icon', async (_, arg) => {
+  try {
+    if (typeof arg !== 'string' || !arg.trim()) {
+      throw new Error('动态图标 ID 无效')
+    }
+
+    return {
+      currentId: setActiveTrayIcon(arg.trim()),
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('import-tray-icon-set', async (_, arg) => {
+  try {
+    const importedTrayIcon = importTrayIconSet(
+      typeof arg?.name === 'string' ? arg.name : '',
+      Array.isArray(arg?.framePaths) ? arg.framePaths.filter((item: unknown): item is string => typeof item === 'string') : [],
+    )
+
+    return {
+      currentId: refreshTrayIconLibrary(),
+      item: importedTrayIcon,
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('open-tray-icon-directory', async (_, arg) => {
+  try {
+    const trayIconState = getTrayIconState()
+    const targetPath = arg === 'builtin' ? trayIconState.builtinDirectory : trayIconState.customDirectory
+
+    await fs.mkdir(targetPath, { recursive: true })
+
+    const result = await shell.openPath(targetPath)
+    if (result) {
+      throw new Error(result)
+    }
+
+    return {
+      path: targetPath,
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
   }
 })
 

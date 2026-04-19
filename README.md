@@ -123,7 +123,7 @@
 
 ### RunCat
 
-托盘图标会根据 CPU 使用情况动态切换速度，支持在托盘菜单里切换不同动画主题。
+托盘图标会根据 CPU 使用情况动态切换速度，支持在托盘菜单和独立的“动态图标”页面里切换不同动画主题。
 
 <table>
   <tr>
@@ -132,7 +132,11 @@
   </tr>
 </table>
 
-如果你想添加自定义图标，可以直接往 [public/icons](./public/icons) 里补素材，并在 [electron/tray-list.ts](./electron/tray-list.ts) 里注册。
+现在不需要再手动改 [electron/tray-list.ts](./electron/tray-list.ts) 了。
+
+- 内置图标会自动扫描 [public/icons](./public/icons) 下的子目录。
+- 自定义图标可以在“动态图标”页面里导入一组动画帧，也可以直接把素材放进 `~/wallpaper-box/tray-icons/<你的图标名>/`。
+- 同一组动画帧会按文件名顺序播放，适合使用 `001.png`、`002.png` 这类命名。
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030045464.gif" width="600" />
 
@@ -149,6 +153,7 @@
 
 - 代理测试当前会尝试访问 `Google`
 - AI 接口配置不在这里，而是在 `AI 壁纸` 页面里单独设置
+- 菜单栏动态图标的预览、切换和自定义导入已经拆分到独立的 `动态图标` 页面
 
 <img width="1000" alt="531b7f4d-270e-4233-8a14-fbc2d4d4c2ff" src="https://github.com/user-attachments/assets/2987e3fa-08f5-4251-bd06-8d0a451d30f7" />
 
