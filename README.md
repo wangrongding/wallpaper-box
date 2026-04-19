@@ -135,7 +135,7 @@
 现在不需要再手动改 [electron/tray-list.ts](./electron/tray-list.ts) 了。
 
 - 内置图标会自动扫描 [public/icons](./public/icons) 下的子目录。
-- 自定义图标可以在“动态图标”页面里导入一组动画帧，也可以直接把素材放进 `~/wallpaper-box/tray-icons/<你的图标名>/`。
+- 自定义图标可以在“动态图标”页面里导入、删除一组动画帧，也可以直接把素材放进 `~/wallpaper-box/tray-icons/<你的图标名>/`。
 - 同一组动画帧会按文件名顺序播放，适合使用 `001.png`、`002.png` 这类命名。
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030045464.gif" width="600" />

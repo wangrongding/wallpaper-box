@@ -8,7 +8,7 @@ import { initMenu } from './menu'
 import { getWallpaperRootPath, getWallpaperThumbnailDirectory } from './paths'
 import { setProxy, removeProxy } from './proxy'
 import { getTrayIconState, refreshTrayIconLibrary, setActiveTrayIcon, setTrayIcon } from './tray'
-import { importTrayIconSet } from './tray-list'
+import { deleteCustomTrayIconSet, importTrayIconSet } from './tray-list'
 import { startVideoDownload } from './video-downloader'
 import { execFile as execFileCallback } from 'child_process'
 import type { ChildProcess } from 'child_process'
@@ -495,6 +495,26 @@ ipcMain.handle('import-tray-icon-set', async (_, arg) => {
     return {
       currentId: refreshTrayIconLibrary(),
       item: importedTrayIcon,
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('delete-tray-icon-set', async (_, arg) => {
+  try {
+    if (typeof arg !== 'string' || !arg.trim()) {
+      throw new Error('动态图标 ID 无效')
+    }
+
+    deleteCustomTrayIconSet(arg.trim())
+
+    return {
+      currentId: refreshTrayIconLibrary(),
       success: true,
     }
   } catch (error) {

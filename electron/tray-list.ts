@@ -17,6 +17,7 @@ export type TrayIconSetDescriptor = {
   framePaths: string[]
   id: string
   label: string
+  lastModifiedAt: number
   name: string
   previewPath: string
   source: TrayIconSource
@@ -77,6 +78,16 @@ function createNativeImageFromAbsolutePath(assetPath: string) {
   return image
 }
 
+function getTrayIconLastModifiedAt(framePaths: string[]) {
+  return framePaths.reduce((latestModifiedAt, framePath) => {
+    try {
+      return Math.max(latestModifiedAt, fs.statSync(framePath).mtimeMs)
+    } catch {
+      return latestModifiedAt
+    }
+  }, 0)
+}
+
 function ensureTrayIconDirectories() {
   fs.mkdirSync(customTrayIconDirectory, { recursive: true })
 }
@@ -124,6 +135,7 @@ function createTrayIconSet(source: TrayIconSource, directoryName: string, groupN
     id: `${source}:${directoryName}:${name}`,
     images,
     label: name,
+    lastModifiedAt: getTrayIconLastModifiedAt(framePaths),
     name,
     previewPath: framePaths[0],
     source,
@@ -168,7 +180,7 @@ function getTrayIconSetsFromDirectory(source: TrayIconSource, directoryName: str
     }
   }
 
-  return iconSets.sort((left, right) => compareText(left.label, right.label))
+  return iconSets
 }
 
 function listLibraryTrayIconSets(libraryPath: string, source: TrayIconSource) {
@@ -179,8 +191,14 @@ function listLibraryTrayIconSets(libraryPath: string, source: TrayIconSource) {
   return fs
     .readdirSync(libraryPath, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
-    .sort((left, right) => compareText(left.name, right.name))
     .flatMap((entry) => getTrayIconSetsFromDirectory(source, entry.name, path.join(libraryPath, entry.name)))
+    .sort((left, right) => {
+      if (source === 'custom' && left.lastModifiedAt !== right.lastModifiedAt) {
+        return right.lastModifiedAt - left.lastModifiedAt
+      }
+
+      return compareText(left.label, right.label)
+    })
 }
 
 function sanitizeTrayIconName(value: string) {
@@ -204,7 +222,7 @@ export function getTrayIconLibraryPaths() {
 export function getTrayIconSets() {
   ensureTrayIconDirectories()
 
-  return [...listLibraryTrayIconSets(builtinTrayIconDirectory, 'builtin'), ...listLibraryTrayIconSets(customTrayIconDirectory, 'custom')]
+  return [...listLibraryTrayIconSets(customTrayIconDirectory, 'custom'), ...listLibraryTrayIconSets(builtinTrayIconDirectory, 'builtin')]
 }
 
 export function getTrayIconSetDescriptors() {
@@ -241,4 +259,39 @@ export function importTrayIconSet(name: string, framePaths: string[]) {
   })
 
   return getTrayIconSetsFromDirectory('custom', normalizedName, destinationDirectory)[0] || null
+}
+
+export function deleteCustomTrayIconSet(targetId: string) {
+  ensureTrayIconDirectories()
+
+  const trayIconSets = getTrayIconSets()
+  const trayIconSet = trayIconSets.find((item) => item.id === targetId)
+
+  if (!trayIconSet) {
+    throw new Error('未找到要删除的自定义动态图标')
+  }
+
+  if (trayIconSet.source !== 'custom') {
+    throw new Error('内置动态图标不支持删除')
+  }
+
+  const relatedTrayIconSets = trayIconSets.filter((item) => item.source === 'custom' && item.directory === trayIconSet.directory)
+
+  if (relatedTrayIconSets.length <= 1) {
+    fs.rmSync(trayIconSet.directory, { force: true, recursive: true })
+    return
+  }
+
+  trayIconSet.framePaths.forEach((framePath) => {
+    fs.rmSync(framePath, { force: true })
+  })
+
+  if (!fs.existsSync(trayIconSet.directory)) {
+    return
+  }
+
+  const remainingEntries = fs.readdirSync(trayIconSet.directory)
+  if (!remainingEntries.length) {
+    fs.rmdirSync(trayIconSet.directory)
+  }
 }

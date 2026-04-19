@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getRendererFilePath, ipcRenderer, toRendererFileUrl } from '@/lib/electron-runtime'
 import { cn } from '@/lib/utils'
-import { AppWindowMac, FolderOpen, ImagePlus, RefreshCw } from 'lucide-react'
+import { AppWindowMac, FolderOpen, ImagePlus, RefreshCw, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 type TrayIconSource = 'builtin' | 'custom'
@@ -61,6 +61,7 @@ export default function TrayIconPanel() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [deletingId, setDeletingId] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function loadTrayIcons() {
@@ -150,6 +151,33 @@ export default function TrayIconPanel() {
       toast.success(refreshed ? '自定义动态图标已导入，现在可以在下方预览并切换' : '自定义动态图标已导入')
     } finally {
       setImporting(false)
+    }
+  }
+
+  async function handleDeleteTrayIcon(item: TrayIconItem) {
+    if (item.source !== 'custom') {
+      return
+    }
+
+    const confirmed = window.confirm(`确认删除 ${item.label} 吗？删除后会移除这组自定义动画帧。`)
+    if (!confirmed) {
+      return
+    }
+
+    setDeletingId(item.id)
+
+    try {
+      const response = (await ipcRenderer.invoke('delete-tray-icon-set', item.id)) as TrayIconMutationResponse
+
+      if (!response?.success) {
+        toast.error(response?.message || '删除自定义动态图标失败')
+        return
+      }
+
+      const refreshed = await loadTrayIcons()
+      toast.success(refreshed ? '自定义动态图标已删除' : '自定义动态图标已删除，列表待刷新')
+    } finally {
+      setDeletingId('')
     }
   }
 
@@ -308,14 +336,28 @@ export default function TrayIconPanel() {
 
                   <p className='mb-4 break-all text-[12px] leading-5 text-[var(--text-tertiary)]'>{item.directory}</p>
 
-                  <Button
-                    size='sm'
-                    variant={isActive ? 'secondary' : 'default'}
-                    className='w-full'
-                    onClick={() => void handleSelectTrayIcon(item.id)}
-                  >
-                    {isActive ? '已选中这个图标' : '使用这个图标'}
-                  </Button>
+                  <div className='flex gap-2'>
+                    <Button
+                      size='sm'
+                      variant={isActive ? 'secondary' : 'default'}
+                      className={item.source === 'custom' ? 'flex-1' : 'w-full'}
+                      onClick={() => void handleSelectTrayIcon(item.id)}
+                    >
+                      {isActive ? '已选中这个图标' : '使用这个图标'}
+                    </Button>
+                    {item.source === 'custom' && (
+                      <Button
+                        size='sm'
+                        variant='destructive'
+                        className='shrink-0'
+                        loading={deletingId === item.id}
+                        onClick={() => void handleDeleteTrayIcon(item)}
+                      >
+                        {deletingId !== item.id && <Trash2 className='mr-1.5 h-3.5 w-3.5' />}
+                        删除
+                      </Button>
+                    )}
+                  </div>
                 </article>
               )
             })}
