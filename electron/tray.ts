@@ -1,14 +1,13 @@
-import { trays } from './tray-list'
+import { getDefaultTrayIconId, getTrayIconLibraryPaths, getTrayIconSetDescriptors, getTrayIconSets } from './tray-list'
 import { Tray, nativeImage, Menu, shell, BrowserWindow } from 'electron'
+import type { MenuItemConstructorOptions, NativeImage } from 'electron'
+import Store from 'electron-store'
 import os from 'os'
-import * as path from 'path'
 
-// 创建原生图像
-export function createNativeImage(path: string) {
-  return nativeImage.createFromPath(path).resize({ width: 30, height: 28 })
-}
+const store = new Store()
 
-export let icons = trays.mario
+let currentTrayIconId = ((store.get('tray-icon-id') as string) || '').trim()
+let icons: NativeImage[] = [nativeImage.createEmpty()]
 
 // 图表索引
 let index = 0
@@ -21,24 +20,121 @@ export let tray: Tray
 // 主窗口
 let main: BrowserWindow
 
+function clampIntervalIndex(value: number) {
+  return Math.min(intervals.length - 1, Math.max(0, value))
+}
+
+function resolveTrayIconSet(targetId = currentTrayIconId) {
+  const trayIconSets = getTrayIconSets()
+  const defaultTrayIconId = getDefaultTrayIconId()
+
+  return trayIconSets.find((item) => item.id === targetId) || trayIconSets.find((item) => item.id === defaultTrayIconId) || trayIconSets[0] || null
+}
+
+function applyTrayIconSelection(targetId = currentTrayIconId) {
+  const trayIconSet = resolveTrayIconSet(targetId)
+
+  if (!trayIconSet) {
+    currentTrayIconId = ''
+    icons = [nativeImage.createEmpty()]
+    index = 0
+    return null
+  }
+
+  currentTrayIconId = trayIconSet.id
+  icons = trayIconSet.images.length ? trayIconSet.images : [nativeImage.createEmpty()]
+  index = 0
+  store.set('tray-icon-id', currentTrayIconId)
+
+  return trayIconSet
+}
+
+function createTrayIconRadioItems(source: 'builtin' | 'custom'): MenuItemConstructorOptions[] {
+  const items = getTrayIconSetDescriptors().filter((item) => item.source === source)
+
+  if (!items.length) {
+    return [{ label: source === 'builtin' ? '暂无内置图标' : '暂无自定义图标', enabled: false }]
+  }
+
+  return items.map((item) => ({
+    checked: item.id === currentTrayIconId,
+    click: () => {
+      setActiveTrayIcon(item.id)
+    },
+    label: item.label,
+    type: 'radio',
+  }))
+}
+
+function buildTrayIconSelectionMenu() {
+  const { customDirectory } = getTrayIconLibraryPaths()
+
+  return [
+    { label: '内置图标', enabled: false },
+    ...createTrayIconRadioItems('builtin'),
+    { type: 'separator' as const },
+    { label: '自定义图标', enabled: false },
+    ...createTrayIconRadioItems('custom'),
+    { type: 'separator' as const },
+    {
+      label: '打开自定义图标目录',
+      click: async () => {
+        await shell.openPath(customDirectory)
+      },
+    },
+  ] satisfies MenuItemConstructorOptions[]
+}
+
 // 设置托盘图标
 export function setTrayIcon(mainWindow: BrowserWindow) {
   main = mainWindow
+  applyTrayIconSelection(currentTrayIconId)
   // 初始化托盘图标
-  tray = new Tray(icons[0])
+  tray = new Tray(icons[0] || nativeImage.createEmpty())
   // 设置托盘图标悬停提示
   tray.setToolTip('wallpaper-box')
   // 动态替换托盘图标
-  dynamicTrayIcon(intervalIndex)
+  dynamicTrayIcon()
   // 设置托盘图标菜单
   setTrayIconMenu()
 }
 
-type Trays = keyof typeof trays
-// 切换托盘图标,参数的类型为 trays 的 key
-function changeTrayIcon(item: Trays) {
-  icons = trays[item]
-  // dynamicTrayIcon(intervalIndex)
+export function getTrayIconState() {
+  const resolvedTrayIcon = applyTrayIconSelection(currentTrayIconId)
+  const { builtinDirectory, customDirectory } = getTrayIconLibraryPaths()
+
+  return {
+    builtinDirectory,
+    currentId: resolvedTrayIcon?.id || currentTrayIconId,
+    customDirectory,
+    items: getTrayIconSetDescriptors(),
+  }
+}
+
+export function refreshTrayIconLibrary() {
+  const trayIconSet = applyTrayIconSelection(currentTrayIconId)
+
+  if (tray && !tray.isDestroyed()) {
+    tray.setImage(icons[0] || nativeImage.createEmpty())
+    setTrayIconMenu()
+  }
+
+  return trayIconSet?.id || ''
+}
+
+export function setActiveTrayIcon(targetId: string) {
+  const trayIconSet = applyTrayIconSelection(targetId)
+
+  if (!trayIconSet) {
+    throw new Error('未找到可用的菜单栏动态图标')
+  }
+
+  if (tray && !tray.isDestroyed()) {
+    tray.setImage(icons[0] || nativeImage.createEmpty())
+    setTrayIconMenu()
+  }
+
+  return trayIconSet.id
 }
 
 // 设置托盘图标菜单
@@ -46,14 +142,7 @@ export function setTrayIconMenu() {
   const contextMenu = Menu.buildFromTemplate([
     {
       label: '更换图标',
-      submenu: [
-        { label: 'runcat', type: 'radio', click: () => changeTrayIcon('runcat') },
-        { label: 'mario', type: 'radio', click: () => changeTrayIcon('mario'), checked: true },
-        { label: 'Mona', type: 'radio', click: () => changeTrayIcon('mona') },
-        { label: 'partyBlobCat', type: 'radio', click: () => changeTrayIcon('partyBlobCat') },
-        { label: 'Points', type: 'radio', click: () => changeTrayIcon('points') },
-        { label: 'RuncatX', type: 'radio', click: () => changeTrayIcon('runcatX') },
-      ],
+      submenu: buildTrayIconSelectionMenu(),
     },
     { type: 'separator' },
     { label: '显示主窗口', type: 'normal', click: () => main.show() },
@@ -76,23 +165,27 @@ export function setTrayIconMenu() {
 }
 
 // 动态替换托盘图标
-export function dynamicTrayIcon(intervalIndex: number) {
+export function dynamicTrayIcon() {
+  if (!tray || tray.isDestroyed()) {
+    return
+  }
+
   // 替换托盘图标
-  tray.setImage(icons[index] || icons[0])
-  index = (index + 1) % icons.length
-  intervalIndex = cpuUsage()
+  tray.setImage(icons[index] || icons[0] || nativeImage.createEmpty())
+  index = (index + 1) % Math.max(icons.length, 1)
+  cpuUsage()
   // tray.setTitle(intervalIndex.toString())
-  setTimeout(() => dynamicTrayIcon(intervalIndex), intervals[intervalIndex])
+  setTimeout(() => dynamicTrayIcon(), intervals[clampIntervalIndex(intervalIndex)])
 }
 
 // 获取系统 cpu 信息
 export function cpuUsage() {
   getCPUUsage((percentage: number) => {
-    intervalIndex = Number((percentage * 10).toFixed(0))
+    intervalIndex = clampIntervalIndex(Number((percentage * 10).toFixed(0)))
     // console.log(` - CPU使用占比：${Number(percentage * 100).toFixed(2)}%`)
   }, true)
 
-  return intervalIndex
+  return clampIntervalIndex(intervalIndex)
 }
 
 //这里获取的是CPU总信息
