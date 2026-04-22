@@ -26,7 +26,7 @@ const MenuBar: React.FC = () => {
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 20 * 1000)
-      const response = await fetch('https://source.unsplash.com/random/3840x2400', { signal: controller.signal })
+      const response = await fetch('https://picsum.photos/3840/2400', { signal: controller.signal })
       clearTimeout(timeoutId)
 
       if (!response.ok) {
