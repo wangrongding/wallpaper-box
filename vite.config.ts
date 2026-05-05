@@ -1,4 +1,3 @@
-import { devInspectPlugin } from './plugins/vite-plugin-dev-inspect'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -11,13 +10,12 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 // const commonjsPackages = ['fs', 'os', 'node:process', 'node:util', 'node:child_process', 'path', ...builtinModules] as const
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(() => {
   return {
     base: './',
     // vite 插件配置
     plugins: [
       react(),
-      command === 'serve' && devInspectPlugin(),
       // Api自动导入
       AutoImport({
         dts: true,

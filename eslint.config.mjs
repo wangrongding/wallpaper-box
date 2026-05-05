@@ -54,16 +54,6 @@ export default [
     },
   },
   {
-    files: ['plugins/dev-inspect-client.js'],
-    languageOptions: {
-      globals: {
-        ...browserGlobals,
-        __WBX_BASE__: 'readonly',
-        __WBX_ROOT__: 'readonly',
-      },
-    },
-  },
-  {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       parser: tsParser,

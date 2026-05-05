@@ -30,6 +30,9 @@ release
 out/
 
 .agents
+.claude
+.codex
 skills-lock.json
 
 resources/bin
+tsconfig.node.tsbuildinfo
