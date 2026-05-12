@@ -7,6 +7,15 @@ import { toast } from 'sonner'
 
 type TrayIconSource = 'builtin' | 'custom'
 
+type TrayIconSpriteSheet = {
+  columns: number
+  frameHeight: number
+  frameWidth: number
+  path: string
+  row: number
+  rows: number
+}
+
 type TrayIconItem = {
   directory: string
   frameCount: number
@@ -16,6 +25,7 @@ type TrayIconItem = {
   name: string
   previewPath: string
   source: TrayIconSource
+  spriteSheet?: TrayIconSpriteSheet
 }
 
 type TrayIconListResponse = {
@@ -48,6 +58,13 @@ function inferTrayIconName(files: File[]) {
 
 function getTrayIconSourceLabel(source: TrayIconSource) {
   return source === 'builtin' ? '内置' : '自定义'
+}
+
+function getSpriteBackgroundPosition(currentFrame: number, spriteSheet: TrayIconSpriteSheet) {
+  const x = spriteSheet.columns <= 1 ? 0 : (currentFrame / (spriteSheet.columns - 1)) * 100
+  const y = spriteSheet.rows <= 1 ? 0 : (spriteSheet.row / (spriteSheet.rows - 1)) * 100
+
+  return `${x}% ${y}%`
 }
 
 export default function TrayIconPanel() {
@@ -217,7 +234,8 @@ export default function TrayIconPanel() {
             <div>
               <p className='text-[14px] font-medium text-[var(--text-primary)]'>图标库与目录</p>
               <p className='mt-1 text-[12px] leading-5 text-[var(--text-tertiary)]'>
-                内置图标会自动扫描 public/icons，自定义图标会扫描用户目录。每个子文件夹代表一组动画帧，系统按文件名顺序播放。
+                内置图标会自动扫描 public/icons，自定义图标会扫描用户目录。每个子文件夹可以是一组切割好的动画帧，也可以是带 pet.json 的 Codex
+                精灵图；精灵图会按格子裁切后播放。
               </p>
             </div>
 
@@ -253,7 +271,7 @@ export default function TrayIconPanel() {
           <div className='mb-3'>
             <p className='text-[14px] font-medium text-[var(--text-primary)]'>导入一组自定义动画帧</p>
             <p className='mt-1 text-[12px] leading-5 text-[var(--text-tertiary)]'>
-              选择一组 PNG / ICO / JPG / WebP 图片帧，应用会自动复制到自定义图标目录，并在这里提供预览与切换。
+              选择一组 PNG / ICO / JPG / WebP 图片帧，或直接选择一张 Codex Pet 风格的精灵图；应用会复制到自定义图标目录，并提供预览与切换。
             </p>
           </div>
 
@@ -268,7 +286,7 @@ export default function TrayIconPanel() {
             />
             <Button variant='outline' size='sm' className='shrink-0' onClick={() => fileInputRef.current?.click()}>
               <ImagePlus className='mr-1.5 h-3.5 w-3.5' />
-              选择动画帧
+              选择动画帧/精灵图
             </Button>
             <Button size='sm' className='shrink-0' loading={importing} onClick={() => void handleImport()}>
               {!importing && <ImagePlus className='mr-1.5 h-3.5 w-3.5' />}
@@ -295,8 +313,10 @@ export default function TrayIconPanel() {
         ) : items.length ? (
           <div className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
             {items.map((item) => {
-              const framePath = item.framePaths.length ? item.framePaths[previewTick % item.framePaths.length] : item.previewPath
+              const currentFrame = previewTick % Math.max(item.frameCount, 1)
+              const framePath = item.framePaths.length ? item.framePaths[currentFrame % item.framePaths.length] : item.previewPath
               const previewSrc = framePath ? toRendererFileUrl(framePath) : ''
+              const spritePreviewSrc = item.spriteSheet?.path ? toRendererFileUrl(item.spriteSheet.path) : ''
               const isActive = item.id === currentId
 
               return (
@@ -314,6 +334,7 @@ export default function TrayIconPanel() {
                       <p className='text-[14px] font-medium text-[var(--text-primary)]'>{item.label}</p>
                       <p className='mt-1 text-[12px] text-[var(--text-tertiary)]'>
                         {getTrayIconSourceLabel(item.source)} · {item.frameCount} 帧
+                        {item.spriteSheet ? ` · 精灵图 ${item.spriteSheet.columns}×${item.spriteSheet.rows}` : ''}
                       </p>
                     </div>
                     <span
@@ -327,7 +348,19 @@ export default function TrayIconPanel() {
                   </div>
 
                   <div className='mb-3 flex h-24 items-center justify-center rounded-xl border border-[var(--border-subtle)] bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.14),transparent_55%),rgba(2,6,23,0.35)]'>
-                    {previewSrc ? (
+                    {item.spriteSheet && spritePreviewSrc ? (
+                      <div
+                        aria-label={item.label}
+                        role='img'
+                        className='h-14 bg-no-repeat [image-rendering:pixelated]'
+                        style={{
+                          aspectRatio: `${item.spriteSheet.frameWidth} / ${item.spriteSheet.frameHeight}`,
+                          backgroundImage: `url(${spritePreviewSrc})`,
+                          backgroundPosition: getSpriteBackgroundPosition(currentFrame, item.spriteSheet),
+                          backgroundSize: `${item.spriteSheet.columns * 100}% ${item.spriteSheet.rows * 100}%`,
+                        }}
+                      />
+                    ) : previewSrc ? (
                       <img src={previewSrc} alt={item.label} className='h-14 w-auto object-contain [image-rendering:pixelated]' />
                     ) : (
                       <span className='text-[12px] text-[var(--text-tertiary)]'>暂无预览</span>
@@ -366,7 +399,7 @@ export default function TrayIconPanel() {
           <div className='rounded-xl border border-dashed border-[var(--border-subtle)] px-4 py-10 text-center'>
             <p className='text-[14px] font-medium text-[var(--text-primary)]'>还没有可用的菜单栏动态图标</p>
             <p className='mt-2 text-[12px] leading-5 text-[var(--text-tertiary)]'>
-              把动画帧放进 public/icons 的子文件夹里，或者导入一组自定义图片帧，然后点击刷新。
+              把切割好的动画帧或 Codex Pet 精灵图放进 public/icons 的子文件夹里，或者导入自定义图片后点击刷新。
             </p>
           </div>
         )}
