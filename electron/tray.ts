@@ -8,6 +8,7 @@ const store = new Store()
 
 let currentTrayIconId = ((store.get('tray-icon-id') as string) || '').trim()
 let icons: NativeImage[] = [nativeImage.createEmpty()]
+let currentFrameDurationMs: number | null = null
 
 // 图表索引
 let index = 0
@@ -37,12 +38,14 @@ function applyTrayIconSelection(targetId = currentTrayIconId) {
   if (!trayIconSet) {
     currentTrayIconId = ''
     icons = [nativeImage.createEmpty()]
+    currentFrameDurationMs = null
     index = 0
     return null
   }
 
   currentTrayIconId = trayIconSet.id
   icons = trayIconSet.images.length ? trayIconSet.images : [nativeImage.createEmpty()]
+  currentFrameDurationMs = trayIconSet.animation?.frameDurationMs || null
   index = 0
   store.set('tray-icon-id', currentTrayIconId)
 
@@ -173,9 +176,11 @@ export function dynamicTrayIcon() {
   // 替换托盘图标
   tray.setImage(icons[index] || icons[0] || nativeImage.createEmpty())
   index = (index + 1) % Math.max(icons.length, 1)
-  cpuUsage()
+  if (!currentFrameDurationMs) {
+    cpuUsage()
+  }
   // tray.setTitle(intervalIndex.toString())
-  setTimeout(() => dynamicTrayIcon(), intervals[clampIntervalIndex(intervalIndex)])
+  setTimeout(() => dynamicTrayIcon(), currentFrameDurationMs || intervals[clampIntervalIndex(intervalIndex)])
 }
 
 // 获取系统 cpu 信息
