@@ -5,6 +5,9 @@ import fs from 'fs'
 import path from 'path'
 
 const supportedTrayIconExtensions = new Set(['.png', '.ico', '.jpg', '.jpeg', '.webp'])
+const spriteSheetManifestNames = ['pet.json', 'tray-icon.json', 'sprite.json']
+const defaultSpriteSheetColumns = 8
+const defaultSpriteSheetRows = 9
 const trayIconExtensionPriority = ['.png', '.webp', '.jpg', '.jpeg', '.ico']
 const builtinTrayIconDirectory = getPublicAssetPath('icons')
 const customTrayIconDirectory = path.join(getWallpaperRootPath(), 'tray-icons')
@@ -27,6 +30,32 @@ export type TrayIconSetDescriptor = {
   name: string
   previewPath: string
   source: TrayIconSource
+  spriteSheet?: TrayIconSpriteSheetDescriptor
+}
+
+export type TrayIconSpriteSheetDescriptor = {
+  columns: number
+  frameHeight: number
+  frameWidth: number
+  path: string
+  row: number
+  rows: number
+}
+
+type SpriteSheetManifest = {
+  columns?: number
+  defaultAnimation?: string
+  displayName?: string
+  frameHeight?: number
+  frameWidth?: number
+  id?: string
+  rows?: number
+  spriteSheetPath?: string
+  spritesheetPath?: string
+  states?: Record<string, number | { row?: number }>
+  tray?: { animation?: string; row?: number }
+  trayAnimation?: string
+  trayRow?: number
 }
 
 export type TrayIconSet = TrayIconSetDescriptor & {
@@ -76,6 +105,136 @@ function parseFrameCandidate(directoryName: string, fileName: string): FrameCand
     groupName,
     stem,
   }
+}
+
+function readSpriteSheetManifest(directoryPath: string): SpriteSheetManifest | null {
+  for (const manifestName of spriteSheetManifestNames) {
+    const manifestPath = path.join(directoryPath, manifestName)
+
+    if (!fs.existsSync(manifestPath)) {
+      continue
+    }
+
+    try {
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')) as SpriteSheetManifest
+      return manifest && typeof manifest === 'object' ? manifest : null
+    } catch (error) {
+      console.warn(`[tray] sprite manifest could not be parsed: ${manifestPath}`, error)
+    }
+  }
+
+  return null
+}
+
+function getManifestSpriteSheetPath(manifest: SpriteSheetManifest | null, directoryPath: string) {
+  const spriteSheetPath = manifest?.spritesheetPath || manifest?.spriteSheetPath
+
+  if (!spriteSheetPath) {
+    return ''
+  }
+
+  return path.isAbsolute(spriteSheetPath) ? spriteSheetPath : path.join(directoryPath, spriteSheetPath)
+}
+
+function findSpriteSheetPath(directoryPath: string, entries: fs.Dirent[], manifest: SpriteSheetManifest | null) {
+  const manifestSpriteSheetPath = getManifestSpriteSheetPath(manifest, directoryPath)
+
+  if (manifestSpriteSheetPath && fs.existsSync(manifestSpriteSheetPath)) {
+    return manifestSpriteSheetPath
+  }
+
+  const spriteSheetEntry = entries
+    .filter((entry) => entry.isFile())
+    .find((entry) => {
+      const extension = path.extname(entry.name).toLowerCase()
+      const stem = path.basename(entry.name, extension).toLowerCase()
+      return supportedTrayIconExtensions.has(extension) && ['spritesheet', 'sprite-sheet', 'sprite_sheet', 'atlas'].includes(stem)
+    })
+
+  return spriteSheetEntry ? path.join(directoryPath, spriteSheetEntry.name) : ''
+}
+
+function getSpriteSheetRow(manifest: SpriteSheetManifest | null, rows: number) {
+  const requestedAnimation = manifest?.tray?.animation || manifest?.trayAnimation || manifest?.defaultAnimation
+  const requestedState = requestedAnimation ? manifest?.states?.[requestedAnimation] : undefined
+  const rowFromState = typeof requestedState === 'number' ? requestedState : requestedState?.row
+  const row = manifest?.tray?.row ?? manifest?.trayRow ?? rowFromState ?? 0
+
+  return Math.min(Math.max(Math.floor(row), 0), Math.max(rows - 1, 0))
+}
+
+function createSpriteSheetImages(spriteSheetPath: string, frameWidth: number, frameHeight: number, columns: number, row: number) {
+  const spriteSheet = nativeImage.createFromPath(spriteSheetPath)
+
+  if (spriteSheet.isEmpty()) {
+    console.warn(`[tray] sprite sheet could not be loaded: ${spriteSheetPath}`)
+    return []
+  }
+
+  return Array.from({ length: columns }, (_, column) =>
+    spriteSheet.crop({ height: frameHeight, width: frameWidth, x: column * frameWidth, y: row * frameHeight }).resize({ height: 24 }),
+  ).filter((image) => !image.isEmpty())
+}
+
+function createSpriteSheetTrayIconSet(
+  source: TrayIconSource,
+  directoryName: string,
+  directoryPath: string,
+  manifest: SpriteSheetManifest | null,
+  entries: fs.Dirent[],
+) {
+  const spriteSheetPath = findSpriteSheetPath(directoryPath, entries, manifest)
+
+  if (!spriteSheetPath) {
+    return null
+  }
+
+  const spriteSheet = nativeImage.createFromPath(spriteSheetPath)
+  if (spriteSheet.isEmpty()) {
+    console.warn(`[tray] sprite sheet could not be loaded: ${spriteSheetPath}`)
+    return null
+  }
+
+  const size = spriteSheet.getSize()
+  const columns = Math.max(1, Math.floor(manifest?.columns || defaultSpriteSheetColumns))
+  const rows = Math.max(1, Math.floor(manifest?.rows || defaultSpriteSheetRows))
+  const frameWidth = Math.floor(manifest?.frameWidth || size.width / columns)
+  const frameHeight = Math.floor(manifest?.frameHeight || size.height / rows)
+
+  if (!frameWidth || !frameHeight || frameWidth * columns > size.width || frameHeight * rows > size.height) {
+    console.warn(`[tray] sprite sheet dimensions are invalid: ${spriteSheetPath}`)
+    return null
+  }
+
+  const row = getSpriteSheetRow(manifest, rows)
+  const images = createSpriteSheetImages(spriteSheetPath, frameWidth, frameHeight, columns, row)
+
+  if (!images.length) {
+    return null
+  }
+
+  const name = manifest?.displayName || manifest?.id || directoryName
+
+  return {
+    directory: directoryPath,
+    frameCount: images.length,
+    framePaths: [spriteSheetPath],
+    id: `${source}:${directoryName}:${name}:spritesheet:${row}`,
+    images,
+    label: name,
+    lastModifiedAt: getTrayIconLastModifiedAt([spriteSheetPath]),
+    name,
+    previewPath: spriteSheetPath,
+    source,
+    spriteSheet: {
+      columns,
+      frameHeight,
+      frameWidth,
+      path: spriteSheetPath,
+      row,
+      rows,
+    },
+  } satisfies TrayIconSet
 }
 
 function createNativeImageFromAbsolutePath(assetPath: string) {
@@ -153,9 +312,8 @@ function ensureTrayIconDirectories() {
   fs.mkdirSync(customTrayIconDirectory, { recursive: true })
 }
 
-function collectTrayFrames(directoryName: string, directoryPath: string) {
+function collectTrayFrames(directoryName: string, directoryPath: string, entries = fs.readdirSync(directoryPath, { withFileTypes: true })) {
   const groups = new Map<string, Map<string, FrameCandidate[]>>()
-  const entries = fs.readdirSync(directoryPath, { withFileTypes: true })
 
   for (const entry of entries) {
     if (!entry.isFile()) {
@@ -205,7 +363,15 @@ function createTrayIconSet(source: TrayIconSource, directoryName: string, groupN
 }
 
 function getTrayIconSetsFromDirectory(source: TrayIconSource, directoryName: string, directoryPath: string) {
-  const frameGroups = collectTrayFrames(directoryName, directoryPath)
+  const entries = fs.readdirSync(directoryPath, { withFileTypes: true })
+  const manifest = readSpriteSheetManifest(directoryPath)
+  const spriteSheetIconSet = createSpriteSheetTrayIconSet(source, directoryName, directoryPath, manifest, entries)
+
+  if (spriteSheetIconSet) {
+    return [spriteSheetIconSet]
+  }
+
+  const frameGroups = collectTrayFrames(directoryName, directoryPath, entries)
   const iconSets: TrayIconSet[] = []
 
   for (const [groupName, groupFrames] of frameGroups.entries()) {
@@ -342,6 +508,39 @@ export function importTrayIconSet(name: string, framePaths: string[]) {
   const destinationDirectory = path.join(customTrayIconDirectory, normalizedName)
   fs.mkdirSync(destinationDirectory, { recursive: true })
   const frameIndexPadding = Math.max(3, String(validFramePaths.length).length)
+
+  if (validFramePaths.length === 1) {
+    const sourcePath = validFramePaths[0]
+    const sourceImage = nativeImage.createFromPath(sourcePath)
+    const size = sourceImage.getSize()
+    const isLikelyCodexSpriteSheet =
+      !sourceImage.isEmpty() && size.width % defaultSpriteSheetColumns === 0 && size.height % defaultSpriteSheetRows === 0
+
+    if (isLikelyCodexSpriteSheet) {
+      const extension = path.extname(sourcePath).toLowerCase() || '.png'
+      const spriteSheetFileName = `spritesheet${extension}`
+      fs.copyFileSync(sourcePath, path.join(destinationDirectory, spriteSheetFileName))
+      fs.writeFileSync(
+        path.join(destinationDirectory, 'pet.json'),
+        JSON.stringify(
+          {
+            columns: defaultSpriteSheetColumns,
+            displayName: normalizedName,
+            frameHeight: size.height / defaultSpriteSheetRows,
+            frameWidth: size.width / defaultSpriteSheetColumns,
+            id: normalizedName,
+            rows: defaultSpriteSheetRows,
+            spritesheetPath: spriteSheetFileName,
+            tray: { row: 0 },
+          },
+          null,
+          2,
+        ),
+      )
+
+      return getTrayIconSetsFromDirectory('custom', normalizedName, destinationDirectory)[0] || null
+    }
+  }
 
   validFramePaths.forEach((framePath, index) => {
     const extension = path.extname(framePath).toLowerCase() || '.png'
