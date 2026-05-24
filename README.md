@@ -121,7 +121,7 @@
 - 推荐按这个结构来写：`主体场景 + 风格质感 + 光线时间 + 镜头构图 + 壁纸要求`
 - 例如：`未来海岸线城市，黄昏逆光，电影感广角构图，干净留白，适合作为宽屏桌面壁纸，无人物无文字无水印`
 
-### RunCat
+### 动态托盘图标
 
 托盘图标会根据 CPU 使用情况动态切换速度，支持在托盘菜单和独立的“动态图标”页面里切换不同动画主题。
 
@@ -130,7 +130,9 @@
      <td width="50%" align="center"><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif"/></td>
      <td width="50%" align="center"><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021550728.png"/></td>
   </tr>
-</table>
+</table>  
+
+<img width="1390" alt="image" src="https://github.com/user-attachments/assets/470fcc81-5348-41be-9b1f-d55f0f6d07c5" />
 
 现在不需要再手动改 [electron/tray-list.ts](./electron/tray-list.ts) 了。
 
