@@ -58,6 +58,7 @@
     "wallpaper": "^7.2.1"
   },
   "devDependencies": {
+    "@ai-ins/vite": "^0.4.5",
     "@eslint/js": "^10.0.1",
     "@trivago/prettier-plugin-sort-imports": "^4.2.0",
     "@types/fs-extra": "^9.0.13",

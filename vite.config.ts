@@ -1,3 +1,4 @@
+import aiIns from '@ai-ins/vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import AutoImport from 'unplugin-auto-import/vite'
@@ -15,6 +16,7 @@ export default defineConfig(() => {
     base: './',
     // vite 插件配置
     plugins: [
+      aiIns(),
       react(),
       // Api自动导入
       AutoImport({
