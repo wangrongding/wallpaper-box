@@ -82,19 +82,20 @@ const MenuBar: React.FC = () => {
       <div className='mx-2 h-4 w-px bg-[var(--border-default)]' />
       <button
         className={cn(
-          'relative flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition-all duration-200',
-          'bg-gradient-to-r from-[var(--accent-primary)] to-sky-400 text-white shadow-sm',
-          'hover:shadow-[var(--shadow-glow)] hover:brightness-110',
+          'relative flex h-8 items-center gap-1.5 overflow-hidden rounded-lg border border-[var(--border-accent)] px-3 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(0,173,238,0.18)] transition-all duration-200',
+          'bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)]',
+          'before:absolute before:inset-0 before:bg-[linear-gradient(120deg,rgba(255,255,255,0.22),transparent_38%,transparent_62%,rgba(255,255,255,0.12))] before:opacity-70 before:transition-opacity before:duration-200',
+          'focus-visible:ring-[var(--accent-primary)]/45 hover:-translate-y-0.5 hover:border-sky-200/40 hover:shadow-[0_10px_24px_rgba(0,173,238,0.26)] hover:brightness-105 hover:before:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] active:translate-y-0 active:shadow-[0_4px_12px_rgba(0,173,238,0.18)]',
           loading && 'pointer-events-none opacity-70',
         )}
         onClick={setRandomWallpaper}
       >
         {loading ? (
-          <div className='h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white' />
+          <div className='relative z-10 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white' />
         ) : (
-          <Dice5 className='h-3.5 w-3.5' />
+          <Dice5 className='relative z-10 h-3.5 w-3.5' />
         )}
-        <span>一键随机</span>
+        <span className='relative z-10'>一键随机</span>
       </button>
       <button
         className='flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-tertiary)] transition-all duration-200 hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)]'

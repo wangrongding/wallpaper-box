@@ -1,6 +1,7 @@
 import { Image as CusImage } from '@/components/Image'
+import { Button } from '@/components/ui/button'
 import { fs, ipcRenderer, toRendererFileUrl } from '@/lib/electron-runtime'
-import { FolderOpen, Inbox } from 'lucide-react'
+import { FolderOpen, HardDrive, ImageIcon, Inbox } from 'lucide-react'
 import { toast } from 'sonner'
 
 type LocalWallpaperItem = {
@@ -8,6 +9,42 @@ type LocalWallpaperItem = {
   path: string
   size: number
   thumbnailPath?: string
+}
+
+type OpenDirectoryResponse = {
+  message?: string
+  path?: string
+  success?: boolean
+}
+
+function formatStorageSize(bytes: number) {
+  if (!bytes) {
+    return '0 MB'
+  }
+
+  const units = ['B', 'KB', 'MB', 'GB']
+  let size = bytes
+  let unitIndex = 0
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024
+    unitIndex += 1
+  }
+
+  return `${unitIndex === 0 ? size.toFixed(0) : size.toFixed(size >= 10 ? 1 : 2)} ${units[unitIndex]}`
+}
+
+function formatModifiedTime(timestamp?: number) {
+  if (!timestamp) {
+    return '暂无记录'
+  }
+
+  return new Intl.DateTimeFormat('zh-CN', {
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    month: '2-digit',
+  }).format(timestamp)
 }
 
 function LocalWallpaperImage({ index, item, onDelete, onSet }: { index: number; item: LocalWallpaperItem; onDelete: () => void; onSet: () => void }) {
@@ -107,6 +144,9 @@ function LocalWallpaperImage({ index, item, onDelete, onSet }: { index: number; 
 export default function List() {
   const [wallpaperList, setWallpaperList] = useState<LocalWallpaperItem[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [openingDirectory, setOpeningDirectory] = useState(false)
+  const totalStorageSize = useMemo(() => wallpaperList.reduce((total, item) => total + item.size, 0), [wallpaperList])
+  const latestModifiedAt = wallpaperList[0]?.modifiedAt
 
   async function getWallpaperList() {
     try {
@@ -121,6 +161,21 @@ export default function List() {
       toast.error(error instanceof Error ? error.message : '加载壁纸失败')
     } finally {
       setLoaded(true)
+    }
+  }
+
+  async function openWallpaperDirectory() {
+    setOpeningDirectory(true)
+
+    try {
+      const response = (await ipcRenderer.invoke('open-local-wallpaper-directory')) as OpenDirectoryResponse
+      if (!response?.success) {
+        throw new Error(response?.message || '打开目录失败')
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '打开目录失败')
+    } finally {
+      setOpeningDirectory(false)
     }
   }
 
@@ -151,37 +206,87 @@ export default function List() {
   }, [])
 
   return (
-    <div className='list-page animate-fade-in-up'>
-      <div className='mb-5 flex items-center gap-3'>
-        <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 text-emerald-400'>
-          <FolderOpen className='h-4 w-4' />
-        </div>
-        <div>
-          <h1 className='font-display text-lg font-semibold text-[var(--text-primary)]'>我的壁纸</h1>
-          <p className='text-[12px] text-[var(--text-tertiary)]'>已下载 {wallpaperList.length} 张壁纸</p>
+    <div className='list-page animate-fade-in-up mx-auto max-w-[1540px] pb-6'>
+      <div className='mb-5 overflow-hidden rounded-xl border border-white/[0.08] bg-[radial-gradient(circle_at_0%_0%,rgba(16,185,129,0.16),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.68),rgba(8,13,24,0.42))] shadow-[0_20px_70px_rgba(2,6,23,0.20)]'>
+        <div className='flex flex-wrap items-center justify-between gap-4 px-5 py-4'>
+          <div className='flex min-w-0 items-center gap-4'>
+            <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-400/10 text-emerald-300 ring-1 ring-emerald-300/20'>
+              <FolderOpen className='h-5 w-5' />
+            </div>
+            <div className='min-w-0'>
+              <h1 className='font-display text-xl font-semibold text-[var(--text-primary)]'>我的壁纸</h1>
+            </div>
+          </div>
+
+          <div className='flex items-center justify-center gap-2'>
+            <div className='flex flex-wrap items-center gap-2 text-[12px] text-[var(--text-tertiary)]'>
+              <span className='inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5'>
+                <ImageIcon className='h-3 w-3 text-emerald-300/80' />
+                {loaded ? `${wallpaperList.length} 张壁纸` : '正在读取'}
+              </span>
+              <span className='inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2 py-0.5'>
+                <HardDrive className='h-3 w-3 text-sky-300/80' />
+                {formatStorageSize(totalStorageSize)}
+              </span>
+              <span className='rounded-full bg-white/[0.06] px-2 py-0.5'>最近更新 {formatModifiedTime(latestModifiedAt)}</span>
+            </div>
+            <Button
+              variant='outline'
+              size='sm'
+              loading={openingDirectory}
+              className='h-8 w-[104px] shrink-0 bg-black/10'
+              onClick={() => void openWallpaperDirectory()}
+            >
+              {!openingDirectory && <FolderOpen className='mr-1.5 h-3.5 w-3.5' />}
+              打开目录
+            </Button>
+          </div>
         </div>
       </div>
+
       {wallpaperList.length > 0 ? (
-        <div className='columns-5 gap-3'>
-          {wallpaperList.map((item: LocalWallpaperItem, index: number) => {
-            return (
-              <LocalWallpaperImage
-                key={item.path}
-                item={item}
-                index={index}
-                onSet={() => setAsBackground(item.path)}
-                onDelete={() => deleteWallpaper(item.path)}
-              />
-            )
-          })}
+        <div className=''>
+          <div className='columns-2 gap-3 sm:columns-3 xl:columns-4 2xl:columns-5'>
+            {wallpaperList.map((item: LocalWallpaperItem, index: number) => {
+              return (
+                <LocalWallpaperImage
+                  key={item.path}
+                  item={item}
+                  index={index}
+                  onSet={() => setAsBackground(item.path)}
+                  onDelete={() => deleteWallpaper(item.path)}
+                />
+              )
+            })}
+          </div>
         </div>
       ) : loaded ? (
-        <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
-          <Inbox className='mb-4 h-14 w-14 opacity-40' />
-          <p className='font-display text-base font-medium'>暂无壁纸</p>
-          <p className='mt-1 text-[13px] opacity-60'>去壁纸列表中下载喜欢的壁纸吧</p>
+        <div className='flex min-h-[360px] flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.10] bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.08),transparent_46%),rgba(255,255,255,0.025)] px-6 py-16 text-center text-[var(--text-tertiary)]'>
+          <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.05] text-emerald-300/70 ring-1 ring-white/[0.08]'>
+            <Inbox className='h-8 w-8' />
+          </div>
+          <p className='font-display text-base font-medium text-[var(--text-secondary)]'>暂无壁纸</p>
+          <p className='mt-1 text-[13px] opacity-70'>去壁纸列表中下载喜欢的壁纸吧</p>
+          <Button variant='secondary' size='sm' className='mt-5' onClick={() => void openWallpaperDirectory()}>
+            <FolderOpen className='mr-1.5 h-3.5 w-3.5' />
+            打开本地目录
+          </Button>
         </div>
-      ) : null}
+      ) : (
+        <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'>
+          {Array.from({ length: 10 }).map((_, index) => (
+            <div
+              key={index}
+              className='overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.035] p-2'
+              style={{
+                aspectRatio: index % 3 === 0 ? '4 / 5' : '16 / 10',
+              }}
+            >
+              <div className='h-full animate-pulse rounded-lg bg-white/[0.055]' />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

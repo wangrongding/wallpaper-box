@@ -5,10 +5,10 @@ import { getDevServerUrl } from './dev-server'
 import { initDock } from './dock'
 import { initKeyboard } from './keyboard'
 import { initMenu } from './menu'
-import { getWallpaperRootPath, getWallpaperThumbnailDirectory } from './paths'
+import { getWallpaperRootPath, getWallpaperThumbnailDirectory, getWallpaperVideoDirectory } from './paths'
 import { setProxy, removeProxy } from './proxy'
 import { getTrayIconState, refreshTrayIconLibrary, setActiveTrayIcon, setTrayIcon } from './tray'
-import { deleteCustomTrayIconSet, importTrayIconSet } from './tray-list'
+import { deleteCustomTrayIconSet, importTrayIconSet, importTrayIconSetFromDataUrls, renameCustomTrayIconSet } from './tray-list'
 import { startVideoDownload } from './video-downloader'
 import { execFile as execFileCallback } from 'child_process'
 import type { ChildProcess } from 'child_process'
@@ -34,6 +34,11 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 let mainWindow: BrowserWindow
 let activeVideoDownload: ChildProcess | null = null
 const supportedLocalWallpaperExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.bmp'])
+
+type TrayIconSpriteFramePayload = {
+  dataUrl: string
+  fileName?: string
+}
 
 // 初始化应用
 const initApp = () => {
@@ -138,6 +143,22 @@ function getErrorMessage(error: unknown) {
   }
 
   return String(error)
+}
+
+function getSpriteFramesFromIpcPayload(value: unknown): TrayIconSpriteFramePayload[] {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  return value
+    .filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === 'object' && item !== null && typeof (item as Record<string, unknown>).dataUrl === 'string',
+    )
+    .map((item) => ({
+      dataUrl: item.dataUrl as string,
+      fileName: typeof item.fileName === 'string' ? item.fileName : undefined,
+    }))
 }
 
 function getAiConfig() {
@@ -387,6 +408,50 @@ ipcMain.handle('list-local-wallpapers', async () => {
   }
 })
 
+ipcMain.handle('open-local-wallpaper-directory', async () => {
+  try {
+    const targetPath = getWallpaperRootPath()
+    await fs.mkdir(targetPath, { recursive: true })
+
+    const result = await shell.openPath(targetPath)
+    if (result) {
+      throw new Error(result)
+    }
+
+    return {
+      path: targetPath,
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('open-video-wallpaper-directory', async () => {
+  try {
+    const targetPath = getWallpaperVideoDirectory()
+    await fs.mkdir(targetPath, { recursive: true })
+
+    const result = await shell.openPath(targetPath)
+    if (result) {
+      throw new Error(result)
+    }
+
+    return {
+      path: targetPath,
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
 ipcMain.handle('get-local-wallpaper-thumbnail', async (_, arg) => {
   try {
     if (typeof arg !== 'string' || !arg.trim()) {
@@ -505,6 +570,63 @@ ipcMain.handle('import-tray-icon-set', async (_, arg) => {
   }
 })
 
+ipcMain.handle('import-tray-icon-set-from-sprite', async (_, arg) => {
+  try {
+    const importedTrayIcon = importTrayIconSetFromDataUrls(
+      typeof arg?.name === 'string' ? arg.name : '',
+      getSpriteFramesFromIpcPayload(arg?.frames),
+      {
+        fps: arg?.metadata?.fps,
+      },
+    )
+
+    return {
+      currentId: refreshTrayIconLibrary(),
+      item: importedTrayIcon,
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
+ipcMain.handle('rename-tray-icon-set', async (_, arg) => {
+  try {
+    const targetId = typeof arg?.id === 'string' ? arg.id.trim() : ''
+    const nextName = typeof arg?.name === 'string' ? arg.name.trim() : ''
+
+    if (!targetId) {
+      throw new Error('动态图标 ID 无效')
+    }
+
+    if (!nextName) {
+      throw new Error('请输入新的动态图标名称')
+    }
+
+    const previousCurrentId = getTrayIconState().currentId || ''
+    const renamedTrayIcon = renameCustomTrayIconSet(targetId, nextName)
+    let currentId = refreshTrayIconLibrary()
+
+    if (renamedTrayIcon && previousCurrentId === targetId) {
+      currentId = setActiveTrayIcon(renamedTrayIcon.id)
+    }
+
+    return {
+      currentId,
+      item: renamedTrayIcon,
+      success: true,
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: getErrorMessage(error),
+    }
+  }
+})
+
 ipcMain.handle('delete-tray-icon-set', async (_, arg) => {
   try {
     if (typeof arg !== 'string' || !arg.trim()) {
@@ -555,13 +677,13 @@ ipcMain.on('open-link-in-browser', (_, arg) => {
 })
 
 // 创建动态壁纸
-ipcMain.on('create-live-wallpaper', (_, arg) => {
+ipcMain.on('create-live-wallpaper', (_, _arg) => {
   closeWebLiveWallpaperWindow() // 确保网页壁纸关闭
   createLiveWallpaperWindow()
 })
 
 // 关闭动态壁纸
-ipcMain.on('close-live-wallpaper', (_, arg) => {
+ipcMain.on('close-live-wallpaper', (_, _arg) => {
   closeLiveWallpaperWindow()
 })
 
@@ -572,7 +694,7 @@ ipcMain.on('create-web-live-wallpaper', (_, arg) => {
 })
 
 // 关闭网页壁纸
-ipcMain.on('close-web-live-wallpaper', (_, arg) => {
+ipcMain.on('close-web-live-wallpaper', (_, _arg) => {
   closeWebLiveWallpaperWindow()
 })
 
