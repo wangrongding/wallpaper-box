@@ -4,39 +4,41 @@
   </a>
 </p>
 
-🏞️ `wallpaper-box` 想做的不只是另一个壁纸下载器，而是一个让桌面真正活起来的客户端：静态壁纸、视频壁纸、网页壁纸、AI 壁纸，再加上会跑的 RunCat 托盘动画。
+[English](./README.md) | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md) | [Español](./README.es.md)
 
-## 功能概览
+🏞️ `wallpaper-box` is more than just another wallpaper downloader — it's a desktop client that truly brings your desktop to life: static wallpapers, video wallpapers, web wallpapers, AI-generated wallpapers, plus a fun RunCat-style animated tray icon that reacts to your CPU usage.
 
-- [x] AI 文生图壁纸
-- [x] 浏览和搜索在线壁纸
-- [x] 下载壁纸到本地
-- [x] 设置静态壁纸
-- [x] 设置视频壁纸（在 MacOS 中，全屏动态壁纸，并没有完全覆盖整块屏幕，欢迎知道如何处理的小伙伴提 PR）
-- [x] 支持通过 `yt-dlp` 下载 YouTube / Bilibili 视频后直接设为视频壁纸
-- [x] 设置网页壁纸
-- [x] 支持通过提示词生成 AI 壁纸
-- [x] 支持在线 URL 和本地 HTML 文件作为网页壁纸
-- [x] RunCat 动态托盘图标，根据 CPU 使用情况改变切换速度
-- [x] 支持开机自启
-- [x] 支持 HTTP 代理配置
+## Features
 
-## 平台说明
+- [x] AI text-to-image wallpaper generation
+- [x] Browse and search online wallpapers
+- [x] Download wallpapers locally
+- [x] Set static wallpapers
+- [x] Set video wallpapers (on macOS the dynamic wallpaper window is fullscreen but doesn't cover the entire screen — PRs welcome!)
+- [x] Download YouTube / Bilibili videos via `yt-dlp` and set them as video wallpapers directly
+- [x] Set web wallpapers
+- [x] Generate AI wallpapers from text prompts
+- [x] Support both online URLs and local HTML files as web wallpapers
+- [x] Animated tray icons (RunCat style) that change speed based on CPU usage
+- [x] Launch at login
+- [x] HTTP proxy support
 
-- 当前仓库内置的打包脚本以 macOS 为主。
-- 默认构建产物是 `universal`，同时兼容 Apple Silicon 和 Intel Mac。
-- 也提供单独的 `x64` / `arm64` 构建命令。
-- 当前构建配置的最低 macOS 版本是 `10.13`。
-- 应用未做开发者签名，首次打开需要手动放行。
+## Platform Notes
 
-## 使用
+- The built-in packaging scripts focus on macOS.
+- Default builds are `universal` (compatible with both Apple Silicon and Intel Macs).
+- Separate `x64` / `arm64` build commands are also available.
+- Minimum supported macOS version is `10.13`.
+- The app is not Apple Developer signed. You will need to manually allow it on first launch.
 
-### 壁纸列表
+## Usage
 
-壁纸来源于 wallhaven.cc。
+### Wallpaper List
 
-- 支持搜索、筛选、预览、下载和直接设置。
-- 下载的静态壁纸默认保存在 `~/wallpaper-box`。
+Wallpapers are sourced from wallhaven.cc.
+
+- Search, filter, preview, download, and set wallpapers directly.
+- Downloaded static wallpapers are saved to `~/wallpaper-box` by default.
 
 <table>
   <tr>
@@ -45,29 +47,29 @@
   </tr>
 </table>
 
-### 动态壁纸
+### Live (Video) Wallpapers
 
-目前支持将本地视频文件设置为桌面动态壁纸，也支持通过 `yt-dlp` 下载在线视频后直接作为壁纸。
+Set local video files as dynamic desktop wallpapers. You can also paste YouTube / Bilibili links to download and use them directly.
 
-- 支持点击选择或拖拽视频文件。
-- 支持粘贴 `YouTube / Bilibili` 链接下载视频。
-- 常见格式如 `MP4`、`MOV`、`WebM` 均可尝试。
-- macOS 下动态壁纸窗口的铺满效果仍有继续优化空间，欢迎 PR。
+- Supports clicking to select or drag & drop video files.
+- Paste `YouTube / Bilibili` links to download videos.
+- Common formats like `MP4`, `MOV`, `WebM` are supported.
+- On macOS the dynamic wallpaper window may not perfectly cover the entire screen — contributions welcome.
 
 <img width="1441" height="900" alt="image" src="https://github.com/user-attachments/assets/ad7e851d-6c14-4780-87d4-bf0c4d1651da" />
 
-说明：
+Notes:
 
-- 视频下载默认保存到 `~/wallpaper-box/videos`
-- 下载完成后会自动设为视频壁纸
-- 当前仓库默认按 macOS 打包，发布包里可以直接内置 `yt-dlp` 与 `Deno`，用户无需手动安装
-- 某些 `Bilibili / YouTube` 视频只提供分离音视频流，这类链接还需要把 `ffmpeg` 和 `ffprobe` 一起打进 `resources/bin/`
-- 如果你使用官方 `yt-dlp_macos` 二进制，视频下载功能的有效最低系统版本会更接近 `macOS 10.15+`
+- Downloaded videos are saved to `~/wallpaper-box/videos`
+- The video is automatically set as wallpaper after download
+- Pre-built release packages include `yt-dlp` and `Deno` — no manual installation required
+- For videos with separate audio/video streams, you may also need to include `ffmpeg` and `ffprobe` in `resources/bin/`
+- Using the official `yt-dlp_macos` binary may raise the effective minimum system version closer to `macOS 10.15+`
 
 <table>
   <tr>
-      <td width="50%" align="center"><b>Windows 中的效果：</b></td>
-      <td width="50%" align="center"><b>MacOS 中的效果：</b></td>
+      <td width="50%" align="center"><b>Windows:</b></td>
+      <td width="50%" align="center"><b>macOS:</b></td>
   </tr>
   <tr>
      <td><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/images202204250101273.gif"/></td>
@@ -75,113 +77,111 @@
   </tr>
 </table>
 
-### 网页壁纸
+### Web Wallpapers
 
-可以将任意网页设置为桌面壁纸，支持在线网址和本地 HTML 文件。
+Set any webpage as your desktop wallpaper. Supports both online URLs and local HTML files.
 
-- **在线网址**：支持直接输入 URL。
-  - 例如：`https://wangrongding.github.io/jellyfish/`
-  - 输入 `google.com`、`localhost:3000` 这类地址时会自动补全协议。
-- **本地文件**：支持选择或拖拽本地 `HTML/HTM/SVG` 文件。
-  - macOS/Linux 示例：`/Users/your-name/Coding/jellyfish/index.html`
-  - Windows 示例：`C:\Users\your-name\Coding\jellyfish\index.html`
+- **Online URLs**: Just enter the address.
+  - Example: `https://wangrongding.github.io/jellyfish/`
+  - `google.com` or `localhost:3000` will automatically add the protocol.
+- **Local files**: Select or drag & drop local `HTML/HTM/SVG` files.
+  - macOS/Linux example: `/Users/your-name/Coding/jellyfish/index.html`
+  - Windows example: `C:\Users\your-name\Coding\jellyfish\index.html`
 
-### AI 壁纸
+### AI Wallpapers
 
-支持直接通过提示词生成壁纸。
+Generate wallpapers directly from text prompts.
 
-- AI 配置入口在 `AI 壁纸` 页面里，不在全局设置页
-- 生成结果会自动保存到 `~/wallpaper-box`
-- 生成完成后可直接设为壁纸或打开所在位置
+- AI settings are located in the **AI Wallpaper** page (not in global Settings).
+- Generated images are automatically saved to `~/wallpaper-box`.
+- After generation you can set it as wallpaper or open the folder.
 
 <img width="1441" height="900" alt="image" src="https://github.com/user-attachments/assets/cf239b2a-e9c7-4a59-9ec0-9c36689af1a6" />
 
-当前已经适配两类常见接法：
+Currently supports two common APIs:
 
-- OpenAI Images API 兼容接口
-- 智谱 `glm-image`
+- OpenAI Images API compatible endpoints
+- Zhipu `glm-image`
 
-推荐配置示例：
+Recommended configuration examples:
 
 - OpenAI
   - `API Base URL`: `https://api.openai.com/v1`
   - `Model`: `gpt-image-1`
-- 智谱 BigModel
+- Zhipu BigModel
   - `API Base URL`: `https://open.bigmodel.cn/api/paas/v4`
   - `Model`: `glm-image`
 
-说明：
+Notes:
 
-- 如果你填的是智谱完整地址 `https://open.bigmodel.cn/api/paas/v4/images/generations`，当前版本也能兼容
-- `glm-image` 支持自定义宽高
-- 自定义宽高限制是：`512-2048`，且宽高都必须是 `32` 的整数倍
+- If you use the full Zhipu endpoint `https://open.bigmodel.cn/api/paas/v4/images/generations`, it is also supported.
+- `glm-image` supports custom width/height.
+- Custom size limits: `512-2048`, and both width and height must be multiples of `32`.
 
-提示词建议：
+Prompt tips:
 
-- 推荐按这个结构来写：`主体场景 + 风格质感 + 光线时间 + 镜头构图 + 壁纸要求`
-- 例如：`未来海岸线城市，黄昏逆光，电影感广角构图，干净留白，适合作为宽屏桌面壁纸，无人物无文字无水印`
+- Recommended structure: `main subject + style/texture + lighting/time + camera composition + wallpaper requirements`
+- Example: `futuristic coastal city, golden hour backlighting, cinematic wide-angle composition, clean negative space, suitable as widescreen desktop wallpaper, no people, no text, no watermark`
 
-### 动态托盘图标
+### Animated Tray Icons
 
-托盘图标会根据 CPU 使用情况动态切换速度，支持在托盘菜单和独立的“动态图标”页面里切换不同动画主题。
+The tray icon changes animation speed based on real-time CPU usage. You can preview and switch themes from the tray menu or the dedicated **Animated Icons** page.
 
 <table>
   <tr>
      <td width="50%" align="center"><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202212301215445.gif"/></td>
      <td width="50%" align="center"><img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301021550728.png"/></td>
   </tr>
-</table>  
+</table>
 
 <img width="1390" alt="image" src="https://github.com/user-attachments/assets/470fcc81-5348-41be-9b1f-d55f0f6d07c5" />
 
-现在不需要再手动改 [electron/tray-list.ts](./electron/tray-list.ts) 了。
+You no longer need to manually edit [electron/tray-list.ts](./electron/tray-list.ts).
 
-- 内置图标会自动扫描 [public/icons](./public/icons) 下的子目录。
-- 自定义图标可以在“动态图标”页面里导入、删除一组动画帧，也可以直接把素材放进 `~/wallpaper-box/tray-icons/<你的图标名>/`。
-- 同一组动画帧会按文件名顺序播放，适合使用 `001.png`、`002.png` 这类命名。
+- Built-in icons are automatically scanned from subfolders under [public/icons](./public/icons).
+- Custom icons can be imported/deleted from the **Animated Icons** page, or simply dropped into `~/wallpaper-box/tray-icons/<your-icon-name>/`.
+- Frames in a set are played in filename order (e.g. `001.png`, `002.png`...).
 
 <img src="https://raw.githubusercontent.com/wangrongding/image-house/master/202301030045464.gif" width="600" />
 
-### 设置
+### Settings
 
-当前全局设置页主要保留通用设置：
+The global Settings page contains general options:
 
-- 开机自启
-- HTTP 代理
-- 代理连通性测试
-- 壁纸默认存储位置显示, 当前壁纸下载目录默认是 `~/wallpaper-box`
+- Launch at login
+- HTTP proxy
+- Proxy connectivity test
+- Default wallpaper storage location (currently `~/wallpaper-box`)
 
-说明：
+Notes:
 
-- 代理测试当前会尝试访问 `Google`
-- AI 接口配置不在这里，而是在 `AI 壁纸` 页面里单独设置
-- 菜单栏动态图标的预览、切换和自定义导入已经拆分到独立的 `动态图标` 页面
+- Proxy test attempts to reach Google.
+- AI API configuration lives in the **AI Wallpaper** page, not here.
+- Tray icon preview, switching, and custom imports have been moved to the standalone **Animated Icons** page.
 
 <img width="1000" alt="531b7f4d-270e-4233-8a14-fbc2d4d4c2ff" src="https://github.com/user-attachments/assets/2987e3fa-08f5-4251-bd06-8d0a451d30f7" />
 
-## 开发
+## Development
 
-### 安装依赖
-
-```sh
-yarn install
-```
-
-说明：
-
-- `yarn install` 期间会自动执行 `prepare`，把 `yt-dlp / Deno / ffmpeg / ffprobe` 下载到 `resources/bin/`
-- 如果这些资源已经存在，就会直接跳过，不会重复下载
-- 如果你想手动强制刷新这些二进制，可以执行 `yarn prepare:video-downloader`
-
-### 准备视频下载二进制
-
-如果你想手动强制刷新视频下载相关二进制，可以执行：
+### Install Dependencies
 
 ```sh
-yarn prepare:video-downloader
+pnpm install
 ```
 
-这个脚本会把下面这些二进制下载到 `resources/bin/`：
+Notes:
+
+- `pnpm install` automatically runs `prepare` and downloads `yt-dlp` / `Deno` / `ffmpeg` / `ffprobe` into `resources/bin/`.
+- If the binaries already exist they are skipped.
+- To force refresh the binaries: `pnpm prepare:video-downloader`
+
+### Prepare Video Download Binaries (Manual)
+
+```sh
+pnpm prepare:video-downloader
+```
+
+This downloads the following into `resources/bin/`:
 
 - `yt-dlp_macos`
 - `deno-aarch64-apple-darwin`
@@ -191,127 +191,118 @@ yarn prepare:video-downloader
 - `ffmpeg-darwin-x64`
 - `ffprobe-darwin-x64`
 
-说明：
+Notes:
 
-- 打包时会通过 `electron-builder.extraResources` 一起带进 `.app`
-- `yt-dlp` 遇到分离音视频流时，会自动按当前机器架构选中对应的 `ffmpeg / ffprobe`
-- 开发环境也支持通过环境变量覆盖二进制路径：`WALLPAPER_BOX_YT_DLP_PATH`、`WALLPAPER_BOX_DENO_PATH`、`WALLPAPER_BOX_FFMPEG_PATH`、`WALLPAPER_BOX_FFPROBE_PATH`
+- These are bundled into the app via `electron-builder.extraResources`.
+- `yt-dlp` automatically selects the matching `ffmpeg`/`ffprobe` for the current architecture when dealing with separate audio/video streams.
+- Development overrides are supported via environment variables: `WALLPAPER_BOX_YT_DLP_PATH`, `WALLPAPER_BOX_DENO_PATH`, `WALLPAPER_BOX_FFMPEG_PATH`, `WALLPAPER_BOX_FFPROBE_PATH`.
 
-### 本地开发
+### Local Development
 
-同时启动 Web 和 Electron：
+Start both web and Electron:
 
 ```sh
-yarn dev
+pnpm dev
 ```
 
-分开启动：
+Separate terminals:
 
 ```sh
-yarn dev:web
-yarn dev:electron
+pnpm dev:web
+pnpm dev:electron
 ```
 
-如果你想基于本地构建结果启动 Electron：
+Run Electron against a locally built bundle:
 
 ```sh
-yarn build:web
-yarn build:electron
-yarn electron:start
+pnpm build:web
+pnpm build:electron
+pnpm electron:start
 ```
 
-## 打包
+## Packaging
 
-构建产物默认输出到 `out/` 目录。
+Build artifacts are written to the `out/` directory.
 
-架构说明：
+Architecture notes:
 
-- `universal`：一个包同时包含 `Intel(x64)` 和 `Apple Silicon(arm64)` 两种架构。
-- 如果你不确定对方的 Mac 是哪种芯片，优先发 `universal`。
-- `x64`：给 Intel Mac 用。
-- `arm64`：给 Apple Silicon 机器用，比如 `M1 / M2 / M3 / M4`。
+- `universal`: Single package supporting both Intel (x64) and Apple Silicon (arm64).
+- `x64`: For older Intel Macs.
+- `arm64`: For M1/M2/M3/M4 Macs.
 
 ```sh
-# 默认打包推荐版本：
-# 一个包同时支持 Intel Mac 和 Apple Silicon Mac
-yarn build
+# Recommended default (universal)
+pnpm build
 
-# 显式打包 universal 版本
-# 适合发给大多数用户，不用区分芯片型号
-yarn build:mac:universal
+# Explicit universal build
+pnpm build:mac:universal
 
-# 单独打包 Intel Mac 版本
-# 适合老款 Mac 或明确知道对方是 Intel 芯片
-yarn build:mac:x64
+# Intel only
+pnpm build:mac:x64
 
-# 单独打包 Apple Silicon 版本
-# 适合 M1 / M2 / M3 / M4 等 Apple 芯片设备
-yarn build:mac:arm64
+# Apple Silicon only
+pnpm build:mac:arm64
 
-# 构建 dmg 安装包
-# 默认也是 universal 版本
-yarn build:dmg
+# DMG installer (universal)
+pnpm build:dmg
 
-# 构建 zip 压缩包
-# 默认也是 universal 版本
-yarn build:zip
+# ZIP portable (universal)
+pnpm build:zip
 ```
 
-## 常见问题
+## FAQ
 
-### 1. macOS 提示无法打开应用
+### 1. macOS says the app cannot be opened
 
-因为应用没有做 Apple 开发者签名，macOS 可能会拦截首次打开。可以按下面方式放行：
-
-打开终端：
+The app is not Apple Developer signed. Run these commands in Terminal:
 
 ```sh
-sudo spctl  --master-disable
+sudo spctl --master-disable
 sudo xattr -r -d com.apple.quarantine /Applications/wallpaper-box.app
 ```
 
-如果你的应用不在 `/Applications`，请把命令里的路径替换成实际 `.app` 路径（打开 “访达”（Finder）进入 “应用程序” 目录，找到 wallpaper-box，拖进终端）。
+If the app is not in `/Applications`, replace the path with the actual `.app` location (drag the app from Finder into Terminal).
 
-### 2. 老款 Mac 提示“不支持此应用程序”
+### 2. "This application is not supported on this Mac"
 
-如果看到类似“这台 Mac 不支持此应用程序”的提示，请先确认两件事：
+- Your macOS version is below `10.13`
+- You downloaded the wrong architecture build
 
-- 你的系统版本是否低于 `macOS 10.13`
-- 你拿到的是不是错误架构的包
+Prefer the default `universal` package. You can also build `x64` or `arm64` separately if needed.
 
-建议优先使用默认的 `universal` 包；如果需要单独发包，可以分别构建 `x64` 和 `arm64` 版本。
+### 3. AI generation returns `404 not found`
 
-### 3. AI 生成时报 `404 not found`
-
-如果你接的是智谱 BigModel，当前版本既兼容：
+If using Zhipu BigModel, the current version supports both:
 
 - `https://open.bigmodel.cn/api/paas/v4`
 - `https://open.bigmodel.cn/api/paas/v4/images/generations`
 
-如果仍然报错，优先检查：
+Still failing? Check:
 
-- `API Key`
-- `Model` 是否填成了 `glm-image`
-- `API Base URL` 是否有明显拼写错误
+- API Key
+- Model is set to `glm-image`
+- No obvious typos in `API Base URL`
 
-### 4. AI 自定义宽高报错
+### 4. Custom AI size errors
 
-当前 `glm-image` 的自定义宽高限制是：
+`glm-image` custom width/height limits:
 
-- 范围必须在 `512-2048`
-- 宽和高都必须是 `32` 的整数倍
+- Range: `512-2048`
+- Both width and height must be multiples of `32`
 
-例如这些是合法的：
+Valid examples:
 
 - `2048x1152`
 - `2048x1280`
 - `1792x1024`
 
-## 目录提示
+## Directory Tips
 
-- 静态壁纸、AI 壁纸默认保存目录：`~/wallpaper-box`
-- AI 配置入口：`AI 壁纸` 页面右上角 `设置`
+- Static & AI wallpapers: `~/wallpaper-box`
+- AI configuration: **AI Wallpaper** page → top-right **Settings** button
 
-## 最后
+## Finally
 
-如果你觉得这个项目还不错，点个 star ⭐️ 支持一下 ~ 谢谢 🌸
+If you find this project useful, please consider giving it a ⭐️ — thank you!
+
+Contributions, issues, and PRs are very welcome.
