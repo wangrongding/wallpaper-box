@@ -2,9 +2,10 @@
   "name": "wallpaper-box",
   "private": true,
   "type": "commonjs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "./dist-electron/main.js",
   "description": "让桌面真正活起来：静态壁纸、视频壁纸、网页壁纸和 RunCat 托盘动画，一个客户端全搞定。",
+  "author": "wangrongding",
   "license": "GPL-3.0-or-later",
   "scripts": {
     "prepare": "node ./scripts/prepare-video-downloader-binaries.mjs && husky",
