@@ -88,7 +88,7 @@ const createWindow = () => {
     width: isDev ? 1600 : 1300,
     minWidth: 950,
     height: 900,
-    minHeight: 900,
+    minHeight: 600,
     frame: false, //是否显示边缘框
     // titleBarStyle: 'hiddenInset', //标题栏样式
     fullscreen: false, //是否全屏显示
