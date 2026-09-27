@@ -133,6 +133,19 @@ async function setWallPaper(picturePath: string) {
     return
   }
 
+  if (process.platform === 'linux') {
+    const osRelease = await fs.readFile('/etc/os-release', 'utf8').catch(() => '')
+    if (/^ID="?omarchy"?$/m.test(osRelease)) {
+      await execFile('omarchy', ['theme', 'bg', 'set', resolvedPath])
+
+      const currentBackground = path.join(app.getPath('home'), '.local', 'state', 'omarchy', 'current', 'background')
+      if ((await fs.realpath(currentBackground)) !== (await fs.realpath(resolvedPath))) {
+        throw new Error('Omarchy 未更新当前壁纸')
+      }
+      return
+    }
+  }
+
   const wallpaper = await import('wallpaper')
   await wallpaper.setWallpaper(resolvedPath, { scale: 'auto', screen: 'all' })
 }
