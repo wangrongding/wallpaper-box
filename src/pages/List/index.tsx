@@ -5,8 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { createStore, fs, ipcRenderer, os, path } from '@/lib/electron-runtime'
 import { WALLHAVEN_API_KEY_STORE_KEY, buildWallhavenSearchUrl } from '@/lib/wallhaven'
-import { debounce } from 'lodash'
-import { Download, X, Inbox, Search, Loader2, Monitor, ZoomIn, ZoomOut, Key, ArrowRight } from 'lucide-react'
+import { Download, X, Inbox, Search, Loader2, Monitor, ZoomIn, ZoomOut, Key, ArrowRight, ArrowUp } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -23,7 +22,12 @@ export default function List() {
   const [previewScale, setPreviewScale] = useState(1)
   const [searchKeyword, setSearchKeyword] = useState('')
   const [hasApiKey, setHasApiKey] = useState(true)
-  const [query, setQuery] = useState({
+  const [showBackToTop, setShowBackToTop] = useState(false)
+  const listScrollRef = useRef<HTMLDivElement | null>(null)
+  const loadingRef = useRef(false)
+  const hasMoreRef = useRef(true)
+  const requestVersionRef = useRef(0)
+  const queryRef = useRef({
     general: '0',
     anime: '0',
     people: '0',
@@ -37,6 +41,16 @@ export default function List() {
   })
 
   const filterList = ['general', 'anime', 'people', 'sfw', 'sketchy', 'nsfw']
+
+  const resetList = () => {
+    requestVersionRef.current += 1
+    loadingRef.current = false
+    hasMoreRef.current = true
+    setListLoading(false)
+    setWallpaperList([])
+    setShowBackToTop(false)
+    listScrollRef.current?.scrollTo({ top: 0 })
+  }
 
   // 设置壁纸
   const setAsBackground = async (item: any) => {
@@ -92,43 +106,32 @@ export default function List() {
   // 排序方式改变
   const onSortChange = (checkedVal: any) => {
     console.log('checked = ', checkedVal)
-    setQuery(
-      Object.assign(query, {
-        sorting: checkedVal,
-        page: 1,
-      }),
-    )
-    setWallpaperList([])
-    getWallpaperList()
+    queryRef.current = { ...queryRef.current, sorting: checkedVal, page: 1 }
+    resetList()
+    void getWallpaperList()
   }
 
   // 限制条件改变
-  const onLimitChange = async (checkedVal: any, type: any) => {
-    await setWallpaperList([])
-    setQuery(
-      Object.assign(query, {
-        [type]: checkedVal ? '1' : '0',
-        page: 1,
-      }),
-    )
-    await getWallpaperList()
+  const onLimitChange = (checkedVal: any, type: any) => {
+    queryRef.current = { ...queryRef.current, [type]: checkedVal ? '1' : '0', page: 1 }
+    resetList()
+    void getWallpaperList()
   }
 
   // 搜索关键词
   const onSearch = (keyword: string) => {
-    setWallpaperList([])
-    setQuery(
-      Object.assign(query, {
-        keyword: keyword,
-        page: 1,
-      }),
-    )
-    console.log('🚀🚀🚀 / keyword:', keyword, query)
-    getWallpaperList()
+    queryRef.current = { ...queryRef.current, keyword, page: 1 }
+    resetList()
+    void getWallpaperList()
   }
 
   // 获取壁纸列表
   async function getWallpaperList(): Promise<void> {
+    if (loadingRef.current || !hasMoreRef.current) return
+
+    loadingRef.current = true
+    const requestVersion = requestVersionRef.current
+    const query = { ...queryRef.current }
     setListLoading(true)
     // await getWallHavenAssets(query)
     const categories = query.general + query.anime + query.people
@@ -153,22 +156,25 @@ export default function List() {
         },
       )
       const list = await res.json()
+      if (requestVersion !== requestVersionRef.current) return
+
       setWallpaperList((prev) => [...prev, ...list.data])
+      hasMoreRef.current = list.data.length > 0 && (!list.meta?.last_page || query.page < list.meta.last_page)
       if (list.data.length) {
-        setQuery(
-          Object.assign(query, {
-            page: query.page + 1,
-          }),
-        )
+        queryRef.current.page = query.page + 1
       }
     } catch {
+      if (requestVersion !== requestVersionRef.current) return
       if (query.nsfw === '1') {
         toast.error('该分区暂时被限制，可能访问人次过多，请晚点重试')
       } else {
         toast.error('请检查网络，刷新重试')
       }
     } finally {
-      setListLoading(false)
+      if (requestVersion === requestVersionRef.current) {
+        loadingRef.current = false
+        setListLoading(false)
+      }
     }
   }
 
@@ -199,24 +205,21 @@ export default function List() {
       })
   }
 
-  // 滚动加载更多
-  const main = document.querySelector('#main-content')!
-  const onScroll = debounce(() => {
-    if (listLoading) return
-    const { scrollTop, scrollHeight, clientHeight } = main
+  // 仅在壁纸列表区域滚动，筛选条件始终留在顶部
+  const onScroll = () => {
+    const list = listScrollRef.current
+    if (!list) return
+
+    const { scrollTop, scrollHeight, clientHeight } = list
+    setShowBackToTop(scrollTop > 240)
     if (scrollTop + clientHeight >= scrollHeight - 100) {
-      getWallpaperList()
+      void getWallpaperList()
     }
-  }, 800)
+  }
 
   useEffect(() => {
-    main.addEventListener('scroll', onScroll)
     setHasApiKey(!!store.get(WALLHAVEN_API_KEY_STORE_KEY))
-    getWallpaperList()
-
-    return () => {
-      main?.removeEventListener('scroll', onScroll)
-    }
+    void getWallpaperList()
   }, [])
 
   // ESC 关闭预览
@@ -244,10 +247,10 @@ export default function List() {
       : null
 
   return (
-    <div className='list-page animate-fade-in-up'>
+    <div className='list-page animate-fade-in-up relative flex h-full min-h-0 flex-col'>
       {/* API Key 引导横幅 */}
       {!hasApiKey && (
-        <div className='bg-amber-500/8 mb-4 flex items-center gap-3 rounded-lg border border-amber-500/25 px-4 py-3 text-[13px]'>
+        <div className='bg-amber-500/8 mb-4 flex shrink-0 items-center gap-3 rounded-lg border border-amber-500/25 px-4 py-3 text-[13px]'>
           <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400'>
             <Key className='h-3.5 w-3.5' />
           </div>
@@ -265,12 +268,12 @@ export default function List() {
         </div>
       )}
       {/* 提示信息 */}
-      <div className='mb-4 flex items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-4 py-2.5 text-[13px] text-sky-300/80'>
+      <div className='mb-4 flex shrink-0 items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-4 py-2.5 text-[13px] text-sky-300/80'>
         <span className='text-base'>💡</span>
         <span>加载慢？可以挂全局梯子 🪜 或在设置页配置自定义的网络代理</span>
       </div>
       {/* 筛选条件 */}
-      <div className='mb-5 flex flex-wrap items-center gap-3'>
+      <div className='mb-5 flex shrink-0 flex-wrap items-center gap-3'>
         <div className='flex items-center gap-2 rounded-lg bg-[var(--bg-glass)] p-1.5'>
           {filterList.map((item, index) => {
             return (
@@ -308,41 +311,54 @@ export default function List() {
         </div>
       </div>
       {/* 壁纸列表 */}
-      {wallpaperList.length ? (
-        <>
-          <div className='grid grid-cols-5 gap-3' onScroll={onScroll}>
-            {wallpaperList.map((item: any, index: number) => {
-              return (
-                <CusImage
-                  key={index}
-                  src={item.thumbs.small}
-                  previewSrc={item.path}
-                  index={index}
-                  onPreview={handlePreview}
-                  onSet={() => setAsBackground(item)}
-                />
-              )
-            })}
-          </div>
-          {listLoading && (
-            <div className='flex items-center justify-center gap-2 py-6 text-[var(--text-tertiary)]'>
-              <Loader2 className='h-4 w-4 animate-spin' />
-              <span className='text-sm'>加载中...</span>
+      <div ref={listScrollRef} className='min-h-0 flex-1 overflow-y-auto pr-2' onScroll={onScroll}>
+        {wallpaperList.length ? (
+          <>
+            <div className='grid grid-cols-5 gap-3'>
+              {wallpaperList.map((item: any, index: number) => {
+                return (
+                  <CusImage
+                    key={index}
+                    src={item.thumbs.small}
+                    previewSrc={item.path}
+                    index={index}
+                    onPreview={handlePreview}
+                    onSet={() => setAsBackground(item)}
+                  />
+                )
+              })}
             </div>
-          )}
-        </>
-      ) : listLoading ? (
-        <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
-          <Loader2 className='mb-4 h-8 w-8 animate-spin text-[var(--accent-primary)]' />
-          <p className='font-display text-base font-medium'>正在加载壁纸</p>
-          <p className='mt-1 text-[13px] opacity-60'>首次加载可能需要一点时间</p>
-        </div>
-      ) : (
-        <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
-          <Inbox className='mb-4 h-14 w-14 opacity-40' />
-          <p className='font-display text-base font-medium'>暂无数据</p>
-          <p className='mt-1 text-[13px] opacity-60'>调整筛选条件或搜索关键词</p>
-        </div>
+            {listLoading && (
+              <div className='flex items-center justify-center gap-2 py-6 text-[var(--text-tertiary)]'>
+                <Loader2 className='h-4 w-4 animate-spin' />
+                <span className='text-sm'>加载中...</span>
+              </div>
+            )}
+          </>
+        ) : listLoading ? (
+          <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
+            <Loader2 className='mb-4 h-8 w-8 animate-spin text-[var(--accent-primary)]' />
+            <p className='font-display text-base font-medium'>正在加载壁纸</p>
+            <p className='mt-1 text-[13px] opacity-60'>首次加载可能需要一点时间</p>
+          </div>
+        ) : (
+          <div className='flex flex-col items-center justify-center py-20 text-[var(--text-tertiary)]'>
+            <Inbox className='mb-4 h-14 w-14 opacity-40' />
+            <p className='font-display text-base font-medium'>暂无数据</p>
+            <p className='mt-1 text-[13px] opacity-60'>调整筛选条件或搜索关键词</p>
+          </div>
+        )}
+      </div>
+      {showBackToTop && (
+        <button
+          type='button'
+          aria-label='返回顶部'
+          title='返回顶部'
+          onClick={() => listScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })}
+          className='absolute bottom-4 right-5 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-accent)] bg-[var(--bg-elevated)] text-[var(--accent-primary)] shadow-xl transition-colors hover:bg-[var(--bg-surface)] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]'
+        >
+          <ArrowUp className='h-5 w-5' />
+        </button>
       )}
 
       {/* Image Preview Dialog */}
