@@ -421,8 +421,9 @@ export default function List() {
                 setPreviewScale((s) => Math.min(Math.max(0.2, s - e.deltaY * 0.005), 5))
               }
             }}
+            onClick={closePreview}
           >
-            <div className='relative max-h-[90vh] max-w-[90vw] animate-slide-up'>
+            <div className='relative max-h-[90vh] max-w-[90vw] animate-slide-up' onClick={(e) => e.stopPropagation()}>
               <img
                 src={previewSrc}
                 alt='preview'
