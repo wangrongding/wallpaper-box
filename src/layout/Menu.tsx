@@ -9,6 +9,33 @@ const MenuBar: React.FC = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const currentRoute = useLocation()
+  // 窄宽度时折叠为纯图标模式（hover 显示原生 title 提示）
+  const menuBarRef = useRef<HTMLDivElement | null>(null)
+  const naturalWidthRef = useRef(0)
+  const [compact, setCompact] = useState(false)
+
+  useLayoutEffect(() => {
+    const root = menuBarRef.current
+    const drag = root?.nextElementSibling instanceof HTMLElement ? root.nextElementSibling : null
+    if (!root || !drag) return
+    // 用头部 flex-1 拖拽区的剩余宽度判断空间：拖拽区耗尽即折叠。
+    // 展开态记录菜单完整宽度，展开阈值 = 24px 余量 + 折叠省出的标签宽度，避免临界抖动。
+    const evaluate = () => {
+      const menuWidth = root.offsetWidth
+      const dragWidth = drag.offsetWidth
+      if (dragWidth >= 24) {
+        naturalWidthRef.current = Math.max(naturalWidthRef.current, menuWidth)
+      }
+      const labelWidth = Math.max(0, naturalWidthRef.current - menuWidth)
+      setCompact(dragWidth < 24 + labelWidth)
+    }
+    const observer = new ResizeObserver(evaluate)
+    observer.observe(root)
+    observer.observe(drag)
+    evaluate()
+    return () => observer.disconnect()
+  }, [])
+
 
   // 路由跳转
   function handleMenuClick(path: string) {
@@ -58,20 +85,22 @@ const MenuBar: React.FC = () => {
     }
   }
   return (
-    <div className='no-drag my-0 mr-auto flex h-full items-center gap-1 p-0'>
+    <div ref={menuBarRef} className='no-drag my-0 mr-auto flex h-full items-center gap-1 p-0'>
       <nav className='flex h-[48px] items-center gap-0.5'>
-        {menuRoutes.map((item: any) => (
+        {menuRoutes.map((item: { path: string; title: string; icon: React.ReactNode }) => (
           <button
             key={item.path}
             onClick={() => handleMenuClick(item.path)}
+            title={compact ? item.title : undefined}
             className={cn(
               'relative flex h-8 items-center gap-1.5 rounded-lg px-3 text-[13px] font-medium transition-all duration-200',
               'text-[var(--text-secondary)] hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)]',
               currentRoute.pathname === item.path && 'bg-[var(--bg-glass-active)] text-[var(--accent-primary)] shadow-sm',
+              compact && 'px-2.5',
             )}
           >
             {item.icon}
-            <span>{item.title}</span>
+            {!compact && <span>{item.title}</span>}
             {currentRoute.pathname === item.path && (
               <span className='absolute -bottom-[10px] left-1/2 h-[2px] w-4 -translate-x-1/2 rounded-full bg-[var(--accent-primary)]' />
             )}
@@ -88,13 +117,14 @@ const MenuBar: React.FC = () => {
           loading && 'pointer-events-none opacity-70',
         )}
         onClick={setRandomWallpaper}
+        title={compact ? '一键随机' : undefined}
       >
         {loading ? (
           <div className='relative z-10 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white' />
         ) : (
           <Dice5 className='relative z-10 h-3.5 w-3.5' />
         )}
-        <span className='relative z-10'>一键随机</span>
+        {!compact && <span className='relative z-10'>一键随机</span>}
       </button>
       <button
         className='flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-tertiary)] transition-all duration-200 hover:bg-[var(--bg-glass-hover)] hover:text-[var(--text-primary)]'
