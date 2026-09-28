@@ -5,6 +5,16 @@ import { getDevServerUrl } from './dev-server'
 import { initDock } from './dock'
 import { initKeyboard } from './keyboard'
 import { initMenu } from './menu'
+import {
+  applyOmarchyWallpaper,
+  killOmarchyWallpaper,
+  setOmarchyWallpaperExitHandler,
+  stopOmarchyWallpaper,
+  supportsOmarchyWallpaper,
+  validateDynamicSource,
+} from './omarchy-wallpaper'
+import type { DynamicWallpaperKind } from './omarchy-wallpaper'
+import { floatWindowOnOmarchy } from './omarchy-window'
 import { getWallpaperRootPath, getWallpaperThumbnailDirectory, getWallpaperVideoDirectory } from './paths'
 import { setProxy, removeProxy } from './proxy'
 import { getTrayIconState, refreshTrayIconLibrary, setActiveTrayIcon, setTrayIcon } from './tray'
@@ -23,8 +33,6 @@ const execFile = promisify(execFileCallback)
 
 Store.initRenderer()
 const store = new Store()
-const videoPath = store.get('video-path')
-const webPath = store.get('web-path') as string
 const proxyPath = store.get('proxy-path') as string
 // 是否为开发环境
 const isDev = process.env.IS_DEV === 'true'
@@ -33,6 +41,14 @@ process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true'
 // 保持window对象的全局引用,避免JavaScript对象被垃圾回收时,窗口被自动关闭.
 let mainWindow: BrowserWindow
 let activeVideoDownload: ChildProcess | null = null
+let wallpaperOperation: Promise<unknown> = Promise.resolve()
+setOmarchyWallpaperExitHandler(() => {
+  store.delete('video-path')
+  store.delete('web-path')
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('dynamic-wallpaper-stopped', { reason: 'renderer-exited' })
+  }
+})
 const supportedLocalWallpaperExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.bmp'])
 
 type TrayIconSpriteFramePayload = {
@@ -56,12 +72,18 @@ const initApp = () => {
   if (proxyPath) {
     setProxy(mainWindow, proxyPath)
   }
-  // 创建动态壁纸
-  if (videoPath) {
-    createLiveWallpaperWindow()
-  } else if (webPath) {
-    createWebLiveWallpaperWindow()
-  }
+  void enqueueWallpaperOperation(async () => {
+    const savedVideo = store.get('video-path') as string | undefined
+    const savedWeb = store.get('web-path') as string | undefined
+    if (!savedVideo && !savedWeb) return
+    try {
+      await applyDynamicWallpaper(savedVideo ? 'video' : 'web', (savedVideo || savedWeb) as string)
+    } catch (error) {
+      console.error('Failed to restore dynamic wallpaper:', error)
+      store.delete('video-path')
+      store.delete('web-path')
+    }
+  })
   // 隐藏菜单栏
   // Menu.setApplicationMenu(null)
 }
@@ -83,11 +105,13 @@ protocol.registerSchemesAsPrivileged([
 
 // 创建窗口
 const createWindow = () => {
+  const windowWidth = isDev ? 1600 : 1300
+  const windowHeight = 900
   // 创建窗口
   mainWindow = new BrowserWindow({
-    width: isDev ? 1600 : 1300,
+    width: windowWidth,
     minWidth: 950,
-    height: 900,
+    height: windowHeight,
     minHeight: 600,
     frame: false, //是否显示边缘框
     // titleBarStyle: 'hiddenInset', //标题栏样式
@@ -104,6 +128,8 @@ const createWindow = () => {
       disableHtmlFullscreenWindowResize: true, //禁用 HTML 全屏窗口调整大小
     },
   })
+
+  void floatWindowOnOmarchy(mainWindow, windowWidth, windowHeight)
 
   if (isDev) {
     // mainWindow.loadFile(path.join(__dirname, '../dist-web/index.html'))
@@ -156,6 +182,53 @@ function getErrorMessage(error: unknown) {
   }
 
   return String(error)
+}
+
+function enqueueWallpaperOperation<T>(operation: () => Promise<T>): Promise<T> {
+  const result = wallpaperOperation.then(operation, operation)
+  wallpaperOperation = result.catch(() => undefined)
+  return result
+}
+
+async function applyDynamicWallpaper(kind: DynamicWallpaperKind, input: string) {
+  const source = await validateDynamicSource(kind, input)
+  if (process.platform === 'linux') {
+    if (!(await supportsOmarchyWallpaper())) {
+      throw new Error('当前 Linux 桌面暂不支持网页和视频壁纸；需要 Omarchy Wayland 环境')
+    }
+    await applyOmarchyWallpaper(kind, source)
+  } else if (process.platform === 'darwin') {
+    if (kind === 'video') {
+      const previousVideo = store.get('video-path') as string | undefined
+      store.set('video-path', source)
+      try {
+        await createMacLiveWallpaper()
+      } catch (error) {
+        if (previousVideo) store.set('video-path', previousVideo)
+        else store.delete('video-path')
+        throw error
+      }
+      closeWebLiveWallpaper()
+    } else {
+      await createWebLiveWallpaper(source)
+      closeLiveWallpaper()
+    }
+  } else {
+    throw new Error('当前系统暂不支持网页和视频壁纸')
+  }
+  store.set(kind === 'video' ? 'video-path' : 'web-path', source)
+  store.delete(kind === 'video' ? 'web-path' : 'video-path')
+}
+
+async function stopDynamicWallpaper() {
+  if (process.platform === 'linux') {
+    await stopOmarchyWallpaper()
+  } else if (process.platform === 'darwin') {
+    closeLiveWallpaper()
+    closeWebLiveWallpaper()
+  }
+  store.delete('video-path')
+  store.delete('web-path')
 }
 
 function getSpriteFramesFromIpcPayload(value: unknown): TrayIconSpriteFramePayload[] {
@@ -268,52 +341,6 @@ function sendVideoDownloadProgress(payload: Record<string, unknown>) {
   mainWindow.webContents.send('video-download-progress', payload)
 }
 
-async function createLiveWallpaperWindow() {
-  const videoPath = store.get('video-path') as string
-  if (!videoPath) return
-
-  if (process.platform === 'darwin') {
-    // 创建 mac 端动态壁纸窗口
-    createMacLiveWallpaper()
-  } else if (process.platform === 'win32') {
-    // 创建 win 端动态壁纸窗口
-    // TODO 打开会导致 mac 端无法运行，在 win 端正常。
-    // createWinLiveWallpaper()
-  }
-}
-
-// 关闭动态壁纸窗口
-function closeLiveWallpaperWindow() {
-  // 清除 store 中的 video-path
-  store.delete('video-path')
-  if (process.platform === 'darwin') {
-    closeLiveWallpaper()
-  } else if (process.platform === 'win32') {
-    // closeWinLiveWallpaper()
-  }
-}
-
-// 创建网页壁纸窗口
-function createWebLiveWallpaperWindow() {
-  const webPath = store.get('web-path') as string
-  if (!webPath) return
-
-  // 如果有视频壁纸，先关闭
-  closeLiveWallpaperWindow()
-
-  if (process.platform === 'darwin') {
-    createWebLiveWallpaper(webPath)
-  }
-}
-
-// 关闭网页壁纸窗口
-function closeWebLiveWallpaperWindow() {
-  store.delete('web-path')
-  if (process.platform === 'darwin') {
-    closeWebLiveWallpaper()
-  }
-}
-
 // 设置自动启动
 function setAutoLaunch(val: boolean) {
   app.setLoginItemSettings({
@@ -329,6 +356,10 @@ function setAutoLaunch(val: boolean) {
 // 当 Electron 完成初始化并准备创建浏览器窗口时调用此方法
 app.on('ready', () => {
   initApp()
+})
+
+app.on('before-quit', () => {
+  killOmarchyWallpaper()
 })
 
 // 所有窗口关闭时退出应用.
@@ -368,7 +399,10 @@ ipcMain.on('set-auto-launch', (_, arg) => {
 // 设置图片壁纸
 ipcMain.handle('set-wallpaper', async (_, arg) => {
   try {
-    await setWallPaper(arg)
+    await enqueueWallpaperOperation(async () => {
+      await setWallPaper(arg)
+      await stopDynamicWallpaper()
+    })
     return { success: true }
   } catch (error) {
     console.error('Failed to set wallpaper:', error)
@@ -376,6 +410,29 @@ ipcMain.handle('set-wallpaper', async (_, arg) => {
       success: false,
       message: getErrorMessage(error),
     }
+  }
+})
+
+ipcMain.handle('apply-dynamic-wallpaper', async (_, arg: { kind?: DynamicWallpaperKind; source?: string }) => {
+  try {
+    if (arg?.kind !== 'video' && arg?.kind !== 'web') throw new Error('壁纸类型无效')
+    await enqueueWallpaperOperation(() => applyDynamicWallpaper(arg.kind as DynamicWallpaperKind, arg.source as string))
+    return { success: true }
+  } catch (error) {
+    return { success: false, message: getErrorMessage(error) }
+  }
+})
+
+ipcMain.handle('stop-dynamic-wallpaper', async (_, kind?: DynamicWallpaperKind) => {
+  try {
+    await enqueueWallpaperOperation(async () => {
+      if (kind === 'video' && !store.get('video-path')) return
+      if (kind === 'web' && !store.get('web-path')) return
+      await stopDynamicWallpaper()
+    })
+    return { success: true }
+  } catch (error) {
+    return { success: false, message: getErrorMessage(error) }
   }
 })
 
@@ -687,28 +744,6 @@ ipcMain.handle('open-tray-icon-directory', async (_, arg) => {
 // 在默认浏览器中打开 a 标签
 ipcMain.on('open-link-in-browser', (_, arg) => {
   shell.openExternal(arg)
-})
-
-// 创建动态壁纸
-ipcMain.on('create-live-wallpaper', (_, _arg) => {
-  closeWebLiveWallpaperWindow() // 确保网页壁纸关闭
-  createLiveWallpaperWindow()
-})
-
-// 关闭动态壁纸
-ipcMain.on('close-live-wallpaper', (_, _arg) => {
-  closeLiveWallpaperWindow()
-})
-
-// 创建网页壁纸
-ipcMain.on('create-web-live-wallpaper', (_, arg) => {
-  store.set('web-path', arg)
-  createWebLiveWallpaperWindow()
-})
-
-// 关闭网页壁纸
-ipcMain.on('close-web-live-wallpaper', (_, _arg) => {
-  closeWebLiveWallpaperWindow()
 })
 
 // ============================ 窗口 ============================

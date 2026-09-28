@@ -28,6 +28,12 @@ export function getBundledBinaryPath(...segments: string[]) {
   return path.join(getDevelopmentProjectRoot(), 'resources', 'bin', ...segments)
 }
 
+export function getOmarchyHelperPath() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'omarchy', 'wallpaper_helper.py')
+    : path.join(getDevelopmentProjectRoot(), 'resources', 'omarchy', 'wallpaper_helper.py')
+}
+
 export function getWallpaperRootPath() {
   return path.join(os.homedir(), 'wallpaper-box')
 }
