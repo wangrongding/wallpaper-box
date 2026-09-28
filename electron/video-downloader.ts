@@ -1,5 +1,6 @@
 import { getBundledBinaryPath, getWallpaperVideoDirectory } from './paths'
 import { spawn, type ChildProcess } from 'child_process'
+import { constants as fsConstants } from 'fs'
 import fs from 'fs/promises'
 import os from 'os'
 import path from 'path'
@@ -98,6 +99,25 @@ async function resolveBundledBinary(name: RuntimeBinaryName) {
   return null
 }
 
+async function resolveSystemBinary(name: RuntimeBinaryName) {
+  const candidates = process.platform === 'win32' ? [`${name}.exe`, name] : [name]
+  for (const directory of (process.env.PATH || '').split(path.delimiter)) {
+    if (!directory) continue
+    for (const candidate of candidates) {
+      const target = path.join(directory, candidate)
+      try {
+        if ((await fs.stat(target)).isFile()) {
+          await fs.access(target, fsConstants.X_OK)
+          return target
+        }
+      } catch {
+        // Continue looking in PATH.
+      }
+    }
+  }
+  return null
+}
+
 async function resolveRequiredExecutable(name: RuntimeBinaryName): Promise<string> {
   const envOverride = process.env[getBinaryEnvKey(name)]
   if (envOverride) {
@@ -117,7 +137,9 @@ async function resolveRequiredExecutable(name: RuntimeBinaryName): Promise<strin
     throw new Error(`缺少内置 ${name} 二进制，请先运行 yarn prepare:video-downloader 或将对应文件放到 resources/bin`)
   }
 
-  return name
+  const systemBinary = await resolveSystemBinary(name)
+  if (systemBinary) return systemBinary
+  throw new Error(`缺少 ${name}，请安装系统软件包后重试`)
 }
 
 async function resolveOptionalExecutable(name: RuntimeBinaryName) {
@@ -135,7 +157,7 @@ async function resolveOptionalExecutable(name: RuntimeBinaryName) {
     return bundled
   }
 
-  return null
+  return resolveSystemBinary(name)
 }
 
 function pushByLine(stream: Readable, handler: (line: string) => void) {
@@ -182,6 +204,12 @@ function toFileName(filePath: string) {
 
 function buildFormatSelector(hasFfmpeg: boolean) {
   if (hasFfmpeg) {
+    if (process.platform === 'linux') {
+      // WebKitGTK video wallpapers cannot decode AV1; prefer H.264, then VP9,
+      // before falling back to any format (macOS handles AV1 fine).
+      return 'bestvideo[vcodec^=avc]+bestaudio/bestvideo[vcodec^=vp9]+bestaudio/bestvideo*+bestaudio/best'
+    }
+
     return 'bestvideo*+bestaudio/best'
   }
 
