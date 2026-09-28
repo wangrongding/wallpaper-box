@@ -5,11 +5,11 @@
 ## 已确认的现状
 
 - [x] 本机是 Omarchy 4.0.4；开发模式下 Electron 可启动，`omarchy theme bg set` 可更新当前背景链接。
-- [x] [`electron/main.ts`](./electron/main.ts) 已有仅在 `ID=omarchy` 时调用 Omarchy 命令的静态壁纸最小适配；这项修改仍在工作区，尚未提交。**链接更新不等于桌面画面和所有入口都已验收。**
-- [ ] 视频动态壁纸在 Linux 没有创建分支；[`electron/main.ts`](./electron/main.ts) 的 `createLiveWallpaperWindow()` 只处理 macOS，Windows 分支也未启用。
-- [ ] 网页动态壁纸在 Linux 没有创建分支；`createWebLiveWallpaperWindow()` 只处理 macOS。
-- [ ] 视频、网页和开机自启页面目前会在主进程未确认成功时提示成功；Linux 上可能保存了无效状态。
-- [ ] 当前没有 Linux 安装包、Linux 构建命令或已验证的桌面启动入口。本机有 `yt-dlp`、Deno、`ffmpeg`、`ffprobe`，没有 `mpvpaper`。
+- [x] [`electron/main.ts`](./electron/main.ts) 已有仅在 `ID=omarchy` 时调用 Omarchy 命令的静态壁纸最小适配；静态来源和所有入口仍待完整验收。
+- [x] 视频与网页现有入口已接入 Omarchy Wayland 的 GTK4/WebKitGTK 背景层；双屏本地网页、HTTP 网页和 WebM 视频已实际显示，且背景层能在切换或停止后清除。
+- [x] 视频、网页设置现等待主进程确认；缺失文件、HTTP 404 和进程启动失败不再提示成功。开机自启页面的误报仍待处理。
+- [x] 已增加 x86_64 Omarchy pacman 构建命令，包元数据声明动态壁纸和视频下载依赖；本机已安装包并实测桌面入口、本地 HTML、MP4 和应用内下载。全新机器安装及发布流程仍待验收。
+- [x] 应用窗口在 Omarchy 上启动时自动以 Hyprland 浮动窗口打开，用户仍可按 Super+T 切换平铺/浮动；其他 Linux 桌面不使用 Omarchy 专属命令。
 
 ## P0：先消除误报，建立正确的平台与状态模型
 
@@ -17,7 +17,7 @@
 - [ ] **能力反馈。** 主进程向界面提供静态、视频、网页壁纸及自启动的实际可用状态；缺少后端或依赖时明确显示原因。在功能完成前，Linux 视频和网页“设为壁纸”不能继续立即提示成功。
 - [ ] **统一设置流程。** 把静态、视频、网页的设置/停止操作改成有结果的 `ipcMain.handle` / `ipcRenderer.invoke`；先验证目标、启动并确认生效，再更新持久化状态和停止旧后端。失败时保留旧壁纸，显示真实错误。避免当前 `send` 之后立即 `toast.success` 的行为。
 - [ ] **单一活跃壁纸状态。** 明确定义当前模式和来源，清理旧版 `video-path` / `web-path` 冲突；启动时只恢复实际可用的一种模式。静态 → 视频、视频 → 网页、网页 → 静态及同类型替换都应有一致的回滚和清理顺序。
-- [ ] **静态切换时关闭全部动态层。** 目前在线列表、我的壁纸、AI 生成和一键随机在静态设置成功后只发送 `close-live-wallpaper`，不会关闭网页背景。将切换收敛到主进程，避免静态图片被网页层盖住。
+- [x] **静态切换时关闭全部动态层。** 四个静态入口统一由主进程在设置成功后关闭网页或视频背景，已在双屏验证网页 → 静态切换。
 
 ## P0：静态图片壁纸
 
@@ -28,22 +28,22 @@
 
 ## P0：视频动态壁纸
 
-- [ ] **先验证可行后端。** 在 Omarchy/Hyprland 上试验真正的 Wayland 背景层播放器（`mpvpaper` 只是候选，本机未安装）；确认不会盖住普通窗口、桌面操作或 Omarchy shell 的背景层，并确定安装/打包方式。
-- [ ] **实现 Linux 视频后端。** 校验本地视频和播放器依赖，按显示器启动背景进程，确认进程正常播放后返回成功；处理循环、静音、填充/裁切、无法解码和进程意外退出。
-- [ ] **管理子进程。** 更换视频、切换静态/网页、主动停止、退出应用、异常退出后的再次启动，都不能留下重复或失控的播放器；明确“退出应用后壁纸是否继续播放”的产品规则。
+- [x] **验证可行后端。** 已用 GTK4 layer-shell + WebKitGTK 6.0 在双屏的 Bottom 层显示背景；视频实际播放且低于普通窗口，鼠标输入区域为空。安装包依赖仍待声明。
+- [x] **实现 Linux 视频后端。** 校验本地视频，按显示器创建背景层，确认 HTML5 `playing` 后返回成功；循环、静音、裁切填充。WebM 和 H.264 MP4 已实测；MOV、损坏文件和长期性能仍待验收。
+- [x] **管理子进程。** 替换、停止、静态切换、退出清理、启动恢复、异常退出清除状态已实测。产品规则是退出应用后动态层关闭，重启后恢复上次成功设置的来源。
 - [ ] **显示器与性能。** 验证单屏/多屏、插拔、分辨率和缩放变化；明确所有屏幕同步播放或逐屏配置。检查高分辨率视频的 CPU/GPU 占用及锁屏、全屏应用时的行为。
 - [ ] **打通现有入口。** 本地选择、拖拽和下载完成后的应用都必须等待视频后端确认；把“下载成功”和“已设为壁纸”拆开报告，设置失败时仍保留已下载文件。
 
 ## P0：网页动态壁纸
 
-- [ ] **验证 Wayland 网页背景方案。** 用可处于背景层的网页渲染后端做原型；验证在线 URL 与本地 HTML/HTM/SVG、显示器选择、缩放、鼠标事件策略。macOS 的 `BrowserWindow({ type: 'desktop' })` 不能直接算作 Wayland 方案。
+- [x] **验证 Wayland 网页背景方案。** 本地 HTML、HTTP 页面和 HTTPS 页面已在双屏 Bottom 层加载；全屏尺寸 3440×1440，鼠标输入区域为空。SVG 和复杂 WebGL 页面仍待验收。
 - [ ] **实现加载与生命周期。** 等待页面真正加载并出现在桌面后再返回成功；支持替换 URL/文件、网络断开后的反馈、停止、退出清理、重启恢复和显示器变化。当前预览区仅凭非空 URL 显示“链接已连接”，需要改为真实加载状态。
 - [ ] **隔离网页内容。** 外部网页不能继承现有 `nodeIntegration: true`、`webSecurity: false`、`contextIsolation: false` 的高权限配置；限制本地文件访问、导航、弹窗、外部协议和 IPC，只开放必需能力。审核全局 `file` 协议的 `bypassCSP` / CORS 特权。
-- [ ] **保存真实状态。** `web-path` 仅在网页背景启动成功后保存；关闭失败不能立即提示“已关闭”，重启时不能恢复一个从未显示过的 URL。
+- [x] **保存真实状态。** `web-path` 仅在网页背景启动成功后保存；UI 等待停止结果，HTTP 404 和缺失文件失败不保存，重启恢复与异常退出清理已实测。
 
 ## P1：下载、在线服务与代理
 
-- [ ] **Linux 视频下载依赖。** 决定用系统工具还是随包内置；补齐 `yt-dlp`、Deno、`ffmpeg`、`ffprobe` 的 PATH/自定义路径/包内查找和可执行性检查。本机虽有这些系统命令，但目前只有 `yt-dlp` 能退回 PATH，另三者会被当成缺失。
+- [x] **Linux 视频下载依赖。** Omarchy pacman 包声明 `yt-dlp`、Deno 和 FFmpeg；下载器会从 PATH 查找系统工具，保留环境变量与包内路径优先级。本机已从安装包调用 `yt-dlp` 下载视频并设为壁纸。
 - [ ] **视频下载结果。** 验证 YouTube/Bilibili 链接、分离音视频流合并、代理、中文文件名、失败/取消/重试；Linux 缺失工具时提示具体安装方式。下载成功后视频设置失败需分别反馈。
 - [ ] **在线图片列表。** 验证 Wallhaven 搜索、筛选、分页、预览、下载和 API Key；当前列表使用 `mode: 'no-cors'` 却读取 JSON，需要改成可读取响应的请求路径并处理限速、离线与错误码。
 - [ ] **一键随机来源。** 验证当前随机图片 URL 能返回图片；失败时不能产生空文件或成功提示。
@@ -61,9 +61,9 @@
 
 ## P1：Linux 安装、打包与发布
 
-- [ ] **安装脚本按平台运行。** `pnpm install` 当前会通过 `prepare` 下载整套 macOS 视频工具；Linux 应跳过这一步或准备对应架构的 Linux 工具，避免手动绕过脚本才能安装。
+- [x] **安装脚本按平台运行。** Linux `prepare` 已跳过整套 macOS 视频工具；Omarchy pacman 包通过系统依赖提供 Linux 下载工具。
 - [ ] **固定工具链与资源。** 声明兼容 lockfile v9 的 pnpm/Node 版本；按 Linux 依赖策略处理 `resources/bin`、执行权限和 `extraResources`。发布构建固定下载工具版本并校验文件，避免每次取 `latest`。
-- [ ] **生成 Linux 产物。** 增加明确的 Linux 构建命令、目标架构和包格式、合适分辨率的图标及桌面入口；当前 `pnpm build` 只构建 macOS universal，`public/logo.png` 只有 80×80。
+- [x] **生成 Linux 产物。** 已增加 x86_64 Omarchy pacman 构建命令、512×512 图标与桌面入口；本机已生成并成功安装包。
 - [ ] **全新环境验证。** 在未预装项目依赖的 Omarchy 上执行冻结安装、开发启动、构建、安装包启动和卸载；确认打包后资源路径、动态后端和视频下载工具可用。若发布多个架构，分别验证产物。
 - [ ] **文档与发布流程。** 更新中、英、日、西四份 README 的平台支持表、功能状态、安装/依赖/构建/运行步骤与限制；修正把 `/Users/...` 写作 Linux 本地路径示例的问题。增加 Linux 构建与发布检查流程。
 
@@ -80,3 +80,13 @@
 - [Wayland layer-shell 协议](https://wayland.app/protocols/wlr-layer-shell-unstable-v1)：定义背景层及按显示器创建的 layer surface。
 - [Electron BrowserWindow 的 Wayland 限制](https://www.electronjs.org/docs/latest/api/browser-window)、[Electron 自启动 API 的平台范围](https://www.electronjs.org/docs/latest/api/app)。
 - [`mpvpaper` 项目](https://github.com/GhostNaN/mpvpaper)：视频背景层的候选实现，尚未在本机验证。
+
+
+## 视频壁纸 demo
+
+- https://www.youtube.com/watch?v=9OHzW1ZPZnM
+- https://www.youtube.com/watch?v=MlhW-WJy3oE
+- https://www.youtube.com/watch?v=B6ZrAaGpsNI
+- https://www.youtube.com/watch?v=rg0mkrSoIpo
+- https://www.youtube.com/watch?v=fKcF32dmcDk
+- https://www.youtube.com/watch?v=GpPUa7Red1M

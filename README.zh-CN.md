@@ -25,11 +25,32 @@
 
 ## 平台说明
 
-- 当前仓库内置的打包脚本以 macOS 为主。
+- 默认打包脚本以 macOS 为主；`pnpm build:linux:omarchy` 可生成 x86_64 Omarchy pacman 包。
 - 默认构建产物是 `universal`，同时兼容 Apple Silicon 和 Intel Mac。
 - 也提供单独的 `x64` / `arm64` 构建命令。
 - 当前构建配置的最低 macOS 版本是 `10.13`。
 - 应用未做开发者签名，首次打开需要手动放行。
+
+### Omarchy 4.x 开发环境
+
+在 Omarchy 的原生 Wayland 会话中，静态壁纸调用 Omarchy 命令；网页与视频壁纸使用独立的 GTK4/WebKitGTK 背景层。每个显示器铺满一个背景层，视频静音、循环播放；退出应用后动态层会关闭，重新启动时恢复上次成功设置的动态壁纸。其他 Linux 桌面不会调用 Omarchy 专用后端。
+
+应用在 Omarchy 上启动时，主窗口会自动以 Hyprland 浮动窗口打开，仍可随时按 `Super+T` 切换平铺/浮动；Omarchy 专属命令只在 Omarchy 桌面调用，其他 Linux 桌面不会使用。
+
+源码开发时先安装运行依赖：
+
+```bash
+sudo pacman -S --needed gtk4-layer-shell webkitgtk-6.0 python-gobject python-cairo gst-libav gst-plugins-good
+```
+
+开发时运行 `pnpm dev`。在 x86_64 Omarchy 上可以构建并安装 pacman 包：
+
+```bash
+pnpm build:linux:omarchy
+sudo pacman -U ./out/wallpaper-box-1.0.2.pacman
+```
+
+安装时 pacman 会检查 Omarchy、WebKitGTK、GTK4 layer-shell、Python GObject、GStreamer、`yt-dlp`、Deno 和 FFmpeg 等依赖。已安装生成的包并实测本地网页、MP4 动态壁纸及应用内视频下载；其他架构、MOV 和复杂网页仍待验证。网页壁纸支持 HTTP/HTTPS 及本地 HTML/HTM/SVG，视频壁纸支持本地 MP4/MOV/WebM。应用仅在背景层实际加载、视频开始播放后报告设置成功。
 
 ## 使用
 
@@ -85,7 +106,8 @@
   - 例如：`https://wangrongding.github.io/jellyfish/`
   - 输入 `google.com`、`localhost:3000` 这类地址时会自动补全协议。
 - **本地文件**：支持选择或拖拽本地 `HTML/HTM/SVG` 文件。
-  - macOS/Linux 示例：`/Users/your-name/Coding/jellyfish/index.html`
+  - macOS 示例：`/Users/your-name/Coding/jellyfish/index.html`
+  - Linux 示例：`/home/your-name/Coding/jellyfish/index.html`
   - Windows 示例：`C:\Users\your-name\Coding\jellyfish\index.html`
 
 ### AI 壁纸

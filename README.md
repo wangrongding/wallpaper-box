@@ -25,11 +25,24 @@
 
 ## Platform Notes
 
-- The built-in packaging scripts focus on macOS.
+- The default packaging scripts target macOS. `pnpm build:linux:omarchy` builds an x86_64 pacman package for Omarchy.
 - Default builds are `universal` (compatible with both Apple Silicon and Intel Macs).
 - Separate `x64` / `arm64` build commands are also available.
 - Minimum supported macOS version is `10.13`.
 - The app is not Apple Developer signed. You will need to manually allow it on first launch.
+
+### Omarchy 4.x
+
+On Omarchy with Wayland, web and video wallpapers use a GTK4/WebKitGTK background layer. Build and install the package with:
+
+```bash
+pnpm build:linux:omarchy
+sudo pacman -U ./out/wallpaper-box-1.0.2.pacman
+```
+
+The package declares the desktop renderer, video codec, and download tool dependencies so pacman can resolve them. The installed x86_64 package has been tested with local HTML, MP4, and a video downloaded through the app. Other Linux desktops and CPU architectures have not been validated.
+
+On Omarchy, the app window opens as a floating Hyprland window at startup. You can still toggle between tiling and floating at any time with `Super+T`. Omarchy-specific commands are only invoked on Omarchy — other Linux desktops never use them.
 
 ## Usage
 
