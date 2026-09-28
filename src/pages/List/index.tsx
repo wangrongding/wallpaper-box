@@ -37,6 +37,8 @@ export default function List() {
 
     page: 1,
     sorting: 'toplist',
+    topRange: '1y',
+    ratios: 'all',
     keyword: '',
   })
 
@@ -110,6 +112,20 @@ export default function List() {
     void getWallpaperList()
   }
 
+  // 比例筛选改变
+  const onRatioChange = (checkedVal: string) => {
+    queryRef.current = { ...queryRef.current, ratios: checkedVal, page: 1 }
+    resetList()
+    void getWallpaperList()
+  }
+
+  // 时间范围改变
+  const onTopRangeChange = (checkedVal: string) => {
+    queryRef.current = { ...queryRef.current, topRange: checkedVal, page: 1 }
+    resetList()
+    void getWallpaperList()
+  }
+
   // 限制条件改变
   const onLimitChange = (checkedVal: any, type: any) => {
     queryRef.current = { ...queryRef.current, [type]: checkedVal ? '1' : '0', page: 1 }
@@ -144,15 +160,10 @@ export default function List() {
           keyword: query.keyword,
           page: query.page,
           purity,
+          ratios: query.ratios,
           sorting: query.sorting,
+          topRange: query.topRange,
         }),
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-          mode: 'no-cors',
-        },
       )
       const list = await res.json()
       if (requestVersion !== requestVersionRef.current) return
@@ -267,13 +278,13 @@ export default function List() {
         </div>
       )}
       {/* 提示信息 */}
-      <div className='mb-4 flex shrink-0 items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-4 py-2.5 text-[13px] text-sky-300/80'>
+      <div className='mb-4 flex shrink-0 items-center gap-2 rounded-lg border border-sky-500/20 bg-sky-500/5 px-4 py-2.5 text-[13px] text-sky-300/80 max-[1100px]:hidden'>
         <span className='text-base'>💡</span>
         <span>加载慢？可以挂全局梯子 🪜 或在设置页配置自定义的网络代理</span>
       </div>
       {/* 筛选条件 */}
-      <div className='mb-5 flex shrink-0 flex-wrap items-center gap-3'>
-        <div className='flex items-center gap-2 rounded-lg bg-[var(--bg-glass)] p-1.5'>
+      <div className='mb-5 flex shrink-0 flex-wrap items-center gap-2'>
+        <div className='flex shrink-0 items-center gap-2 rounded-lg bg-[var(--bg-glass)] p-1.5 max-[1100px]:grid max-[1100px]:grid-cols-3 max-[1100px]:justify-items-center max-[1100px]:gap-x-2 max-[1100px]:gap-y-1'>
           {filterList.map((item, index) => {
             return (
               <Switch
@@ -287,16 +298,47 @@ export default function List() {
           })}
         </div>
         <Select defaultValue='toplist' onValueChange={onSortChange}>
-          <SelectTrigger className='w-[130px]'>
+          <SelectTrigger className='w-[104px] shrink-0'>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value='toplist'>toplist</SelectItem>
             <SelectItem value='views'>views</SelectItem>
             <SelectItem value='favorites'>favorites</SelectItem>
+            <SelectItem value='date_added'>date_added</SelectItem>
           </SelectContent>
         </Select>
-        <div className='relative ml-auto w-[280px]'>
+        <Select defaultValue='all' onValueChange={onRatioChange}>
+          <SelectTrigger className='w-[84px] shrink-0'>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='all'>全部比例</SelectItem>
+            <SelectItem value='16x9'>16:9</SelectItem>
+            <SelectItem value='16x10'>16:10</SelectItem>
+            <SelectItem value='21x9'>21:9</SelectItem>
+            <SelectItem value='21x10'>21:10</SelectItem>
+            <SelectItem value='32x9'>32:9</SelectItem>
+            <SelectItem value='4x3'>4:3</SelectItem>
+            <SelectItem value='9x16'>竖屏 9:16</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select defaultValue='1y' onValueChange={onTopRangeChange}>
+          <SelectTrigger className='w-[84px] shrink-0'>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value='1d'>1 天</SelectItem>
+            <SelectItem value='3d'>3 天</SelectItem>
+            <SelectItem value='1w'>1 周</SelectItem>
+            <SelectItem value='1M'>1 月</SelectItem>
+            <SelectItem value='3M'>3 月</SelectItem>
+            <SelectItem value='6M'>6 月</SelectItem>
+            <SelectItem value='1y'>1 年</SelectItem>
+            <SelectItem value='1yAll'>全部</SelectItem>
+          </SelectContent>
+        </Select>
+        <div className='relative ml-auto w-[210px] shrink-0 max-[1100px]:w-[170px]'>
           <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-tertiary)]' />
           <Input
             placeholder='搜索壁纸...'
