@@ -3,8 +3,8 @@ import fs from 'fs'
 import { chmod, mkdir, mkdtemp, rename, rm } from 'fs/promises'
 import os from 'os'
 import path from 'path'
-import { promisify } from 'util'
 import { fileURLToPath } from 'url'
+import { promisify } from 'util'
 
 const execFile = promisify(execFileCallback)
 
@@ -176,6 +176,10 @@ async function prepareBinary(item, tempDirectory) {
 }
 
 async function main() {
+  if (process.platform !== 'darwin') {
+    console.log('Skipping macOS video downloader binaries on this platform.')
+    return
+  }
   await mkdir(outputDirectory, { recursive: true })
 
   const missingPaths = forceRefresh ? [] : getMissingPaths()

@@ -5,6 +5,7 @@
   "version": "1.0.2",
   "main": "./dist-electron/main.js",
   "description": "让桌面真正活起来：静态壁纸、视频壁纸、网页壁纸和 RunCat 托盘动画，一个客户端全搞定。",
+  "homepage": "https://github.com/wangrongding/wallpaper-box",
   "author": "wangrongding",
   "license": "GPL-3.0-or-later",
   "scripts": {
@@ -24,6 +25,7 @@
     "build:mac:universal": "rm -rf ./out && pnpm build:web && pnpm build:electron && electron-builder --mac --universal",
     "build:mac:x64": "rm -rf ./out && pnpm build:web && pnpm build:electron && electron-builder --mac --x64",
     "build:mac:arm64": "rm -rf ./out && pnpm build:web && pnpm build:electron && electron-builder --mac --arm64",
+    "build:linux:omarchy": "pnpm build:web && pnpm build:electron && electron-builder --linux pacman --x64",
     "electron": "electron .",
     "electron:start": "pnpm build:electron && cross-env ELECTRON_RUN_AS_NODE= IS_DEV=false electron .",
     "electron:dev": "pnpm build:electron && cross-env ELECTRON_RUN_AS_NODE= IS_DEV=true electron .",
@@ -111,22 +113,63 @@
         "filter": [
           "**/*"
         ]
-      },
-      {
-        "from": "resources/bin",
-        "to": "bin",
-        "filter": [
-          "**/*"
-        ]
       }
     ],
     "mac": {
       "icon": "./public/logo.icns",
       "minimumSystemVersion": "10.13",
       "x64ArchFiles": "{Contents/Resources/bin/**/*,Contents/Resources/bin/**/.dylibs/**/*}",
+      "extraResources": [
+        {
+          "from": "resources/bin",
+          "to": "bin",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ],
       "target": [
         "dmg",
         "zip"
+      ]
+    },
+    "linux": {
+      "category": "Graphics",
+      "icon": "build/icons",
+      "maintainer": "wangrongding",
+      "extraResources": [
+        {
+          "from": "resources/omarchy",
+          "to": "omarchy",
+          "filter": [
+            "**/*"
+          ]
+        }
+      ],
+      "target": [
+        "pacman"
+      ]
+    },
+    "pacman": {
+      "synopsis": "Desktop wallpaper manager for Omarchy",
+      "depends": [
+        "omarchy",
+        "gtk3",
+        "nss",
+        "libxss",
+        "libsecret",
+        "libnotify",
+        "libayatana-appindicator",
+        "gtk4-layer-shell",
+        "webkitgtk-6.0",
+        "python-gobject",
+        "python-cairo",
+        "gst-plugins-good",
+        "gst-plugins-bad",
+        "gst-libav",
+        "yt-dlp",
+        "deno",
+        "ffmpeg"
       ]
     },
     "dmg": {
