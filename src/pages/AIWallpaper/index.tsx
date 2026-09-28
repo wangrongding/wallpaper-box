@@ -268,7 +268,6 @@ export default function AIWallpaper() {
         return
       }
 
-      ipcRenderer.send('close-live-wallpaper')
       toast.success('已设为桌面壁纸')
     } finally {
       setIsApplying(false)

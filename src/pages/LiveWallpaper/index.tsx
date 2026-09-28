@@ -47,16 +47,24 @@ export default function LiveWallpaper() {
   const [downloadUrl, setDownloadUrl] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
+  const [isApplying, setIsApplying] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState<VideoDownloadProgress | null>(null)
   const [lastDownloadedVideo, setLastDownloadedVideo] = useState<VideoDownloadResponse | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function applyVideoWallpaper(nextPath: string, successMessage: string) {
-    store.set('video-path', nextPath)
     setFilePath(nextPath)
     setPreviewToken(Date.now())
-    ipcRenderer.send('create-live-wallpaper')
-    toast.success(successMessage)
+    setIsApplying(true)
+    try {
+      const result = await ipcRenderer.invoke('apply-dynamic-wallpaper', { kind: 'video', source: nextPath })
+      if (result?.success) toast.success(successMessage)
+      else toast.error(result?.message || '视频壁纸设置失败')
+    } catch (error) {
+      toast.error(String(error))
+    } finally {
+      setIsApplying(false)
+    }
   }
 
   async function handlePickedFile(file?: File | null) {
@@ -105,7 +113,10 @@ export default function LiveWallpaper() {
       }
 
       setLastDownloadedVideo(response)
-      await applyVideoWallpaper(response.path, '视频下载完成，已自动设为壁纸')
+      toast.success('视频下载完成，已保存到本地')
+      await applyVideoWallpaper(response.path, '视频已设为壁纸')
+    } catch (error) {
+      toast.error(`视频下载失败：${String(error)}`)
     } finally {
       setIsDownloading(false)
     }
@@ -175,7 +186,7 @@ export default function LiveWallpaper() {
                 placeholder='https://www.youtube.com/watch?v=... 或 https://www.bilibili.com/video/...'
                 className='h-11 rounded-2xl border-white/10 bg-black/25 text-white placeholder:text-slate-500'
               />
-              <Button onClick={handleDownload} loading={isDownloading} className='h-11 w-full rounded-2xl text-[14px]'>
+              <Button onClick={handleDownload} loading={isDownloading || isApplying} className='h-11 w-full rounded-2xl text-[14px]'>
                 {!isDownloading && <Download className='mr-2 h-4 w-4' />}
                 下载并设为壁纸
               </Button>
@@ -223,7 +234,7 @@ export default function LiveWallpaper() {
                 当前策略
               </div>
               <div className='space-y-2 text-[12px] leading-6 text-slate-300'>
-                <p>在线视频：优先拿最高可用画质，再自动设为动态壁纸。</p>
+                <p>在线视频：优先拿最高可用画质，下载后尝试设为动态壁纸。</p>
                 <p>本地导入：不改码，直接复用当前视频壁纸链路。</p>
                 <button
                   type='button'

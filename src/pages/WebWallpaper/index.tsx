@@ -63,9 +63,11 @@ function normalizeWebUrl(value: string) {
     return ''
   }
 
-  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(trimmed)) {
+  if (/^https?:\/\//i.test(trimmed)) {
     return trimmed
   }
+
+  if (/^[a-zA-Z][a-zA-Z\d+\-.]*:\/\//.test(trimmed)) return ''
 
   if (/^(localhost|127\.0\.0\.1|0\.0\.0\.0)(:\d+)?(\/|$)/i.test(trimmed)) {
     return `http://${trimmed}`
@@ -121,6 +123,7 @@ const WebWallpaper = () => {
   const [url, setUrl] = useState(initialState.url)
   const [localSelection, setLocalSelection] = useState<LocalSelection | null>(initialState.localSelection)
   const [isDragging, setIsDragging] = useState(false)
+  const [isApplying, setIsApplying] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const urlInputRef = useRef<HTMLInputElement>(null)
 
@@ -139,16 +142,24 @@ const WebWallpaper = () => {
     mode === 'local'
       ? '选择本地网页后先在这里确认细节和兼容性，再决定是否把它挂到桌面。'
       : '在线链接输入完成后会直接尝试加载，适合先确认视觉效果，再决定是否设为壁纸。'
-  const previewStatus = previewSrc ? (mode === 'local' ? '预览已就绪' : '链接已连接') : mode === 'local' ? '等待文件' : '等待链接'
+  const previewStatus = previewSrc ? (mode === 'local' ? '已选择文件' : '已输入链接') : mode === 'local' ? '等待文件' : '等待链接'
   const previewActionHint =
     mode === 'local'
       ? '当前模式会先预览本地页面，只有点击“设为壁纸”后桌面才会真正切换。'
       : '推荐网页和输入框都只会准备来源，点击“设为壁纸”后才会替换当前桌面。'
   const previewSourceKind = mode === 'local' ? 'HTML / HTM / SVG' : 'HTTPS / Localhost'
 
-  const applyWallpaper = (targetUrl: string) => {
-    ipcRenderer.send('create-web-live-wallpaper', targetUrl)
-    toast.success('网页壁纸设置成功')
+  const applyWallpaper = async (targetUrl: string) => {
+    setIsApplying(true)
+    try {
+      const result = await ipcRenderer.invoke('apply-dynamic-wallpaper', { kind: 'web', source: targetUrl })
+      if (result?.success) toast.success('网页壁纸设置成功')
+      else toast.error(result?.message || '网页壁纸设置失败')
+    } catch (error) {
+      toast.error(String(error))
+    } finally {
+      setIsApplying(false)
+    }
   }
 
   const handleSetOnlineWallpaper = () => {
@@ -237,9 +248,14 @@ const WebWallpaper = () => {
     handleLocalFile(filePath)
   }
 
-  const handleCloseWallpaper = () => {
-    ipcRenderer.send('close-web-live-wallpaper')
-    toast.success('网页壁纸已关闭')
+  const handleCloseWallpaper = async () => {
+    try {
+      const result = await ipcRenderer.invoke('stop-dynamic-wallpaper', 'web')
+      if (result?.success) toast.success('网页壁纸已关闭')
+      else toast.error(result?.message || '关闭网页壁纸失败')
+    } catch (error) {
+      toast.error(String(error))
+    }
   }
 
   const handleClearUrl = () => {
@@ -457,7 +473,12 @@ const WebWallpaper = () => {
               <X className='mr-2 h-4 w-4' />
               关闭壁纸
             </Button>
-            <Button onClick={handleApplyCurrentWallpaper} disabled={!canApplyWallpaper} className='h-11 flex-[1.15] rounded-2xl text-[14px]'>
+            <Button
+              onClick={handleApplyCurrentWallpaper}
+              disabled={!canApplyWallpaper || isApplying}
+              loading={isApplying}
+              className='h-11 flex-[1.15] rounded-2xl text-[14px]'
+            >
               设为壁纸
             </Button>
           </div>

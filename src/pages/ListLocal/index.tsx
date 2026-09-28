@@ -197,7 +197,6 @@ export default function List() {
       return
     }
 
-    ipcRenderer.send('close-live-wallpaper')
     toast.success('设置成功！')
   }
 
